@@ -1,0 +1,27 @@
+﻿<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+	<s:Boolean x:Key="/Default/AddReferences/RecentPaths/=C_003A_005CProgram_0020Files_0020_0028x86_0029_005CSteam_005Csteamapps_005Ccommon_005CRimWorld_005CMods_005C_505A_70B9_5211_5177_005CAssemblies_005C0Harmony_002Edll/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/AddReferences/RecentPaths/=C_003A_005CProgram_0020Files_0020_0028x86_0029_005CSteam_005Csteamapps_005Ccommon_005CRimWorld_005CMods_005C_672C_4F53rjw_002Dmaster_005C1_002E3_005CAssemblies_005CRJW_002Edll/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/AddReferences/RecentPaths/=C_003A_005CProgram_0020Files_0020_0028x86_0029_005CSteam_005Csteamapps_005Ccommon_005CRimWorld_005CRimWorldWin64_005FData_005CManaged_005CAssembly_002DCSharp_002Edll/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/AddReferences/RecentPaths/=C_003A_005CProgram_0020Files_0020_0028x86_0029_005CSteam_005Csteamapps_005Ccommon_005CRimWorld_005CRimWorldWin64_005FData_005CManaged_005CUnityEngine_002Edll/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/AddReferences/RecentPaths/=C_003A_005CProgram_0020Files_0020_0028x86_0029_005CSteam_005Csteamapps_005Cworkshop_005Ccontent_005C294100_005C2009463077_005CCurrent_005CAssemblies_005C0Harmony_002Edll/@EntryIndexedValue">True</s:Boolean>
+	<s:String x:Key="/Default/Environment/AssemblyExplorer/XmlDocument/@EntryValue">&lt;AssemblyExplorer&gt;&#xD;
+  &lt;Assembly Path="C:\Program Files (x86)\Steam\steamapps\common\RimWorld\RimWorldWin64_Data\Managed\Assembly-CSharp.dll" /&gt;&#xD;
+  &lt;Assembly Path="C:\Program Files (x86)\Steam\steamapps\workshop\content\294100\836308268\1.3\Assemblies\0MultiplayerAPI.dll" /&gt;&#xD;
+  &lt;Assembly Path="C:\Program Files (x86)\Steam\steamapps\workshop\content\294100\836308268\1.3\Assemblies\0Harmony.dll" /&gt;&#xD;
+  &lt;Assembly Path="C:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\a16s情趣装备扩展（原s16s）（RJW ASE.v109）\Assemblies\s16-extension.dll" /&gt;&#xD;
+  &lt;Assembly Path="C:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\本体rjw-master\1.3\Assemblies\RJW.dll" /&gt;&#xD;
+  &lt;Assembly Path="C:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\a16s情趣装备扩展（原s16s）（RJW ASE.v109）\Assemblies\RainsS16Addons.dll" /&gt;&#xD;
+  &lt;Assembly Path="C:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\RJW-Sexperience-master\Assemblies\RJWSexperience.dll" /&gt;&#xD;
+  &lt;Assembly Path="C:\Program Files (x86)\Steam\steamapps\workshop\content\294100\2205980094\1.3\Assemblies\StandaloneHotSpring.dll" /&gt;&#xD;
+  &lt;Assembly Path="C:\Program Files (x86)\Steam\steamapps\workshop\content\294100\2371079000\1.3\Assemblies\HSJZChineseCulture.dll" /&gt;&#xD;
+  &lt;Assembly Path="C:\Program Files (x86)\Steam\steamapps\workshop\content\294100\1578234826\1.3\Assemblies\Restraints.dll" /&gt;&#xD;
+  &lt;Assembly Path="C:\Program Files (x86)\Steam\steamapps\workshop\content\294100\2059450213\1.3\Assemblies\WarCrimesExpanded2.dll" /&gt;&#xD;
+  &lt;Assembly Path="C:\Program Files (x86)\Steam\steamapps\workshop\content\294100\2031734067\v1.3\Assemblies\PeteTimesSix.CompactHediffs.dll" /&gt;&#xD;
+  &lt;Assembly Path="C:\Program Files (x86)\Steam\steamapps\common\RimWorld\example\BondageFurniture-master\Assemblies\BondageFurniture.dll" /&gt;&#xD;
+  &lt;Assembly Path="C:\Program Files (x86)\Steam\steamapps\workshop\content\294100\2296404655\1.3\Assemblies\VanillaTraitsExpanded.dll" /&gt;&#xD;
+  &lt;Assembly Path="C:\Program Files (x86)\Steam\steamapps\workshop\content\294100\1201382956\v1.3\Assemblies\TorannMagic.dll" /&gt;&#xD;
+  &lt;Assembly Path="C:\Program Files (x86)\Steam\steamapps\workshop\content\294100\836308268\1.3\Assemblies\BadHygiene.dll" /&gt;&#xD;
+  &lt;Assembly Path="C:\Program Files (x86)\Steam\steamapps\workshop\content\294100\2575938407\Assemblies\yayoAni.dll" /&gt;&#xD;
+  &lt;Assembly Path="C:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\RJW拓展（rjw-ex）\1.3\Assemblies\RimJobWorldExtension.dll" /&gt;&#xD;
+&lt;/AssemblyExplorer&gt;</s:String>
+	</wpf:ResourceDictionary>

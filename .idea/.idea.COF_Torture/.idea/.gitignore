@@ -1,0 +1,13 @@
+# Default ignored files
+/shelf/
+/workspace.xml
+# Rider ignored files
+/contentModel.xml
+/projectSettingsUpdater.xml
+/.idea.COF_Torture.iml
+/modules.xml
+# Datasource local storage ignored files
+/../../../../../../../../../../../../../:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\做点刑具\Source\COF_Torture\.idea\.idea.COF_Torture\.idea/dataSources/
+/dataSources.local.xml
+# Editor-based HTTP Client requests
+/httpRequests/
