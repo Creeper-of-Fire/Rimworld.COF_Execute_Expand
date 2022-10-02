@@ -1,6 +1,8 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using COF_Torture.Hediffs;
+using COF_Torture.ModSetting;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -17,6 +19,90 @@ namespace COF_Torture.Things
         private List<Pawn> lastOwnerList;
         //private int CheckTicks;
 
+        public Graphic graphic; //必定绘制
+        public Graphic graphic_top;
+        public Graphic graphic_top_using;
+        public Graphic graphic_blood;
+        public Graphic graphic_blood_top;
+        public Graphic graphic_blood_top_using;
+
+        public override void Draw()
+        {
+            base.Draw();
+            IntVec3 position = this.Position;
+            Rot4 north = Rot4.North;
+            Vector3 shiftedWithAltitude;
+            //shiftedWithAltitude = position.ToVector3ShiftedWithAltitude(AltitudeLayer.Building);
+            //graphic.Draw(shiftedWithAltitude, north, (Thing)this);
+            if (this.graphic == null)
+                trySetGraphic();
+            if (isUsing)
+            {
+                //关上的盖子
+                shiftedWithAltitude = position.ToVector3ShiftedWithAltitude(AltitudeLayer.PawnRope);
+                graphic_top_using?.Draw(shiftedWithAltitude, north, (Thing)this);
+            }
+            else
+            {
+                //打开的盖子
+                shiftedWithAltitude = position.ToVector3ShiftedWithAltitude(AltitudeLayer.Building);
+                graphic_top?.Draw(shiftedWithAltitude, north, (Thing)this);
+            }
+
+            if (isUsed)
+            {
+                //底部的血液
+                shiftedWithAltitude = position.ToVector3ShiftedWithAltitude(AltitudeLayer.BuildingOnTop);
+                graphic_blood?.Draw(shiftedWithAltitude, north, (Thing)this);
+                if (isUsing)
+                {
+                    //关上的盖子上的血液
+                    shiftedWithAltitude = position.ToVector3ShiftedWithAltitude(AltitudeLayer.Projectile);
+                    graphic_blood_top_using?.Draw(shiftedWithAltitude, north, (Thing)this);
+                }
+                else
+                {
+                    //打开的盖子上的血液
+                    //shiftedWithAltitude = position.ToVector3ShiftedWithAltitude(AltitudeLayer.BuildingOnTop);
+                    graphic_blood_top?.Draw(shiftedWithAltitude, north, (Thing)this);
+                }
+            }
+        }
+
+        public static void trySetGraphicSin(Graphic gph, string texPath, Vector2 dS, ref Graphic graphic_change,
+            bool isTrans = false)
+        {
+            if (graphic_change == null)
+            {
+                Shader shader = ShaderDatabase.Transparent;
+                gph.path = texPath;
+                var isExist = ContentFinder<Texture2D>.Get(gph.path, false);
+                if (isExist != null)
+                {
+                    if (isTrans)
+                        graphic_change = gph.GetColoredVersion(shader, new Color(1f, 1f, 1f,
+                            ModSettingMain.Instance.Setting.topTransparency), Color.black);
+                    else
+                        graphic_change = gph.GetCopy(dS, null);
+                }
+                gph.path = texPath;
+            }
+        }
+
+        public void trySetGraphic()
+        {
+            string texPath = this.Graphic.path;
+            var dS = this.Graphic.drawSize;
+            var gph = this.Graphic.GetCopy(dS, null);
+            trySetGraphicSin(gph, texPath, dS, ref this.graphic);
+            trySetGraphicSin(gph, texPath + "_top", dS, ref this.graphic_top);
+            trySetGraphicSin(gph, texPath + "_top_using", dS, ref this.graphic_top_using, true);
+            trySetGraphicSin(gph, texPath + "_blood", dS, ref this.graphic_blood);
+            trySetGraphicSin(gph, texPath + "_blood_to", dS, ref this.graphic_blood_top);
+            trySetGraphicSin(gph, texPath + "_blood_top_using", dS, ref this.graphic_blood_top_using, true);
+            //gph.path = texPath;
+        }
+
         public new bool Medical
         {
             get => false;
@@ -30,18 +116,12 @@ namespace COF_Torture.Things
             Scribe_Values.Look<bool>(ref this.isUsing, "isUsing");
             Scribe_Values.Look<bool>(ref this.isUsed, "isUsed");
         }
-        
-        
+
 
         public override void SpawnSetup(Map map, bool respawningAfterLoad)
         {
             base.SpawnSetup(map, respawningAfterLoad);
             //this.Medical = false;
-            /*if (this.def.IsBed)
-                Log.Message(this + "is bed");
-            else
-                Log.Message(this + "is not bed");
-            */
         }
 
 

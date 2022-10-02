@@ -27,7 +27,7 @@ namespace COF_Torture.Jobs
                 return JobMaker.MakeJob(this.def.jobDef, (LocalTargetInfo)t);
             }
             else
-            {
+            {  
                 //Log.Message(pawn.ToString()+" try to use"+t.ToString());
                 return (Job)null;
             }
