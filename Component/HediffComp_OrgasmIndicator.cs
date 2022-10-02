@@ -55,6 +55,7 @@ namespace COF_Torture.Component
 
         public override void CompPostTick(ref float severityAdjustment)
         {
+            base.CompPostTick(ref severityAdjustment);
             this.ticksToCount--;
             if (this.ticksToCount > 0) //多次CompPostTick执行一次
                 return;

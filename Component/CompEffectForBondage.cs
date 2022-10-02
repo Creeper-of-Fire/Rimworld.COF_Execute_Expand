@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using COF_Torture.Hediffs;
 using Verse;
 
@@ -38,16 +37,16 @@ namespace COF_Torture.Component
             Verse.Hediff hediff = t.hediffSet.GetFirstHediffOfDef(hediffDef);
             if (hediff == null)
             {
-                Hediff_Torture hediffAdd;
+                Hediff_WithGiver hediffAdd;
                 if (this.Props.part == null)
                 { 
-                    hediffAdd =(Hediff_Torture) HediffMaker.MakeHediff(hediffDef, this.Victim);
+                    hediffAdd =(Hediff_WithGiver) HediffMaker.MakeHediff(hediffDef, this.Victim);
                 }
                 else
                 {
                     var bodyPart = t.hediffSet.GetNotMissingParts().FirstOrFallback<BodyPartRecord>(
                         (Func<BodyPartRecord, bool>)(p => p.def == this.Props.part));
-                    hediffAdd =(Hediff_Torture) HediffMaker.MakeHediff(hediffDef, this.Victim, bodyPart);
+                    hediffAdd =(Hediff_WithGiver) HediffMaker.MakeHediff(hediffDef, this.Victim, bodyPart);
                 }
                 hediffAdd.giver = this.Parent;
                 t.AddHediff(hediffAdd);

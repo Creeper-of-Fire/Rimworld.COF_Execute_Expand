@@ -1,6 +1,5 @@
 using UnityEngine;
 using Verse;
-using System.Collections;
 
 namespace COF_Torture.ModSetting
 {
@@ -39,12 +38,12 @@ namespace COF_Torture.ModSetting
             ls.GapLine(20f);
             ls.Label("自动补充".Translate());
             ls.CheckboxLabeled("殖民者在刑具上会获得饮食和水的补充", ref Setting.isFeed, "殖民者在刑具上会获得饮食和水的补充");
-            /*ls.GapLine(20f);
+            ls.GapLine(20f);
             Text.Font = GameFont.Medium;
-            ls.Label("浮点测试".Translate());
-            ls.Label(Setting.testFloat.ToString());
-            Setting.testFloat = ls.Slider(Setting.testFloat, 100f, 300f);
-            Text.Font = GameFont.Small;
+            ls.Label("盖子透明度（请重进存档以应用）".Translate());
+            ls.Label(Setting.topTransparency.ToString());
+            Setting.topTransparency = ls.Slider(Setting.topTransparency, 0f, 1f);
+            /*Text.Font = GameFont.Small;
             ls.GapLine(20f);
             Text.Font = GameFont.Medium;
             ls.Label("整型测试".Translate());
@@ -70,7 +69,8 @@ namespace COF_Torture.ModSetting
         public bool isFeed = true;
         //public float testFloat = 1f;
         //public int testInt = 2500;
-        public UnityEngine.Vector2 scrollPos = UnityEngine.Vector2.zero;
+        public UnityEngine.Vector2 scrollPos = UnityEngine.Vector2.zero;//这玩意哪来的？我怎么一觉醒来多了这行代码？
+        public float topTransparency = 1.0f;
 
         #endregion
 
@@ -79,7 +79,7 @@ namespace COF_Torture.ModSetting
             base.ExposeData();
             Scribe_Values.Look(ref isSafe, "isSafe", true);
             Scribe_Values.Look(ref isFeed, "isFeed", true);
-            //Scribe_Values.Look(ref testFloat, "TestFloat", 1f);
+            Scribe_Values.Look(ref topTransparency, "topTransparency", 1f);
             //Scribe_Values.Look(ref testInt, "TestInt", 2500);
         }
 
@@ -87,7 +87,7 @@ namespace COF_Torture.ModSetting
         {
             isSafe = true;
             isFeed = true;
-            //testFloat = 1f;
+            topTransparency = 1f;
             //testInt = 2500;
         }
     }

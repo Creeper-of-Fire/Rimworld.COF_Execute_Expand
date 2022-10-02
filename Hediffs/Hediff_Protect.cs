@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using COF_Torture.ModSetting;
 using COF_Torture.Patch;
 using RimWorld;
@@ -8,7 +6,7 @@ using Verse;
 
 namespace COF_Torture.Hediffs
 {
-    public class Hediff_Protect : Hediff_Torture
+    public class Hediff_Protect : Hediff_WithGiver
     {
         public int tickNext;
 
@@ -70,6 +68,15 @@ namespace COF_Torture.Hediffs
             }
           }
         }*/
+        public override bool ShouldRemove
+        {
+            get
+            {
+                if (giver == null)
+                    return true;
+                return base.ShouldRemove;
+            }
+        }
 
         public void SatisfyHunger()
         {

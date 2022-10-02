@@ -1,3 +1,4 @@
+using COF_Torture.ModSetting;
 using UnityEngine;
 using Verse;
 
@@ -10,7 +11,7 @@ namespace COF_Torture.Things
         public Graphic graphic_top_using;
         public Graphic graphic_blood;
         public Graphic graphic_blood_top;
-        public Graphic graphic_blood_top_using; 
+        public Graphic graphic_blood_top_using;
 
         public override void Draw()
         {
@@ -54,16 +55,16 @@ namespace COF_Torture.Things
             }
         }
 
-        public void setGraphic()
+        public void setGraphic() //ToDO: 改成有着色器的
         {
             string texPath = this.Graphic.path;
             var dS = this.Graphic.drawSize;
             var gph = this.Graphic.GetCopy(dS, null);
-            if (this.graphic == null)
+            /*if (this.graphic == null)
             {
                 gph.path = texPath;
                 this.graphic = gph.GetCopy(dS, null);
-            }
+            }*/
             if (this.graphic_top == null)
             {
                 gph.path = texPath + "_top";
@@ -73,7 +74,9 @@ namespace COF_Torture.Things
             if (this.graphic_top_using == null)
             {
                 gph.path = texPath + "_top_using";
-                this.graphic_top_using = gph.GetCopy(dS, null);
+                Shader shader = ShaderDatabase.Transparent;
+                this.graphic_top_using = gph.GetColoredVersion(shader,
+                    new Color(1f, 1f, 1f, ModSettingMain.Instance.Setting.topTransparency), Color.black);
             }
 
             if (this.graphic_blood == null)

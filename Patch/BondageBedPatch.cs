@@ -1,8 +1,3 @@
-using COF_Torture.Things;
-using HarmonyLib;
-using RimWorld;
-using Verse;
-
 namespace COF_Torture.Patch
 {
     /*[HarmonyPatch(typeof(RestUtility), "IsValidBedFor")]

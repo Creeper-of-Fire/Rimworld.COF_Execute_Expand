@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using COF_Torture.Component;
-using COF_Torture.Things;
 using RimWorld;
 using Verse;
 using Verse.AI;

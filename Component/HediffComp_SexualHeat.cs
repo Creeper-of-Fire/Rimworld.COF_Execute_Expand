@@ -11,12 +11,13 @@ namespace COF_Torture.Component
         private float SexualHeatGet;
         public override void CompPostTick(ref float severityAdjustment)
         {
-            HediffCompProperties_SexualHeatWithPain props1 = this.Props;
+            base.CompPostTick(ref severityAdjustment);
             //Log.Message("11111111");
             this.count1++;
             this.count2++;
             if (this.count1 > 1000) //1000次CompPostTick执行一次
             {
+                HediffCompProperties_SexualHeatWithPain props1 = this.Props;
                 this.count1 = 0;
                 float pain = this.Pawn.health.hediffSet.PainTotal;
                 this.SexualHeatGet = pain * props1.SexualHeatConversionRate;

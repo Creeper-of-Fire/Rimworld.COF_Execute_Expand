@@ -2,16 +2,8 @@ using Verse;
 
 namespace COF_Torture.Hediffs
 {
-    public class Hediff_Torture: HediffWithComps
+    public class Hediff_Torture : Hediff_WithGiver
     {
-        public Thing giver;
-
-        public override void ExposeData()
-        {
-            base.ExposeData();
-            Scribe_References.Look<Thing>(ref this.giver, "giver");
-        }
-
         public override float BleedRate
         {
             get
@@ -20,9 +12,13 @@ namespace COF_Torture.Hediffs
                 {
                     return 0.0f;
                 }
+
                 if (this.def.injuryProps == null)
                     return 0.0f;
-                if (this.pawn.Dead || this.Part.def.IsSolid(this.Part, this.pawn.health.hediffSet.hediffs))//|| this.pawn.health.hediffSet.PartOrAnyAncestorHasDirectlyAddedParts(this.Part))
+                if (this.pawn.Dead ||
+                    this.Part.def.IsSolid(this.Part,
+                        this.pawn.health.hediffSet
+                            .hediffs)) //|| this.pawn.health.hediffSet.PartOrAnyAncestorHasDirectlyAddedParts(this.Part))
                     return 0.0f;
                 try
                 {
@@ -31,21 +27,22 @@ namespace COF_Torture.Hediffs
                 }
                 catch
                 {
-                    Log.Message("[COF_TORTURE]错误："+this+"没有设置流血的数值");
+                    Log.Message("[COF_TORTURE]错误：" + this + "没有设置流血的数值");
                     return 0.0f;
                 }
             }
         }
 
-        public override void PostTick()
+        public override bool ShouldRemove
         {
-            base.PostTick();
-            if (giver == null)
+            get
             {
-                this.Severity = 0.0f;
+                if (giver == null)
+                    return true;
+                return base.ShouldRemove;
             }
         }
-        
+
         //使用自带的方法来让小人死亡，所以重写CauseDeathNow（这是为了继续使用致死严重度来适配UI模组）
         public override bool CauseDeathNow()
         {

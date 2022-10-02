@@ -36,13 +36,13 @@ namespace COF_Torture.Component
                     var a = t.health.hediffSet.GetNotMissingParts()
                         .FirstOrFallback<BodyPartRecord>(
                             (Func<BodyPartRecord, bool>)(p => p.def == this.Props.part));
-                    Hediff_Torture h = (Hediff_Torture)HediffMaker.MakeHediff(this.Props.hediff, t, a);
+                    Hediff_WithGiver h = (Hediff_WithGiver)HediffMaker.MakeHediff(this.Props.hediff, t, a);
                     h.giver = this.parent;
                     t.health.AddHediff(h);
                 }
                 else
                 {
-                    var h = (Hediff_Torture)t.health.hediffSet.GetFirstHediffOfDef(this.Props.hediff);
+                    var h = (Hediff_WithGiver)t.health.hediffSet.GetFirstHediffOfDef(this.Props.hediff);
                     if (h != null && h.giver == this.parent)
                     {
                         t.health.RemoveHediff(h);

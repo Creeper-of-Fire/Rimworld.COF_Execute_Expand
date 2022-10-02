@@ -40,9 +40,6 @@
           <HintPath>..\..\..\..\RimWorldWin64_Data\Managed\Assembly-CSharp.dll</HintPath>
           <Private>False</Private>
         </Reference>
-        <Reference Include="Restraints">
-          <HintPath>..\..\..\..\..\..\workshop\content\294100\1578234826\1.3\Assemblies\Restraints.dll</HintPath>
-        </Reference>
         <Reference Include="System" />
         <Reference Include="System.Core" />
         <Reference Include="System.Data" />
@@ -60,13 +57,16 @@
         <Compile Include="Component\CompEffectForBondage.cs" />
         <Compile Include="Component\CompHediffGiver.cs" />
         <Compile Include="Component\CompUsableBondageBed.cs" />
+        <Compile Include="Component\HediffComp_ExecuteAddHediff.cs" />
         <Compile Include="Component\HediffComp_ExecuteIndicator.cs" />
         <Compile Include="Component\HediffComp_OrgasmIndicator.cs" />
         <Compile Include="Component\HediffComp_SexualHeat.cs" />
         <Compile Include="Damages\DamageDefOf.cs" />
         <Compile Include="Hediffs\HediffDefOf.cs" />
+        <Compile Include="Hediffs\Hediff_ExecuteInjury.cs" />
         <Compile Include="Hediffs\Hediff_Protect.cs" />
         <Compile Include="Hediffs\Hediff_Torture.cs" />
+        <Compile Include="Hediffs\Hediff_WithGiver.cs" />
         <Compile Include="Jobs\JobDefof.cs" />
         <Compile Include="Jobs\JobDriver_PlayExecuteBuilding.cs" />
         <Compile Include="Jobs\JobDriver_ReleaseBondageBed.cs" />

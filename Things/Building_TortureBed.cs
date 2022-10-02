@@ -1,13 +1,10 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using COF_Torture.Hediffs;
 using RimWorld;
 using UnityEngine;
 using Verse;
 using Verse.AI;
-using Verse.Sound;
 
 namespace COF_Torture.Things
 {
@@ -33,6 +30,8 @@ namespace COF_Torture.Things
             Scribe_Values.Look<bool>(ref this.isUsing, "isUsing");
             Scribe_Values.Look<bool>(ref this.isUsed, "isUsed");
         }
+        
+        
 
         public override void SpawnSetup(Map map, bool respawningAfterLoad)
         {
@@ -227,7 +226,7 @@ namespace COF_Torture.Things
             {
                 foreach (var hediffR in aps.health.hediffSet.hediffs)
                 {
-                    if (hediffR is Hediff_Torture hT && hT.giver != null)
+                    if (hediffR is Hediff_WithGiver hT && hT.giver != null)
                         if (hT.giver == this)
                         {
                             hT.giver = null;
@@ -288,7 +287,7 @@ namespace COF_Torture.Things
                     {
                         if (hediffR != null)
                         {
-                            if (hediffR is Hediff_Torture ht && ht.giver != null)
+                            if (hediffR is Hediff_WithGiver ht && ht.giver != null)
                                 if (ht.giver == this)
                                 {
                                     ht.giver = null;
