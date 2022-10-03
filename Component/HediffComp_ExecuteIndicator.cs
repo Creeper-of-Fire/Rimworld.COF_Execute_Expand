@@ -2,6 +2,7 @@ using COF_Torture.Hediffs;
 using COF_Torture.ModSetting;
 using COF_Torture.Patch;
 using COF_Torture.Things;
+using RimWorld;
 using Verse;
 using HediffDefOf = RimWorld.HediffDefOf;
 
@@ -10,8 +11,8 @@ namespace COF_Torture.Component
     public class HediffCompProperties_ExecuteIndicator : HediffCompProperties
     {
         public int ticksToCount = 100;
-        public int ticksToExecute = 9000;
-        public float severityToDeath = 10.0f;
+        //public int ticksToExecute = 9000;
+        //public float severityToDeath = 10.0f;
 
         public LetterDef letter;
         public HediffCompProperties_ExecuteIndicator() => this.compClass = typeof(HediffComp_ExecuteIndicator);
@@ -26,7 +27,16 @@ namespace COF_Torture.Component
 
         private float severityAdd;
 
-        private Hediff bloodLoss;
+        private float severityToDeath;
+
+        public bool isButcherDone;
+        //private Hediff bloodLoss;
+
+        public override void CompExposeData()
+        {
+            base.CompExposeData();
+            Scribe_Values.Look(ref isButcherDone, "isButcherDone", false);
+        }
 
         public override void CompPostTick(ref float severityAdjustment)
         {
@@ -36,46 +46,111 @@ namespace COF_Torture.Component
                 return;
             HediffCompProperties_ExecuteIndicator props1 = this.Props;
             this.ticksToCount = props1.ticksToCount;
-            severityAdd = props1.severityToDeath / ((float)props1.ticksToExecute / props1.ticksToCount);
-            this.parent.Severity += severityAdd;
-            this.ShouldNotDie();
-            if (this.parent.Severity + 0.01f > props1.severityToDeath)
+
+            if (isButcherDone == false && Parent.def != COF_Torture.Hediffs.HediffDefOf.COF_Torture_Mincer_Execute)
+            {
+                isButcherDone = true;
+            }
+            if (severityToDeath <= 0f)
+            {
+                if (this.Parent.def.lethalSeverity <= 0f)
+                {
+                    Log.Error("[COF_TORTURE]错误："+this.Parent+"是用于处理处刑效果的hediff，但是没有致死严重度数据");
+                    severityToDeath = 10f;
+                }
+                else
+                    severityToDeath = this.Parent.def.lethalSeverity;
+            }
+
+            if (severityAdd == 0f)
+                severityAdd = severityToDeath /
+                              ((float)ModSettingMain.Instance.Setting.executeHours * 2500 / props1.ticksToCount);
+            //this.ShouldNotDie();//还是决定使用harmony赋予不死效果
+            if ((double)this.parent.Severity >= (double) severityToDeath && isButcherDone)
             {
                 var a = (Building_TortureBed)this.Parent.giver;
                 a.isUsed = true;
-                if (ModSettingMain.Instance.Setting.isSafe)
-                {
-                    this.parent.Severity = (props1.severityToDeath - 0.01f);
-                }
-                else
+                if (!ModSettingMain.Instance.Setting.isSafe)
                     this.KillByExecute();
             }
+            else
+            {
+                this.parent.Severity += severityAdd;
+            }
+        }
+
+        public override void CompPostPostAdd(DamageInfo? dinfo)
+        {
+            base.CompPostPostAdd(dinfo);
+            var hediffAdd = (Hediff_Protect) HediffMaker.MakeHediff(COF_Torture.Hediffs.HediffDefOf.COF_Torture_Fixed,this.Pawn);
+            hediffAdd.giver = this.Parent.giver;
+            Pawn.health.AddHediff(hediffAdd);
+        }
+
+        public override void CompPostPostRemoved()
+        {
+            ShouldNotDie();
+            if (ShouldBeDead())//放下来时如果会立刻死，就改变死因为本comp造成
+            {
+                var h = Pawn.health.hediffSet.GetFirstHediffOfDef(COF_Torture.Hediffs.HediffDefOf.COF_Torture_Fixed);
+                if (h != null)
+                {
+                    Pawn.health.hediffSet.hediffs.Remove(h);
+                    h.PostRemoved();
+                    Log.Message("catch the death"+Pawn.Dead);
+                }
+                KillByExecute();
+            }
+            base.CompPostPostRemoved();
+        }
+        
+        private bool ShouldBeDead()
+        {
+            var health = Pawn.health;
+            if (health.Dead)
+                return true;
+            for (int index = 0; index < health.hediffSet.hediffs.Count; ++index)
+            {
+                if (health.hediffSet.hediffs[index].CauseDeathNow())
+                    return true;
+            }
+            if (health.ShouldBeDeadFromRequiredCapacity() != null)
+                return true;
+            if ((double) PawnCapacityUtility.CalculatePartEfficiency(health.hediffSet, Pawn.RaceProps.body.corePart) <= 0.0)
+            {
+                if (DebugViewSettings.logCauseOfDeath)
+                    Log.Message("CauseOfDeath: zero efficiency of " + Pawn.RaceProps.body.corePart.Label);
+                return true;
+            }
+            return health.ShouldBeDeadFromLethalDamageThreshold();
         }
 
         public void ShouldNotDie()
         {
             if (this.Def.injuryProps.bleedRate != 0.0f)
             {
-                if (this.bloodLoss == null)
-                    this.bloodLoss = this.Pawn.health.hediffSet.GetFirstHediffOfDef(HediffDefOf.BloodLoss);
-                if (this.bloodLoss.Severity > 0.9f)
-                    this.bloodLoss.Severity = 0.9f;
+                var bloodLoss = this.Pawn.health.hediffSet.GetFirstHediffOfDef(HediffDefOf.BloodLoss);
+                if (bloodLoss.Severity > 0.9f)
+                    bloodLoss.Severity = 0.9f;
             }
         }
 
         public void KillByExecute()
         {
             //a.ChangeGraphic();
-            if (SettingPatch.RimJobWorldIsActive)
+            if (SettingPatch.RimJobWorldIsActive && Pawn.story.traits.HasTrait(TraitDefOf.Masochist))
             {
-                var execute = Damages.DamageDefOf.Execute;
+                var execute = Damages.DamageDefOf.Execute_Licentious;
                 var dInfo = new DamageInfo(execute, 1);
                 var dHediff = HediffMaker.MakeHediff(Hediffs.HediffDefOf.COF_Torture_Licentious, this.Pawn);
                 this.parent.pawn.Kill(dInfo, dHediff);
             }
             else
             {
-                this.parent.pawn.Kill(new DamageInfo(), this.Parent);
+                var execute = Damages.DamageDefOf.Execute;
+                var dInfo = new DamageInfo(execute, 1);
+                var dHediff = HediffMaker.MakeHediff(this.Parent.def, this.Pawn);
+                this.parent.pawn.Kill(dInfo, dHediff);
             }
         }
     }

@@ -24,11 +24,6 @@ namespace COF_Torture.Component
             {
                 t.RemoveHediff(h);
             }
-            h = t.hediffSet.GetFirstHediffOfDef(COF_Torture.Hediffs.HediffDefOf.COF_Torture_Fixed);
-            if (h != null)
-            {
-                t.RemoveHediff(h);
-            }
         }
         public void AddEffect()
         {
@@ -48,9 +43,6 @@ namespace COF_Torture.Component
                         (Func<BodyPartRecord, bool>)(p => p.def == this.Props.part));
                     hediffAdd =(Hediff_WithGiver) HediffMaker.MakeHediff(hediffDef, this.Victim, bodyPart);
                 }
-                hediffAdd.giver = this.Parent;
-                t.AddHediff(hediffAdd);
-                hediffAdd = (Hediff_Protect) HediffMaker.MakeHediff(COF_Torture.Hediffs.HediffDefOf.COF_Torture_Fixed,this.Victim);
                 hediffAdd.giver = this.Parent;
                 t.AddHediff(hediffAdd);
             }

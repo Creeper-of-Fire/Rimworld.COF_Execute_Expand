@@ -1,5 +1,7 @@
 using System.Collections.Generic;
+using System.Linq;
 using COF_Torture.Hediffs;
+using COF_Torture.ModSetting;
 using COF_Torture.Patch;
 using Verse;
 
@@ -10,6 +12,7 @@ namespace COF_Torture.Component
         public int ticksToAdd = 100;
         public FloatRange severityToAdd;
         public int addHediffNumMax = 20;
+        public int addHediffNumInt = 20;
         public HediffDef addHediff;
         public List<BodyPartDef> addBodyParts;
 
@@ -34,9 +37,14 @@ namespace COF_Torture.Component
             return new DamageInfo();
         }
 
-        public IEnumerable<BodyPartRecord> ListOfPart()
+        public virtual IEnumerable<BodyPartRecord> ListOfPart()
         {
             var partsHave = Pawn.health.hediffSet.GetNotMissingParts();
+            if (partsHave == null)
+            {
+                yield break;
+            }
+
             var partsAdd = this.Props.addBodyParts;
             //var h = (Hediff_Injury)HediffMaker.MakeHediff(Props.addHediff, Pawn);
             if (partsAdd == null)
@@ -56,12 +64,17 @@ namespace COF_Torture.Component
             }
         }
 
-        public void addHediff()
+        public virtual void addHediff()
         {
+            if (ticksToAdd >= this.Props.ticksToAdd)
+                ticksToAdd = 0;
+            else
+                return;
             if (giver == null)
             {
                 giver = this.Parent.giver;
             }
+
             var part = ListOfPart().RandomElement();
             var hDef = this.Props.addHediff;
             //Log.Message(part + "");
@@ -69,16 +82,19 @@ namespace COF_Torture.Component
             h.Severity = this.Props.severityToAdd.RandomInRange;
             if (Pawn.health.hediffSet.GetHediffCount(hDef) < this.Props.addHediffNumMax)
             {
-                if (!Pawn.health.WouldLosePartAfterAddingHediff(hDef, part, h.Severity))
+                if (!Pawn.health.WouldLosePartAfterAddingHediff(hDef, part, h.Severity) ||
+                    !ModSettingMain.Instance.Setting.isSafe)
                 {
                     if (part == null || (double)part.coverageAbs > 0.0)
                     {
                         //Log.Message(h + "");
-                        if (!Pawn.health.WouldDieAfterAddingHediff(hDef, part, h.Severity))
+                        if (!ModSettingMain.Instance.Setting.isSafe ||
+                            !Pawn.health.WouldDieAfterAddingHediff(hDef, part, h.Severity))
                         {
                             h.giver = giver;
                             Pawn.health.AddHediff(h, part, dInfo());
                         }
+
                         return;
                     }
                 }
@@ -87,26 +103,26 @@ namespace COF_Torture.Component
             }
         }
 
-       /* public Hediff_Injury MakeHediffHarmless(Hediff_Injury h,BodyPartRecord part, Pawn pawn)
-        {
-            if (pawn.health.capacities.GetLevel(PawnCapacityDefOf.Consciousness) <= 0.05f)
-            {
-                var cap = new PawnCapacityModifier();
-                cap.offset = 0.01f;
-                h.CapMods.Add(cap);
-            }
-            //if (pawn.health.WouldDieAfterAddingHediff(h, part, h.Severity))
-            {
-                //MakeHediffHarmless(h, part, pawn);
-            }
-            return h;
-        }*/
+        /* public Hediff_Injury MakeHediffHarmless(Hediff_Injury h,BodyPartRecord part, Pawn pawn)
+         {
+             if (pawn.health.capacities.GetLevel(PawnCapacityDefOf.Consciousness) <= 0.05f)
+             {
+                 var cap = new PawnCapacityModifier();
+                 cap.offset = 0.01f;
+                 h.CapMods.Add(cap);
+             }
+             //if (pawn.health.WouldDieAfterAddingHediff(h, part, h.Severity))
+             {
+                 //MakeHediffHarmless(h, part, pawn);
+             }
+             return h;
+         }*/
 
 
         public override void CompPostPostAdd(DamageInfo? dinfo)
         {
             base.CompPostPostAdd(dinfo);
-            for (int i = 0; i < this.Props.addHediffNumMax; i++)
+            for (int i = 0; i < this.Props.addHediffNumInt; i++)
             {
                 addHediff();
             }
@@ -116,12 +132,7 @@ namespace COF_Torture.Component
         {
             base.CompPostTick(ref severityAdjustment);
             ticksToAdd++;
-            if (ticksToAdd >= this.Props.ticksToAdd)
-            {
-                ticksToAdd = 0;
-                addHediff();
-                //Log.Message("Add Hediff");
-            }
+            addHediff();
         }
     }
 }

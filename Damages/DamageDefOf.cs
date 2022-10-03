@@ -7,5 +7,6 @@ namespace COF_Torture.Damages
     public static class DamageDefOf
     {
         public static DamageDef Execute;
+        public static DamageDef Execute_Licentious;
     }
 }
