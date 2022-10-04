@@ -66,8 +66,10 @@
         <Compile Include="Hediffs\HediffDefOf.cs" />
         <Compile Include="Hediffs\Hediff_ExecuteInjury.cs" />
         <Compile Include="Hediffs\Hediff_Protect.cs" />
+        <Compile Include="Hediffs\Hediff_Protect2.cs" />
         <Compile Include="Hediffs\Hediff_Torture.cs" />
         <Compile Include="Hediffs\Hediff_WithGiver.cs" />
+        <Compile Include="Jobs\CT_Toil_GoToBed.cs" />
         <Compile Include="Jobs\JobDefof.cs" />
         <Compile Include="Jobs\JobDriver_PlayExecuteBuilding.cs" />
         <Compile Include="Jobs\JobDriver_ReleaseBondageBed.cs" />
@@ -82,6 +84,7 @@
         <Compile Include="Patch\NeverPainDownedPatch.cs" />
         <Compile Include="Patch\TraitWithHediffPatch.cs" />
         <Compile Include="Properties\AssemblyInfo.cs" />
+        <Compile Include="Things\BuildingDef.cs" />
         <Compile Include="Things\Building_TortureBed.cs" />
     </ItemGroup>
     <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

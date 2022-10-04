@@ -24,6 +24,11 @@ namespace COF_Torture.Component
             {
                 t.RemoveHediff(h);
             }
+            h = t.hediffSet.GetFirstHediffOfDef(COF_Torture.Hediffs.HediffDefOf.COF_Torture_Fixed);
+            if (h != null)
+            {
+                t.RemoveHediff(h);
+            }
         }
         public void AddEffect()
         {
@@ -46,6 +51,9 @@ namespace COF_Torture.Component
                 hediffAdd.giver = this.Parent;
                 t.AddHediff(hediffAdd);
             }
+            Hediff_Protect hediffTF = (Hediff_Protect) HediffMaker.MakeHediff(COF_Torture.Hediffs.HediffDefOf.COF_Torture_Fixed,this.Victim);
+            hediffTF.giver = this.Parent;
+            t.AddHediff(hediffTF);
         }
     }
 }

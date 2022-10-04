@@ -22,7 +22,7 @@ namespace COF_Torture.Patch
         {
             ModSettingPatch();
             var harmony = new Harmony("com.github.Creeper-of-Fire");
-            Harmony.DEBUG = true;
+            //Harmony.DEBUG = true;
             harmony.PatchAll(Assembly.GetExecutingAssembly());
             Log.Message("[COF_Torture]修改加载中!");
         }

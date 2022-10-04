@@ -3,6 +3,7 @@ using System.Linq;
 using COF_Torture.Hediffs;
 using COF_Torture.ModSetting;
 using COF_Torture.Patch;
+using COF_Torture.Things;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -24,8 +25,9 @@ namespace COF_Torture.Component
         public BodyPartHeight height;
         public Hediff_WithGiver Parent => (Hediff_WithGiver)this.parent;
         public int ticksToAdd;
-        public Thing giverOfHediff;
+        public Building_TortureBed giverOfHediff;
         public float productBar;
+        public List<Hediff_WithGiver> hediffList;
 
         public static bool notOnlyBone(List<BodyPartRecord> partsHave)
         {
@@ -110,10 +112,10 @@ namespace COF_Torture.Component
                 if (comp != null) comp.isButcherDone = true;
                 return;
             }
-            foreach (var VARIABLE in parts)
-            {
-                Log.Message(VARIABLE + "");
-            }
+            //foreach (var VARIABLE in parts)
+            //{
+            //    Log.Message(VARIABLE + "");
+            //}
 
             var part = parts.RandomElement();
             var hDef = this.Props.addHediff;

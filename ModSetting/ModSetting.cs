@@ -33,8 +33,8 @@ namespace COF_Torture.ModSetting
             } //按钮与监听
 
             ls.GapLine(20f);
-            ls.Label("死亡模式".Translate());
-            ls.CheckboxLabeled("殖民者不会因为酷刑死亡", ref Setting.isSafe, "殖民者不会因为酷刑死亡");
+            ls.Label("Safe Mode Is Default".Translate());
+            ls.CheckboxLabeled("建筑物默认启用安全模式", ref Setting.isSafe, "建筑物默认启用安全模式");
            
             ls.GapLine(20f);
             ls.Label("自动补充".Translate());
@@ -85,7 +85,7 @@ namespace COF_Torture.ModSetting
         public override void ExposeData()
         {
             base.ExposeData();
-            Scribe_Values.Look(ref isSafe, "isSafe", true);
+            Scribe_Values.Look(ref isSafe, "isSafe", true); //建筑物初始是否启用安全模式
             Scribe_Values.Look(ref isFeed, "isFeed", true);
             Scribe_Values.Look(ref leftHead, "leftHead", true);
             Scribe_Values.Look(ref topTransparency, "topTransparency", 1f);

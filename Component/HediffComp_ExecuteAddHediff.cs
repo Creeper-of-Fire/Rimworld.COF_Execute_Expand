@@ -3,6 +3,8 @@ using System.Linq;
 using COF_Torture.Hediffs;
 using COF_Torture.ModSetting;
 using COF_Torture.Patch;
+using COF_Torture.Things;
+using RimWorld;
 using Verse;
 
 namespace COF_Torture.Component
@@ -24,7 +26,7 @@ namespace COF_Torture.Component
         public HediffCompProperties_ExecuteAddHediff Props => (HediffCompProperties_ExecuteAddHediff)this.props;
         public Hediff_WithGiver Parent => (Hediff_WithGiver)this.parent;
         public int ticksToAdd;
-        public Thing giver;
+        public Building_TortureBed giver;
 
         public static DamageInfo dInfo()
         {
@@ -64,43 +66,63 @@ namespace COF_Torture.Component
             }
         }
 
-        public virtual void addHediff()
+        public virtual void addHediff(int depth = 0)
         {
-            if (ticksToAdd >= this.Props.ticksToAdd)
-                ticksToAdd = 0;
-            else
+            depth ++;
+            if (depth>=10)
                 return;
             if (giver == null)
             {
                 giver = this.Parent.giver;
             }
 
-            var part = ListOfPart().RandomElement();
-            var hDef = this.Props.addHediff;
+            BodyPartRecord part = ListOfPart().RandomElement();
+            if (part == null)
+                return;
+            HediffDef hDef = this.Props.addHediff;
             //Log.Message(part + "");
             Hediff_ExecuteInjury h = (Hediff_ExecuteInjury)HediffMaker.MakeHediff(hDef, Pawn, part);
             h.Severity = this.Props.severityToAdd.RandomInRange;
             if (Pawn.health.hediffSet.GetHediffCount(hDef) < this.Props.addHediffNumMax)
             {
-                if (!Pawn.health.WouldLosePartAfterAddingHediff(hDef, part, h.Severity) ||
-                    !ModSettingMain.Instance.Setting.isSafe)
+                if (isAddAble(hDef, part, h))
                 {
-                    if (part == null || (double)part.coverageAbs > 0.0)
-                    {
-                        //Log.Message(h + "");
-                        if (!ModSettingMain.Instance.Setting.isSafe ||
-                            !Pawn.health.WouldDieAfterAddingHediff(hDef, part, h.Severity))
-                        {
-                            h.giver = giver;
-                            Pawn.health.AddHediff(h, part, dInfo());
-                        }
-
-                        return;
-                    }
+                    h.giver = giver;
+                    Pawn.health.AddHediff(h, part, dInfo());
                 }
 
-                this.addHediff();
+                this.addHediff(depth);
             }
+        }
+
+        private bool isAddAble(HediffDef hDef, BodyPartRecord part, Hediff_ExecuteInjury h)
+        {
+            if (part == null)
+                return false;
+            if (!((double)part.coverageAbs > 0.0))
+            {
+                return false;
+            }
+
+            if (this.Parent.giver is Building_TortureBed bT && bT.isSafe)
+            {
+                if (part.def == BodyPartDefOf.Torso && Pawn.health.hediffSet.GetPartHealth(part) <= h.Severity)
+                {
+                    return false;
+                }
+
+                if (Pawn.health.WouldDieAfterAddingHediff(hDef, part, h.Severity))
+                {
+                    return false;
+                }
+
+                if (Pawn.health.WouldLosePartAfterAddingHediff(hDef, part, h.Severity))
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         /* public Hediff_Injury MakeHediffHarmless(Hediff_Injury h,BodyPartRecord part, Pawn pawn)
@@ -132,7 +154,11 @@ namespace COF_Torture.Component
         {
             base.CompPostTick(ref severityAdjustment);
             ticksToAdd++;
-            addHediff();
+            if (ticksToAdd >= this.Props.ticksToAdd)
+            {
+                ticksToAdd = 0;
+                addHediff();
+            }
         }
     }
 }

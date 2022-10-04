@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using COF_Torture.Hediffs;
+using COF_Torture.Things;
 using Verse;
 
 namespace COF_Torture.Component
@@ -37,7 +38,7 @@ namespace COF_Torture.Component
                         .FirstOrFallback<BodyPartRecord>(
                             (Func<BodyPartRecord, bool>)(p => p.def == this.Props.part));
                     Hediff_WithGiver h = (Hediff_WithGiver)HediffMaker.MakeHediff(this.Props.hediff, t, a);
-                    h.giver = this.parent;
+                    h.giver = (Building_TortureBed)this.parent;
                     t.health.AddHediff(h);
                 }
                 else

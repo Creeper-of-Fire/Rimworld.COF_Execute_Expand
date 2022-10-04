@@ -70,7 +70,7 @@ namespace COF_Torture.Component
             {
                 var a = (Building_TortureBed)this.Parent.giver;
                 a.isUsed = true;
-                if (!ModSettingMain.Instance.Setting.isSafe)
+                if (this.Parent.giver is Building_TortureBed bT && !bT.isSafe)
                     this.KillByExecute();
             }
             else
@@ -82,23 +82,14 @@ namespace COF_Torture.Component
         public override void CompPostPostAdd(DamageInfo? dinfo)
         {
             base.CompPostPostAdd(dinfo);
-            var hediffAdd = (Hediff_Protect) HediffMaker.MakeHediff(COF_Torture.Hediffs.HediffDefOf.COF_Torture_Fixed,this.Pawn);
-            hediffAdd.giver = this.Parent.giver;
-            Pawn.health.AddHediff(hediffAdd);
         }
 
         public override void CompPostPostRemoved()
         {
-            ShouldNotDie();
+            if (this.Parent.giver is Building_TortureBed bT && bT.isSafe)
+                ShouldNotDie();
             if (ShouldBeDead())//放下来时如果会立刻死，就改变死因为本comp造成
             {
-                var h = Pawn.health.hediffSet.GetFirstHediffOfDef(COF_Torture.Hediffs.HediffDefOf.COF_Torture_Fixed);
-                if (h != null)
-                {
-                    Pawn.health.hediffSet.hediffs.Remove(h);
-                    h.PostRemoved();
-                    Log.Message("catch the death"+Pawn.Dead);
-                }
                 KillByExecute();
             }
             base.CompPostPostRemoved();
@@ -138,6 +129,8 @@ namespace COF_Torture.Component
         public void KillByExecute()
         {
             //a.ChangeGraphic();
+            this.Parent.giver.victim = null;
+            this.Parent.giver.isUsing = false;
             if (SettingPatch.RimJobWorldIsActive && Pawn.story.traits.HasTrait(TraitDefOf.Masochist))
             {
                 var execute = Damages.DamageDefOf.Execute_Licentious;

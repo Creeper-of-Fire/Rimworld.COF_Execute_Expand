@@ -50,33 +50,7 @@ namespace COF_Torture.Jobs
             }
             yield return Toils_General.WaitWith(TargetIndex.A, 60, true, true);
             yield return Toils_Reserve.Release(TargetIndex.A);
-            yield return JobDriver_UseBondageBed.BondageIntoBedByOthers((Building_Bed) this.Thing, this.pawn, target_pawn);
+            yield return CT_Toil_GoToBed.BondageIntoBed((Building_Bed) this.Thing, target_pawn,this.pawn);
         }
-        
-        public static Toil BondageIntoBedByOthers(Building_Bed bed, Pawn taker, Pawn takee) => new Toil()
-        {
-            initAction = (Action) (() =>
-            {
-                if (bed.Destroyed)
-                {
-                    taker.jobs.EndCurrentJob(JobCondition.Incompletable);
-                }
-                else
-                {
-                    Building_TortureBed thing = (Building_TortureBed)bed;
-                    thing.SetVictim(takee);
-                }
-                taker.carryTracker.TryDropCarriedThing(bed.Position, ThingPlaceMode.Direct, out Thing _);
-                if (!bed.Destroyed && (bed.OwnersForReading.Contains(takee) || bed.Medical && bed.AnyUnoccupiedSleepingSlot || takee.ownership == null))
-                {
-                    takee.jobs.Notify_TuckedIntoBed(bed);
-                    takee.mindState.Notify_TuckedIntoBed();
-                }
-                if (!takee.IsPrisonerOfColony)
-                    return;
-                LessonAutoActivator.TeachOpportunity(ConceptDefOf.PrisonerTab, (Thing) takee, OpportunityType.GoodToKnow);
-            }),
-            defaultCompleteMode = ToilCompleteMode.Instant
-        };
     }
 }

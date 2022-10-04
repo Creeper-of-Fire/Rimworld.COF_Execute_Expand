@@ -3,10 +3,11 @@ using COF_Torture.ModSetting;
 using COF_Torture.Patch;
 using RimWorld;
 using Verse;
+using Verse.AI;
 
 namespace COF_Torture.Hediffs
 {
-    public class Hediff_Protect : Hediff_WithGiver
+    public class Hediff_Protect2 : Hediff_WithGiver
     {
         public int tickNext;
 
@@ -24,6 +25,11 @@ namespace COF_Torture.Hediffs
 
         public override void Tick()
         {
+            if (pawn.jobs.curJob.def == JobDefOf.Wait_Downed)
+            {
+                /*Job j = JobMaker.MakeJob(Jobs.JobDefOf.CT_LayDown, (LocalTargetInfo)(Thing)this.pawn.cell),
+                    JobCondition.InterruptForced, tag: new JobTag?(JobTag.TuckedIntoBed);*/
+            }
             if (Find.TickManager.TicksGame < this.tickNext)
                 return;
             //this.HealWounds();
@@ -33,16 +39,6 @@ namespace COF_Torture.Hediffs
                 this.SatisfyThirst();
             }
             this.SetNextTick();
-        }
-        
-        public override bool ShouldRemove
-        {
-            get
-            {
-                if (giver == null)
-                    return true;
-                return base.ShouldRemove;
-            }
         }
 
         public void SatisfyHunger()

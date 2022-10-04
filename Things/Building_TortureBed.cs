@@ -15,6 +15,9 @@ namespace COF_Torture.Things
         public Pawn victim;
         public bool isUsing; //isUsing只表示是否在被处刑使用，娱乐使用并不会触发它
         public bool isUsed; //isUsed表示这个道具是否被使用过（指是否有人死在里面），会影响道具的图片显示
+        public bool isSafe = true; //是否安全
+        public Building_TortureBed_Def Def => (Building_TortureBed_Def)this.def;
+        public Vector3 shiftPawnDrawPos => new Vector3(0, 0, Def.shiftPawnDrawPosZ);
 
         private List<Pawn> lastOwnerList;
         //private int CheckTicks;
@@ -25,6 +28,7 @@ namespace COF_Torture.Things
         public Graphic graphic_blood;
         public Graphic graphic_blood_top;
         public Graphic graphic_blood_top_using;
+        public Texture2D texSafe;
 
         public override void Draw()
         {
@@ -32,10 +36,16 @@ namespace COF_Torture.Things
             IntVec3 position = this.Position;
             Rot4 north = Rot4.North;
             Vector3 shiftedWithAltitude;
-            //shiftedWithAltitude = position.ToVector3ShiftedWithAltitude(AltitudeLayer.Building);
-            //graphic.Draw(shiftedWithAltitude, north, (Thing)this);
+            shiftedWithAltitude = position.ToVector3ShiftedWithAltitude(AltitudeLayer.LayingPawn);
+            //if (victim != null)
+                //this.victim.DrawAt(shiftedWithAltitude);
             if (this.graphic == null)
+            {
                 trySetGraphic();
+                return;
+            }
+            shiftedWithAltitude = position.ToVector3ShiftedWithAltitude(AltitudeLayer.Building);
+            graphic.Draw(shiftedWithAltitude, Rot4.South, (Thing)this);
             if (isUsing)
             {
                 //关上的盖子
@@ -69,7 +79,7 @@ namespace COF_Torture.Things
             }
         }
 
-        public static void trySetGraphicSin(Graphic gph, string texPath, Vector2 dS, ref Graphic graphic_change,
+        public static void trySetGraphicSingle(Graphic gph, string texPath, Vector2 dS, ref Graphic graphic_change,
             bool isTrans = false)
         {
             if (graphic_change == null)
@@ -85,6 +95,7 @@ namespace COF_Torture.Things
                     else
                         graphic_change = gph.GetCopy(dS, null);
                 }
+
                 gph.path = texPath;
             }
         }
@@ -94,13 +105,14 @@ namespace COF_Torture.Things
             string texPath = this.Graphic.path;
             var dS = this.Graphic.drawSize;
             var gph = this.Graphic.GetCopy(dS, null);
-            trySetGraphicSin(gph, texPath, dS, ref this.graphic);
-            trySetGraphicSin(gph, texPath + "_top", dS, ref this.graphic_top);
-            trySetGraphicSin(gph, texPath + "_top_using", dS, ref this.graphic_top_using, true);
-            trySetGraphicSin(gph, texPath + "_blood", dS, ref this.graphic_blood);
-            trySetGraphicSin(gph, texPath + "_blood_to", dS, ref this.graphic_blood_top);
-            trySetGraphicSin(gph, texPath + "_blood_top_using", dS, ref this.graphic_blood_top_using, true);
-            //gph.path = texPath;
+            this.graphic  = this.Graphic.GetCopy(dS, null);;
+            //trySetGraphicSingle(gph, texPath, dS, ref this.graphic);
+            trySetGraphicSingle(gph, texPath + "_top", dS, ref this.graphic_top);
+            trySetGraphicSingle(gph, texPath + "_top_using", dS, ref this.graphic_top_using, true);
+            trySetGraphicSingle(gph, texPath + "_blood", dS, ref this.graphic_blood);
+            trySetGraphicSingle(gph, texPath + "_blood_to", dS, ref this.graphic_blood_top);
+            trySetGraphicSingle(gph, texPath + "_blood_top_using", dS, ref this.graphic_blood_top_using, true);
+            texSafe = ContentFinder<Texture2D>.Get("COF_Torture/UI/isSafe");
         }
 
         public new bool Medical
@@ -115,12 +127,14 @@ namespace COF_Torture.Things
             Scribe_References.Look<Pawn>(ref this.victim, "victim");
             Scribe_Values.Look<bool>(ref this.isUsing, "isUsing");
             Scribe_Values.Look<bool>(ref this.isUsed, "isUsed");
+            Scribe_Values.Look<bool>(ref this.isSafe, "isSafe", defaultValue: ModSettingMain.Instance.Setting.isSafe);
         }
 
 
         public override void SpawnSetup(Map map, bool respawningAfterLoad)
         {
             base.SpawnSetup(map, respawningAfterLoad);
+            isSafe = ModSettingMain.Instance.Setting.isSafe;
             //this.Medical = false;
         }
 
@@ -151,50 +165,8 @@ namespace COF_Torture.Things
                     return;
                 GenMapUI.DrawThingLabel((Thing)this, this.OwnersForReading[0].LabelShort, defaultThingLabelColor);
             }
-            /*else
-            {
-                for (int index = 0; index < this.OwnersForReading.Count; ++index)
-                {
-                    if (!this.OwnersForReading[index].InBed() || this.OwnersForReading[index].CurrentBed() != this || !(this.OwnersForReading[index].Position == this.GetSleepingSlotPos(index)))
-                        GenMapUI.DrawThingLabel((Vector2) this.GetMultiOwnersLabelScreenPosFor(index), this.OwnersForReading[index].LabelShort, defaultThingLabelColor);
-                }
-            }*/
         }
-        /*private Vector3 AdjustOwnerLabelPosToAvoidOverlapping(Vector3 screenPos, int slotIndex)
-        {
-            Verse.Text.Font = GameFont.Tiny;
-            float num1 = Verse.Text.CalcSize(this.OwnersForReading[slotIndex].LabelShort).x + 1f;
-            Vector2 uiPosition = this.DrawPos.MapToUIPosition();
-            float num2 = Mathf.Abs(screenPos.x - uiPosition.x);
-            IntVec3 sleepingSlotPos = this.GetSleepingSlotPos(slotIndex);
-            if ((double) num1 > (double) num2 * 2.0)
-            {
-                float num3 = slotIndex != 0 ? (float) this.GetSleepingSlotPos(0).x : (float) this.GetSleepingSlotPos(1).x;
-                if ((double) sleepingSlotPos.x < (double) num3)
-                    screenPos.x -= (float) (((double) num1 - (double) num2 * 2.0) / 2.0);
-                else
-                    screenPos.x += (float) (((double) num1 - (double) num2 * 2.0) / 2.0);
-            }
-            return screenPos;
-        }
-        private Vector3 GetMultiOwnersLabelScreenPosFor(int slotIndex)
-        {
-            IntVec3 sleepingSlotPos = this.GetSleepingSlotPos(slotIndex);
-            Vector3 drawPos = this.DrawPos;
-            if (this.Rotation.IsHorizontal)
-            {
-                drawPos.z = (float) sleepingSlotPos.z + 0.6f;
-            }
-            else
-            {
-                drawPos.x = (float) sleepingSlotPos.x + 0.5f;
-                drawPos.z += -0.4f;
-            }
-            Vector2 screenPos = drawPos.MapToUIPosition();
-            if (!this.Rotation.IsHorizontal && this.SleepingSlotsCount == 2)
-                screenPos = (Vector2) this.AdjustOwnerLabelPosToAvoidOverlapping((Vector3) screenPos, slotIndex);
-            return (Vector3) screenPos;
-        }*/
+
 
         public override void TickRare()
         {
@@ -204,39 +176,38 @@ namespace COF_Torture.Things
             //if (CheckTicks >= 60)
             //{
             //    CheckTicks = 0;
-            if (isUsing)
+            if (!isUsing)
+                return;
+            if (victim != null)
             {
-                if (victim != null)
+                if (victim.Dead)
                 {
-                    if (victim.Dead)
-                    {
-                        victim = null;
-                        isUsing = false;
-                    }
-                    else
-                    {
-                        if (victim.jobs != null && victim.jobs.curJob.def == JobDefOf.Wait_Downed)
-                        {
-                            //Job job = JobMaker.MakeJob(COF_Torture.Jobs.JobDefOf.UseBondageAlone,
-                            //    (LocalTargetInfo)(Verse.Thing)this);
-                            //job.count = 1;
-                            Log.Error("[COF_TORTURE]被束缚的殖民者突然倒地，试图进行修复（很可能是殖民者被传送了或者" + this + "的所有者发生变更）");
-                            Pawn_HealthTracker victimHealth = victim.health;
-                            victim.jobs.ClearQueuedJobs();
-                            victim.jobs.StopAll();
-                            //RemoveVictim();
-                            victim = victimHealth.hediffSet.pawn;
-                            BugFixBondageIntoBed(this, victim);
-                        }
-                    }
+                    victim = null;
+                    isUsing = false;
                 }
                 else
                 {
-                    Log.Error("[COF_TORTURE]机器" + this + "正在运行，理论上应该有被注册的使用者，实际上没有");
-                    isUsing = false;
+                    if (victim.jobs != null && victim.jobs.curJob.def == JobDefOf.Wait_Downed)
+                    {
+                        //Job job = JobMaker.MakeJob(COF_Torture.Jobs.JobDefOf.UseBondageAlone,
+                        //    (LocalTargetInfo)(Verse.Thing)this);
+                        //job.count = 1;
+                        Log.Error("[COF_TORTURE]被束缚的殖民者突然倒地，试图进行修复（很可能是殖民者被传送了或者" + this + "的所有者发生变更）");
+                        Pawn_HealthTracker victimHealth = victim.health;
+                        victim.jobs.ClearQueuedJobs();
+                        victim.jobs.StopAll();
+                        //RemoveVictim();
+                        victim = victimHealth.hediffSet.pawn;
+                        BugFixBondageIntoBed(this, victim);
+                    }
                 }
-                //}
             }
+            else
+            {
+                Log.Error("[COF_TORTURE]机器" + this + "正在运行，理论上应该有被注册的使用者，实际上没有");
+                isUsing = false;
+            }
+            //}
         }
 
         private static void BugFixBondageIntoBed(Building_Bed bed, Pawn takee)
@@ -361,23 +332,29 @@ namespace COF_Torture.Things
                     Log.Message("[COF_TORTURE]try move effect by component, but component can't removeEffect.");
                 }
 
-                try
+                //try
+                //{
+                foreach (var hediffR in victim.health.hediffSet.hediffs)
                 {
-                    foreach (var hediffR in victim.health.hediffSet.hediffs)
+                    if (hediffR != null)
                     {
-                        if (hediffR != null)
+                        if (hediffR is Hediff_ExecuteInjury it && it.giver != null)
                         {
-                            if (hediffR is Hediff_WithGiver ht && ht.giver != null)
-                                if (ht.giver == this)
-                                {
-                                    ht.giver = null;
-                                    Log.Message("[COF_TORTURE]发现没有被component.RemoveEffect去除的hediff" + ht + "。尝试去除");
-                                    victim.health.RemoveHediff(hediffR);
-                                }
+                            it.giver = null;
+                            //Log.Message("[COF_TORTURE]发现有主hediff" + hediffR + "已经去除主人");
                         }
+
+                        if (hediffR is Hediff_WithGiver ht && ht.giver != null)
+                            if (ht.giver == this)
+                            {
+                                ht.giver = null;
+                                //Log.Message("[COF_TORTURE]发现没有被component.RemoveEffect去除的hediff" + ht + "。尝试去除");
+                                //victim.health.RemoveHediff(hediffR);
+                            }
                     }
                 }
-                catch
+                //}
+                /*catch
                 {
                     try
                     {
@@ -389,7 +366,7 @@ namespace COF_Torture.Things
                     }
 
                     Log.Message("[COF_TORTURE]has victim, but can't removeEffect.");
-                }
+                }*/
             }
             else
             {
@@ -426,6 +403,26 @@ namespace COF_Torture.Things
                 {
                     yield return fMO;
                 }
+            }
+        }
+
+        public override IEnumerable<Gizmo> GetGizmos()
+        {
+            foreach (var g in base.GetGizmos())
+            {
+                yield return g;
+            }
+
+            if (Faction == Faction.OfPlayer)
+            {
+                var ro = new Command_Toggle();
+                ro.defaultLabel = "CT_isSafe".Translate();
+                ro.defaultDesc = "CT_isSafeDesc".Translate();
+                ro.hotKey = KeyBindingDefOf.Misc3;
+                ro.icon = texSafe;
+                ro.isActive = () => isSafe;
+                ro.toggleAction = () => isSafe = !isSafe;
+                yield return ro;
             }
         }
     }
