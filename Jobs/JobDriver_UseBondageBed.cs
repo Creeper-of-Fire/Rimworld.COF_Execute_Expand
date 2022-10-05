@@ -35,7 +35,7 @@ namespace COF_Torture.Jobs
             {
                 Building_Bed That_bed = (Building_Bed) hediffFixed.giver;
                 if (That_bed != null)
-                    yield return JobDriver_ReleaseBondageBed.ReleaseVictim(That_bed, target_pawn);
+                    yield return JobDriver_ReleaseBondageBed.ReleaseVictim(That_bed);
                 else
                 {
                     Log.Error("[COF_TORTURE]试图解绑一个殖民者，但是其‘捆绑’状态没有给予者");
@@ -50,7 +50,7 @@ namespace COF_Torture.Jobs
             }
             yield return Toils_General.WaitWith(TargetIndex.A, 60, true, true);
             yield return Toils_Reserve.Release(TargetIndex.A);
-            yield return CT_Toil_GoToBed.BondageIntoBed((Building_Bed) this.Thing, target_pawn,this.pawn);
+            yield return CT_Toils_GoToBed.BondageIntoBed((Building_Bed) this.Thing, target_pawn,this.pawn);
         }
     }
 }

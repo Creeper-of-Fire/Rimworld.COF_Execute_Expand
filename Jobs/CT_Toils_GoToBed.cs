@@ -6,7 +6,7 @@ using Verse.AI;
 
 namespace COF_Torture.Jobs
 {
-    public class CT_Toil_GoToBed
+    public class CT_Toils_GoToBed
     {
         public static Toil BondageIntoBed(Building_Bed bed, Pawn takee, Pawn taker = null)
         {
@@ -27,12 +27,13 @@ namespace COF_Torture.Jobs
                     Building_TortureBed thing = (Building_TortureBed)bed;
                     thing.SetVictim(takee);
                 }
+
                 if (taker != null)
                     taker.carryTracker.TryDropCarriedThing(bed.Position, ThingPlaceMode.Direct, out Thing _);
                 if (!bed.Destroyed && (bed.OwnersForReading.Contains(takee) ||
                                        bed.Medical && bed.AnyUnoccupiedSleepingSlot || takee.ownership == null))
                 {
-                    CT_TuckedIntoBed(bed,takee);
+                    CT_TuckedIntoBed(bed, takee);
                     takee.mindState.Notify_TuckedIntoBed();
                 }
 
@@ -44,13 +45,38 @@ namespace COF_Torture.Jobs
             toil.defaultCompleteMode = ToilCompleteMode.Instant;
             return toil;
         }
+        
+        public static void BugFixBondageIntoBed(Building_Bed bed, Pawn takee)
+        {
+            if (bed.Destroyed)
+            {
+                takee.jobs.EndCurrentJob(JobCondition.Incompletable);
+            }
+            else
+            {
+                Building_TortureBed thing = (Building_TortureBed)bed;
+                thing.SetVictim(takee);
+            }
+
+            if (!bed.Destroyed)
+            {
+                takee.Position = RestUtility.GetBedSleepingSlotPosFor(takee, bed);
+                takee.Notify_Teleported(false);
+                takee.stances.CancelBusyStanceHard();
+                takee.jobs.StartJob(JobMaker.MakeJob(Jobs.JobDefOf.CT_LayDown, (LocalTargetInfo)(Thing)bed),
+                    JobCondition.InterruptForced, tag: new JobTag?(JobTag.TuckedIntoBed));
+                takee.mindState.Notify_TuckedIntoBed();
+            }
+
+            LessonAutoActivator.TeachOpportunity(ConceptDefOf.PrisonerTab, (Thing)takee, OpportunityType.GoodToKnow);
+        }
 
         public static void CT_TuckedIntoBed(Building_Bed bed, Pawn takee)
         {
             takee.Position = RestUtility.GetBedSleepingSlotPosFor(takee, bed);
             takee.Notify_Teleported(false);
             takee.stances.CancelBusyStanceHard();
-            takee.jobs.StartJob(JobMaker.MakeJob(RimWorld.JobDefOf.LayDown, (LocalTargetInfo)(Thing)bed),
+            takee.jobs.StartJob(JobMaker.MakeJob(JobDefOf.CT_LayDown, (LocalTargetInfo)(Thing)bed),
                 JobCondition.InterruptForced, tag: new JobTag?(JobTag.TuckedIntoBed));
         }
     }

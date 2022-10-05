@@ -9,84 +9,7 @@ namespace COF_Torture.Component
 {
     public class CompUsableBondageBed : CompUsable
     {
-        protected override string FloatMenuOptionLabel(Pawn pawn) => (string)"SR_CantUse".Translate();
-
-
-/*
-        public static bool IsValidBedFor(
-            Thing bedThing,
-            Pawn sleeper,
-            Pawn traveler,
-            bool checkSocialProperness,
-            bool allowMedBedEvenIfSetToNoCare = false,
-            bool ignoreOtherReservations = false,
-            GuestStatus? guestStatus = null)
-        {
-            if (!(bedThing is Building_Bed buildingBed) ||
-                !traveler.CanReserveAndReach((LocalTargetInfo)(Thing)buildingBed, PathEndMode.OnCell, Danger.Some,
-                    buildingBed.SleepingSlotsCount, ignoreOtherReservations: ignoreOtherReservations) ||
-                traveler.HasReserved<JobDriver_TakeToBed>((LocalTargetInfo)(Thing)buildingBed,
-                    new LocalTargetInfo?((LocalTargetInfo)(Thing)sleeper)) ||
-                !RestUtility.CanUseBedEver(sleeper, buildingBed.def) || !buildingBed.AnyUnoccupiedSleepingSlot &&
-                (!sleeper.InBed() || sleeper.CurrentBed() != buildingBed) &&
-                !buildingBed.CompAssignableToPawn.AssignedPawns.Contains<Pawn>(sleeper) ||
-                buildingBed.IsForbidden(traveler))
-                return false;
-            GuestStatus? nullable = guestStatus;
-            GuestStatus guestStatus1 = GuestStatus.Prisoner;
-            bool forPrisoner = nullable.GetValueOrDefault() == guestStatus1 & nullable.HasValue;
-            nullable = guestStatus;
-            GuestStatus guestStatus2 = GuestStatus.Slave;
-            bool flag = nullable.GetValueOrDefault() == guestStatus2 & nullable.HasValue;
-            if (checkSocialProperness && !buildingBed.IsSociallyProper(sleeper, forPrisoner) ||
-                buildingBed.CompAssignableToPawn.IdeoligionForbids(sleeper) || buildingBed.IsBurning())
-                return false;
-            if (forPrisoner)
-            {
-                if (!buildingBed.ForPrisoners || !buildingBed.Position.IsInPrisonCell(buildingBed.Map))
-                    return false;
-            }
-            else if (flag)
-            {
-                if (!buildingBed.ForSlaves)
-                    return false;
-            }
-            else if (buildingBed.Faction != traveler.Faction &&
-                     (traveler.HostFaction == null || buildingBed.Faction != traveler.HostFaction) ||
-                     buildingBed.ForPrisoners || buildingBed.ForSlaves)
-                return false;
-
-            if (buildingBed.Medical)
-            {
-                if (!allowMedBedEvenIfSetToNoCare && !HealthAIUtility.ShouldEverReceiveMedicalCareFromPlayer(sleeper) ||
-                    !HealthAIUtility.ShouldSeekMedicalRest(sleeper))
-                    return false;
-            }
-            else if (buildingBed.OwnersForReading.Any<Pawn>() && !buildingBed.OwnersForReading.Contains(sleeper))
-            {
-                if (((sleeper.IsPrisoner | forPrisoner ? 1 : (sleeper.IsSlave ? 1 : 0)) | (flag ? 1 : 0)) != 0)
-                {
-                    if (!buildingBed.AnyUnownedSleepingSlot)
-                        return false;
-                }
-                else if (!IsAnyOwnerLovePartnerOf(buildingBed, sleeper) || !buildingBed.AnyUnownedSleepingSlot)
-                    return false;
-            }
-
-            return true;
-        }
-
-        private static bool IsAnyOwnerLovePartnerOf(Building_Bed bed, Pawn sleeper)
-        {
-            for (int index = 0; index < bed.OwnersForReading.Count; ++index)
-            {
-                if (LovePartnerRelationUtility.LovePartnerRelationExists(sleeper, bed.OwnersForReading[index]))
-                    return true;
-            }
-
-            return false;
-        }
-*/
+        protected override string FloatMenuOptionLabel(Pawn pawn) => (string)"CT_CantUse".Translate();
 
         public override IEnumerable<FloatMenuOption> CompFloatMenuOptions(
             Pawn pawn)
@@ -111,16 +34,16 @@ namespace COF_Torture.Component
                     yield return new FloatMenuOption(
                         (string)(usableBondageBed.FloatMenuOptionLabel(pawn) + " (" + "CT_Forbid".Translate() + ")"),
                         (Action)null, MenuOptionPriority.DisabledOption);
-                else if (ParentBed.victim != null)
+                else if (ParentBed.isUnUsableForOthers())
                 {
-                    //执行释放
-                    if (!pawn.CanReserve((LocalTargetInfo)(Verse.Thing)ParentBed.victim))
+                    //不可用，则执行释放逻辑
+                    if (!pawn.CanReserve((LocalTargetInfo)(Verse.Thing)ParentBed.GetVictim()))
                         yield return new FloatMenuOption(
-                            (string)(usableBondageBed.FloatMenuOptionLabel(ParentBed.victim) + " (" +
+                            (string)(usableBondageBed.FloatMenuOptionLabel(ParentBed.GetVictim()) + " (" +
                                      "CT_Reserved".Translate() + ")"), (Action)null, MenuOptionPriority.DisabledOption);
                     else
                         yield return new FloatMenuOption(
-                            (string)"CT_Release_BondageBed".Translate((NamedArgument)ParentBed.victim.Label),
+                            (string)"CT_Release_BondageBed".Translate((NamedArgument)ParentBed.GetVictim().Label),
                             new Action(ReleaseAction), MenuOptionPriority.GoHere);
                 }
                 else
@@ -188,7 +111,7 @@ namespace COF_Torture.Component
             }
 
 
-            void ReleaseAction() => this.TryReleaseVictim(pawn, (LocalTargetInfo)(Verse.Thing)ParentBed.victim);
+            void ReleaseAction() => this.TryReleaseVictim(pawn);
         }
 
         public virtual void TryReleaseAndBoundVictim(Pawn pawn, LocalTargetInfo extraTarget)
@@ -196,13 +119,12 @@ namespace COF_Torture.Component
             this.TryStartUseJob(pawn, extraTarget);
         }
 
-        public virtual void TryReleaseVictim(Pawn pawn, LocalTargetInfo extraTarget)
+        public virtual void TryReleaseVictim(Pawn pawn)
         {
-            if (!pawn.CanReach((LocalTargetInfo)(Verse.Thing)this.parent, PathEndMode.Touch, Danger.Some) ||
-                !pawn.CanReserveAndReach(extraTarget, PathEndMode.Touch, Danger.Some))
+            if (!pawn.CanReach((LocalTargetInfo)(Verse.Thing)this.parent, PathEndMode.Touch, Danger.Some))
                 return;
             Job job = JobMaker.MakeJob(COF_Torture.Jobs.JobDefOf.ReleaseBondageBed,
-                (LocalTargetInfo)(Verse.Thing)this.parent, extraTarget);
+                (LocalTargetInfo)(Verse.Thing)this.parent);
             job.count = 1;
             pawn.jobs.TryTakeOrderedJob(job);
         }

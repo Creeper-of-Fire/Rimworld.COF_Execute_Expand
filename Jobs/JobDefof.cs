@@ -10,5 +10,6 @@ namespace COF_Torture.Jobs
         public static JobDef UseBondageBed;
         public static JobDef ReleaseBondageBed;
         public static JobDef UseBondageAlone;
+        public static JobDef CT_LayDown;
     }
 }

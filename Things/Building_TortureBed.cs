@@ -1,25 +1,44 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using COF_Torture.Component;
 using COF_Torture.Hediffs;
 using COF_Torture.ModSetting;
+using COF_Torture.Patch;
 using RimWorld;
+using RimWorld.QuestGen;
 using UnityEngine;
 using Verse;
 using Verse.AI;
 
 namespace COF_Torture.Things
 {
-    public class Building_TortureBed : Building_Bed
+    public class Building_TortureBed : Building_Bed, IThingHolder
     {
-        public Pawn victim;
-        public bool isUsing; //isUsing只表示是否在被处刑使用，娱乐使用并不会触发它
+        private Pawn victim;
+        public Pawn GetVictim() => victim;
+        private Corpse corpseInBuilding;
+        private bool isUsing; //isUsing只表示是否在被处刑使用，娱乐使用并不会触发它
+
+        public bool isUnUsableForOthers()
+        {
+            if (isUsing)
+                return true;
+            /*if (victim != null)
+                return true;
+            if (corpseContainer.Any)
+                return true;*/
+            return false;
+        }
+
         public bool isUsed; //isUsed表示这个道具是否被使用过（指是否有人死在里面），会影响道具的图片显示
         public bool isSafe = true; //是否安全
         public Building_TortureBed_Def Def => (Building_TortureBed_Def)this.def;
         public Vector3 shiftPawnDrawPos => new Vector3(0, 0, Def.shiftPawnDrawPosZ);
 
         private List<Pawn> lastOwnerList;
+
+        public bool showVictimBody = true;
         //private int CheckTicks;
 
         public Graphic graphic; //必定绘制
@@ -30,90 +49,10 @@ namespace COF_Torture.Things
         public Graphic graphic_blood_top_using;
         public Texture2D texSafe;
 
-        public override void Draw()
-        {
-            base.Draw();
-            IntVec3 position = this.Position;
-            Rot4 north = Rot4.North;
-            Vector3 shiftedWithAltitude;
-            shiftedWithAltitude = position.ToVector3ShiftedWithAltitude(AltitudeLayer.LayingPawn);
-            //if (victim != null)
-                //this.victim.DrawAt(shiftedWithAltitude);
-            if (this.graphic == null)
-            {
-                trySetGraphic();
-                return;
-            }
-            shiftedWithAltitude = position.ToVector3ShiftedWithAltitude(AltitudeLayer.Building);
-            graphic.Draw(shiftedWithAltitude, Rot4.South, (Thing)this);
-            if (isUsing)
-            {
-                //关上的盖子
-                shiftedWithAltitude = position.ToVector3ShiftedWithAltitude(AltitudeLayer.PawnRope);
-                graphic_top_using?.Draw(shiftedWithAltitude, north, (Thing)this);
-            }
-            else
-            {
-                //打开的盖子
-                shiftedWithAltitude = position.ToVector3ShiftedWithAltitude(AltitudeLayer.Building);
-                graphic_top?.Draw(shiftedWithAltitude, north, (Thing)this);
-            }
+        public ThingOwner corpseContainer;
 
-            if (isUsed)
-            {
-                //底部的血液
-                shiftedWithAltitude = position.ToVector3ShiftedWithAltitude(AltitudeLayer.BuildingOnTop);
-                graphic_blood?.Draw(shiftedWithAltitude, north, (Thing)this);
-                if (isUsing)
-                {
-                    //关上的盖子上的血液
-                    shiftedWithAltitude = position.ToVector3ShiftedWithAltitude(AltitudeLayer.Projectile);
-                    graphic_blood_top_using?.Draw(shiftedWithAltitude, north, (Thing)this);
-                }
-                else
-                {
-                    //打开的盖子上的血液
-                    //shiftedWithAltitude = position.ToVector3ShiftedWithAltitude(AltitudeLayer.BuildingOnTop);
-                    graphic_blood_top?.Draw(shiftedWithAltitude, north, (Thing)this);
-                }
-            }
-        }
-
-        public static void trySetGraphicSingle(Graphic gph, string texPath, Vector2 dS, ref Graphic graphic_change,
-            bool isTrans = false)
-        {
-            if (graphic_change == null)
-            {
-                Shader shader = ShaderDatabase.Transparent;
-                gph.path = texPath;
-                var isExist = ContentFinder<Texture2D>.Get(gph.path, false);
-                if (isExist != null)
-                {
-                    if (isTrans)
-                        graphic_change = gph.GetColoredVersion(shader, new Color(1f, 1f, 1f,
-                            ModSettingMain.Instance.Setting.topTransparency), Color.black);
-                    else
-                        graphic_change = gph.GetCopy(dS, null);
-                }
-
-                gph.path = texPath;
-            }
-        }
-
-        public void trySetGraphic()
-        {
-            string texPath = this.Graphic.path;
-            var dS = this.Graphic.drawSize;
-            var gph = this.Graphic.GetCopy(dS, null);
-            this.graphic  = this.Graphic.GetCopy(dS, null);;
-            //trySetGraphicSingle(gph, texPath, dS, ref this.graphic);
-            trySetGraphicSingle(gph, texPath + "_top", dS, ref this.graphic_top);
-            trySetGraphicSingle(gph, texPath + "_top_using", dS, ref this.graphic_top_using, true);
-            trySetGraphicSingle(gph, texPath + "_blood", dS, ref this.graphic_blood);
-            trySetGraphicSingle(gph, texPath + "_blood_to", dS, ref this.graphic_blood_top);
-            trySetGraphicSingle(gph, texPath + "_blood_top_using", dS, ref this.graphic_blood_top_using, true);
-            texSafe = ContentFinder<Texture2D>.Get("COF_Torture/UI/isSafe");
-        }
+        public Building_TortureBed() =>
+            this.corpseContainer = (ThingOwner)new ThingOwner<Pawn>((IThingHolder)this, false);
 
         public new bool Medical
         {
@@ -128,8 +67,8 @@ namespace COF_Torture.Things
             Scribe_Values.Look<bool>(ref this.isUsing, "isUsing");
             Scribe_Values.Look<bool>(ref this.isUsed, "isUsed");
             Scribe_Values.Look<bool>(ref this.isSafe, "isSafe", defaultValue: ModSettingMain.Instance.Setting.isSafe);
+            Scribe_Deep.Look<ThingOwner>(ref this.corpseContainer, "corpseContainer", (object)this);
         }
-
 
         public override void SpawnSetup(Map map, bool respawningAfterLoad)
         {
@@ -138,33 +77,21 @@ namespace COF_Torture.Things
             //this.Medical = false;
         }
 
+        public override void Destroy(DestroyMode mode = DestroyMode.Vanish)
+        {
+            base.Destroy(mode);
+        }
 
         public override void DeSpawn(DestroyMode mode = DestroyMode.Vanish)
         {
             //如果床上面有囚犯
-            if (victim != null)
+            if (isUnUsableForOthers())
             {
-                this.RemoveVictim();
+                this.ReleaseContainer();
             }
 
             base.DeSpawn(mode);
             //TryRemoveHediffFromAllPawns();
-        }
-
-        public override void DrawGUIOverlay()
-        {
-            if (this.Medical || Find.CameraDriver.CurrentZoom != CameraZoomRange.Closest ||
-                !this.CompAssignableToPawn.PlayerCanSeeAssignments)
-                return;
-            Color defaultThingLabelColor = GenMapUI.DefaultThingLabelColor;
-            if (!this.OwnersForReading.Any<Pawn>())
-                GenMapUI.DrawThingLabel((Thing)this, (string)"Unowned".Translate(), defaultThingLabelColor);
-            else if (this.OwnersForReading.Count == 1 && !this.isUsing)
-            {
-                if (this.OwnersForReading[0].InBed() && this.OwnersForReading[0].CurrentBed() == this)
-                    return;
-                GenMapUI.DrawThingLabel((Thing)this, this.OwnersForReading[0].LabelShort, defaultThingLabelColor);
-            }
         }
 
 
@@ -176,9 +103,9 @@ namespace COF_Torture.Things
             //if (CheckTicks >= 60)
             //{
             //    CheckTicks = 0;
-            if (!isUsing)
+            if (!isUnUsableForOthers())
                 return;
-            if (victim != null)
+            /*if (victim != null)
             {
                 if (victim.Dead)
                 {
@@ -198,7 +125,7 @@ namespace COF_Torture.Things
                         victim.jobs.StopAll();
                         //RemoveVictim();
                         victim = victimHealth.hediffSet.pawn;
-                        BugFixBondageIntoBed(this, victim);
+                        Jobs.CT_Toils_GoToBed.BugFixBondageIntoBed(this, victim);
                     }
                 }
             }
@@ -206,91 +133,129 @@ namespace COF_Torture.Things
             {
                 Log.Error("[COF_TORTURE]机器" + this + "正在运行，理论上应该有被注册的使用者，实际上没有");
                 isUsing = false;
-            }
+            }*/
             //}
-        }
-
-        private static void BugFixBondageIntoBed(Building_Bed bed, Pawn takee)
-        {
-            if (bed.Destroyed)
-            {
-                takee.jobs.EndCurrentJob(JobCondition.Incompletable);
-            }
-            else
-            {
-                Building_TortureBed thing = (Building_TortureBed)bed;
-                thing.SetVictimPlace(takee);
-                thing.SetVictimHediff(takee);
-            }
-
-            if (!bed.Destroyed)
-            {
-                takee.Position = RestUtility.GetBedSleepingSlotPosFor(takee, bed);
-                takee.Notify_Teleported(false);
-                takee.stances.CancelBusyStanceHard();
-                takee.jobs.StartJob(JobMaker.MakeJob(JobDefOf.LayDown, (LocalTargetInfo)(Thing)bed),
-                    JobCondition.InterruptForced, tag: new JobTag?(JobTag.TuckedIntoBed));
-                takee.mindState.Notify_TuckedIntoBed();
-            }
-
-            LessonAutoActivator.TeachOpportunity(ConceptDefOf.PrisonerTab, (Thing)takee, OpportunityType.GoodToKnow);
         }
 
         public void SetVictim(Pawn pawn)
         {
             SetVictimPlace(pawn);
-            SetVictimHediff(pawn);
+            SetVictimHediff();
             this.isUsing = true;
-        }
 
-        private void SetVictimPlace(Pawn pawn)
-        {
-            if (victim == null)
+            void SetVictimPlace(Pawn p)
             {
-                this.victim = pawn;
-                lastOwnerList = new List<Pawn>(OwnersForReading);
-                OwnersForReading.Clear();
-                this.CompAssignableToPawn.TryAssignPawn(victim);
-            }
-        }
-
-        private void SetVictimHediff(Pawn pawn)
-        {
-            var crebb = this.GetComps<COF_Torture.Component.CompEffectForBondage>();
-            if (crebb == null)
-            {
-                Log.Error("[COF_TORTURE]" + this + " Can not find compEffectForBondage");
-                return;
-            }
-
-            foreach (var e in crebb)
-            {
-                e.AddEffect(); //添加状态
-            }
-        }
-
-        private void TryRemoveHediffFromAllPawns()
-        {
-            List<Pawn> allPawnsSpawned = this.Map.mapPawns.AllPawnsSpawned;
-            Log.Message("[COF_TORTURE]Try Remove Hediff From All Pawns.");
-            foreach (var aps in allPawnsSpawned)
-            {
-                foreach (var hediffR in aps.health.hediffSet.hediffs)
+                if (victim == null)
                 {
-                    if (hediffR is Hediff_WithGiver hT && hT.giver != null)
-                        if (hT.giver == this)
-                        {
-                            hT.giver = null;
-                            aps.health.RemoveHediff(hT);
-                        }
+                    this.victim = p;
+                    lastOwnerList = new List<Pawn>(OwnersForReading);
+                    OwnersForReading.Clear();
+                    this.CompAssignableToPawn.TryAssignPawn(victim);
+                }
+            }
+
+            void SetVictimHediff()
+            {
+                var crebb = this.GetComps<COF_Torture.Component.CompEffectForBondage>();
+                if (crebb == null)
+                {
+                    Log.Error("[COF_TORTURE]" + this + " Can not find compEffectForBondage");
+                    return;
+                }
+
+                foreach (var e in crebb)
+                {
+                    e.AddEffect(); //添加状态
                 }
             }
         }
 
-        public void RemoveVictim()
+        /*public void DrawCorpse()
+        {
+            Vector3 drawLoc = this.DrawPos + this.shiftPawnDrawPos;
+            Rot4 rotation2 = this.Rotation;
+            if (rotation2 == Rot4.East || rotation2 == Rot4.West)
+                drawLoc.z += 0.2f;
+            victim.Drawer.renderer.RenderPawnAt(drawLoc, neverAimWeapon: true);
+        }*/
+
+        public void KillVictim()
+        {
+            KillVictimDirect(victim);
+            victim = null;
+        }
+
+        public static void KillVictimDirect(Pawn corpse)
+        {
+            if (SettingPatch.RimJobWorldIsActive && corpse.story.traits.HasTrait(TraitDefOf.Masochist))
+            {
+                var execute = Damages.DamageDefOf.Execute_Licentious;
+                var dInfo = new DamageInfo(execute, 1);
+                var dHediff = HediffMaker.MakeHediff(Hediffs.HediffDefOf.COF_Torture_Licentious, corpse);
+                corpse.Kill(dInfo, dHediff);
+            }
+            else
+            {
+                var execute = Damages.DamageDefOf.Execute;
+                var dInfo = new DamageInfo(execute, 1);
+                var dHediff = HediffMaker.MakeHediff(Hediffs.HediffDefOf.COF_Torture_Fixed, corpse);
+                corpse.Kill(dInfo, dHediff);
+            }
+        }
+
+        public void ReleaseCorpse()
+        {
+            List<Pawn> corpseList = new List<Pawn>();
+            Log.Message(corpseInBuilding+"ReleaseCorpse");
+            if (this.corpseContainer.Count > 0)
+            {
+                foreach (var thing in this.corpseContainer)
+                {
+                    var corpse = (Pawn)thing;
+                    corpseList.Add(corpse);
+                    Log.Message("Add"+corpse);
+                }
+
+                this.corpseContainer.TryDropAll(this.Position, this.Map, ThingPlaceMode.Near);
+            }
+
+            this.corpseContainer.ClearAndDestroyContents();
+            foreach (var corpse in corpseList)
+            {
+                KillVictimDirect(corpse);
+            }
+        }
+        
+        public void ShouldNotDie()
+        {
+            var bloodLoss = victim.health.hediffSet.GetFirstHediffOfDef(RimWorld.HediffDefOf.BloodLoss);
+            if (bloodLoss.Severity > 0.9f)
+                bloodLoss.Severity = 0.9f;
+        }
+
+        public void ReleaseContainer()
         {
             this.isUsing = false;
-            this.TryRemoveVictimHediff();
+            this.showVictimBody = true;
+            if (victim != null)
+            {
+                this.ShouldNotDie();
+                if (HediffComp_ExecuteIndicator.ShouldBeDead(victim)) //放下来时如果会立刻死，就改变死因为本comp造成
+                {
+                    KillVictimDirect(victim);
+                }
+                else
+                   RemoveVictim();
+            }
+            else
+            {
+                ReleaseCorpse();
+            }
+        }
+
+        private void RemoveVictim()
+        {
+            this.RemoveVictimHediff();
             this.RemoveVictimPlace();
         }
 
@@ -306,7 +271,7 @@ namespace COF_Torture.Things
                 }
         }
 
-        private void TryRemoveVictimHediff()
+        private void RemoveVictimHediff()
         {
             if (victim != null)
             {
@@ -382,6 +347,158 @@ namespace COF_Torture.Things
             }
         }
 
+        private void TryRemoveHediffFromAllPawns()
+        {
+            List<Pawn> allPawnsSpawned = this.Map.mapPawns.AllPawnsSpawned;
+            Log.Message("[COF_TORTURE]Try Remove Hediff From All Pawns.");
+            foreach (var aps in allPawnsSpawned)
+            {
+                foreach (var hediffR in aps.health.hediffSet.hediffs)
+                {
+                    if (hediffR is Hediff_WithGiver hT && hT.giver != null)
+                        if (hT.giver == this)
+                        {
+                            hT.giver = null;
+                            aps.health.RemoveHediff(hT);
+                        }
+                }
+            }
+        }
+
+        public override void Draw()
+        {
+            //base.Draw();
+            IntVec3 position = this.Position;
+            Rot4 north = Rot4.North;
+            Vector3 shiftedWithAltitude;
+            shiftedWithAltitude = position.ToVector3ShiftedWithAltitude(AltitudeLayer.LayingPawn);
+            if (this.corpseContainer != null)
+            {
+                foreach (var pawn in this.corpseContainer)
+                {
+                    pawn.DrawAt(shiftedWithAltitude);
+                }
+            }
+            //if (victim != null)
+            //    victim.DrawAt(shiftedWithAltitude+this.shiftPawnDrawPos);
+            if (this.graphic == null)
+            {
+                trySetGraphic();
+                return;
+            }
+
+            shiftedWithAltitude = position.ToVector3ShiftedWithAltitude(AltitudeLayer.Building);
+            graphic.Draw(shiftedWithAltitude, Rot4.South, (Thing)this);
+            if (isUnUsableForOthers())
+            {
+                //关上的盖子
+                shiftedWithAltitude = position.ToVector3ShiftedWithAltitude(AltitudeLayer.PawnRope);
+                graphic_top_using?.Draw(shiftedWithAltitude, north, (Thing)this);
+            }
+            else
+            {
+                //打开的盖子
+                shiftedWithAltitude = position.ToVector3ShiftedWithAltitude(AltitudeLayer.Building);
+                graphic_top?.Draw(shiftedWithAltitude, north, (Thing)this);
+            }
+
+            if (isUsed)
+            {
+                //底部的血液
+                shiftedWithAltitude = position.ToVector3ShiftedWithAltitude(AltitudeLayer.BuildingOnTop);
+                graphic_blood?.Draw(shiftedWithAltitude, north, (Thing)this);
+                if (isUnUsableForOthers())
+                {
+                    //关上的盖子上的血液
+                    shiftedWithAltitude = position.ToVector3ShiftedWithAltitude(AltitudeLayer.Projectile);
+                    graphic_blood_top_using?.Draw(shiftedWithAltitude, north, (Thing)this);
+                }
+                else
+                {
+                    //打开的盖子上的血液
+                    //shiftedWithAltitude = position.ToVector3ShiftedWithAltitude(AltitudeLayer.BuildingOnTop);
+                    graphic_blood_top?.Draw(shiftedWithAltitude, north, (Thing)this);
+                }
+            }
+        }
+
+        private static void trySetGraphicSingle(Graphic gph, string texPath, Vector2 dS, ref Graphic graphic_change,
+            bool isTrans = false)
+        {
+            if (graphic_change == null)
+            {
+                Shader shader = ShaderDatabase.Transparent;
+                gph.path = texPath;
+                var isExist = ContentFinder<Texture2D>.Get(gph.path, false);
+                if (isExist != null)
+                {
+                    if (isTrans)
+                        graphic_change = gph.GetColoredVersion(shader, new Color(1f, 1f, 1f,
+                            ModSettingMain.Instance.Setting.topTransparency), Color.black);
+                    else
+                        graphic_change = gph.GetCopy(dS, null);
+                }
+
+                //Log.Message("2");
+            }
+        }
+
+        private void trySetGraphic()
+        {
+            string texPath = this.Graphic.path;
+            var dS = this.Graphic.drawSize;
+            var gph = this.Graphic.GetCopy(dS, null);
+            trySetGraphicFor5(gph, texPath, dS);
+            gph.path = texPath;
+            //Log.Message("0");
+            if (this.def.rotatable)
+            {
+                string rot1 = null, rot2 = null;
+                if (this.Rotation == Rot4.West)
+                {
+                    rot1 = "_west";
+                    rot2 = "_east";
+                }
+
+                if (this.Rotation == Rot4.South)
+                {
+                    rot1 = "_south";
+                    rot2 = "_north";
+                }
+
+                if (this.Rotation == Rot4.East)
+                {
+                    rot1 = "_east";
+                    rot2 = "_west";
+                }
+
+                if (this.Rotation == Rot4.North)
+                {
+                    rot1 = "_north";
+                    rot2 = "_south";
+                }
+
+                //Log.Message("1");
+                trySetGraphicFor5(gph, texPath + rot2, dS);
+                gph.path = texPath;
+                trySetGraphicFor5(gph, texPath + rot1, dS);
+                gph.path = texPath;
+            }
+
+            this.graphic = gph;
+            texSafe = ContentFinder<Texture2D>.Get("COF_Torture/UI/isSafe");
+        }
+
+        private void trySetGraphicFor5(Graphic gph, string texPath, Vector2 dS)
+        {
+            trySetGraphicSingle(gph, texPath + "_top", dS, ref this.graphic_top);
+            trySetGraphicSingle(gph, texPath + "_top_using", dS, ref this.graphic_top_using, true);
+            trySetGraphicSingle(gph, texPath + "_blood", dS, ref this.graphic_blood);
+            trySetGraphicSingle(gph, texPath + "_blood_to", dS, ref this.graphic_blood_top);
+            trySetGraphicSingle(gph, texPath + "_blood_top_using", dS, ref this.graphic_blood_top_using, true);
+        }
+
+
         public override IEnumerable<FloatMenuOption> GetFloatMenuOptions(Pawn myPawn)
         {
             if (AllComps != null)
@@ -406,11 +523,63 @@ namespace COF_Torture.Things
             }
         }
 
+        public override void DrawGUIOverlay()
+        {
+            if (this.Medical || Find.CameraDriver.CurrentZoom != CameraZoomRange.Closest ||
+                !this.CompAssignableToPawn.PlayerCanSeeAssignments)
+                return;
+            Color defaultThingLabelColor = GenMapUI.DefaultThingLabelColor;
+            if (!this.OwnersForReading.Any<Pawn>())
+                GenMapUI.DrawThingLabel((Thing)this, (string)"Unowned".Translate(), defaultThingLabelColor);
+            else if (this.OwnersForReading.Count == 1 && !this.isUsing)
+            {
+                if (this.OwnersForReading[0].InBed() && this.OwnersForReading[0].CurrentBed() == this)
+                    return;
+                GenMapUI.DrawThingLabel((Thing)this, this.OwnersForReading[0].LabelShort, defaultThingLabelColor);
+            }
+        }
+
+
         public override IEnumerable<Gizmo> GetGizmos()
         {
-            foreach (var g in base.GetGizmos())
+            foreach (Gizmo gizmo in base.GetGizmos())
             {
-                yield return g;
+                if (gizmo is Command_Toggle ct)
+                {
+                    if (ct.defaultLabel == "CommandBedSetForPrisonersLabel".Translate())
+                    {
+                        if (isUnUsableForOthers())
+                        {
+                            gizmo.Disable("CT_CommandBondageBedDisableToSetWhenUsing".Translate());
+                        }
+                    }
+
+                    if (ct.defaultLabel == "CommandBedSetAsMedicalLabel".Translate())
+                    {
+                        continue;
+                    }
+                }
+
+                if (gizmo is Command_Action ca)
+                {
+                    if (ca.defaultLabel == "CommandThingSetOwnerLabel".Translate())
+                    {
+                        if (isUnUsableForOthers())
+                        {
+                            gizmo.Disable("CT_CommandBondageBedDisableToSetWhenUsing".Translate());
+                        }
+                    }
+                }
+
+                if (ModsConfig.IdeologyActive && gizmo is Command_SetBedOwnerType)
+                {
+                    if (isUnUsableForOthers())
+                    {
+                        gizmo.Disable("CT_CommandBondageBedDisableToSetWhenUsing".Translate());
+                    }
+                }
+
+                yield return gizmo;
             }
 
             if (Faction == Faction.OfPlayer)
@@ -418,12 +587,22 @@ namespace COF_Torture.Things
                 var ro = new Command_Toggle();
                 ro.defaultLabel = "CT_isSafe".Translate();
                 ro.defaultDesc = "CT_isSafeDesc".Translate();
-                ro.hotKey = KeyBindingDefOf.Misc3;
+                ro.hotKey = KeyBindingDefOf.Misc4;
                 ro.icon = texSafe;
                 ro.isActive = () => isSafe;
                 ro.toggleAction = () => isSafe = !isSafe;
                 yield return ro;
             }
+        }
+
+        public void GetChildHolders(List<IThingHolder> outChildren)
+        {
+            ThingOwnerUtility.AppendThingHoldersFromThings(outChildren, (IList<Thing>)this.GetDirectlyHeldThings());
+        }
+
+        public ThingOwner GetDirectlyHeldThings()
+        {
+            return this.corpseContainer;
         }
     }
 }

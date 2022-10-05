@@ -26,8 +26,9 @@ namespace COF_Torture.Component
         public Hediff_WithGiver Parent => (Hediff_WithGiver)this.parent;
         public int ticksToAdd;
         public Building_TortureBed giverOfHediff;
+
         public float productBar;
-        public List<Hediff_WithGiver> hediffList;
+        //public List<Hediff_WithGiver> hediffList;
 
         public static bool notOnlyBone(List<BodyPartRecord> partsHave)
         {
@@ -84,11 +85,10 @@ namespace COF_Torture.Component
                         !ModSettingMain.Instance.Setting.leftHead)
                         yield return p;
                 }
-
-                yield break;
+                //yield break;
             }
 
-            height = BodyPartHeight.Undefined;
+            /*height = BodyPartHeight.Undefined;
             partsHave = Pawn.health.hediffSet.GetNotMissingParts(height: height).ToList();
             if (notOnlyBone(partsHave))
             {
@@ -96,7 +96,7 @@ namespace COF_Torture.Component
                 {
                     yield return p;
                 }
-            }
+            }*/
         }
 
         public void addHediff()
@@ -105,11 +105,14 @@ namespace COF_Torture.Component
             {
                 giverOfHediff = this.Parent.giver;
             }
+
             var parts = ListOfPart().ToList();
             if (!parts.Any())
             {
                 var comp = Parent.TryGetComp<HediffComp_ExecuteIndicator>();
                 if (comp != null) comp.isButcherDone = true;
+                var building = Parent.giver;
+                if (building != null) building.showVictimBody = false;
                 return;
             }
             //foreach (var VARIABLE in parts)
@@ -125,7 +128,7 @@ namespace COF_Torture.Component
             {
                 h.giver = giverOfHediff;
                 Pawn.health.AddHediff(h, part, dInfo());
-                productBar += h.Severity*Props.meatPerSeverity;
+                productBar += h.Severity * Props.meatPerSeverity;
                 return;
             }
 
@@ -155,7 +158,6 @@ namespace COF_Torture.Component
             }
             else
                 return;
-            
         }
 
         public void productMeat()
@@ -164,15 +166,16 @@ namespace COF_Torture.Component
             {
                 return;
             }
+
             if (Pawn.RaceProps.meatDef != null)
             {
                 Thing thing = ThingMaker.MakeThing(Pawn.RaceProps.meatDef);
                 thing.stackCount = (int)productBar;
                 productBar -= (int)productBar;
-                GenPlace.TryPlaceThing(thing, this.Parent.giver.Position+(new IntVec3(0,0,-2)), this.Parent.giver.Map, ThingPlaceMode.Near,
+                GenPlace.TryPlaceThing(thing, this.Parent.giver.Position + (new IntVec3(0, 0, -2)),
+                    this.Parent.giver.Map, ThingPlaceMode.Near,
                     out Thing _);
             }
         }
-
     }
 }

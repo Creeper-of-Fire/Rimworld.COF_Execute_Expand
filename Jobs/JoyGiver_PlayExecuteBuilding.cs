@@ -13,7 +13,7 @@ namespace COF_Torture.Jobs
             if (t.GetType() == typeof(Building_TortureBed))
             {
                 var a = (Building_TortureBed)t;
-                if (a.isUsing)
+                if (a.isUnUsableForOthers())
                 {
                     Log.Message(pawn.ToString()+" try to use"+t.ToString()+"but is reserved.");
                     return (Job)null;

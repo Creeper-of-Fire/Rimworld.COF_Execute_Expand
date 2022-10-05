@@ -30,12 +30,12 @@ namespace COF_Torture.Jobs
             }
 
             this.FailOnDestroyedOrNull(TargetIndex.A);
-            if (this.Thing.victim != this.pawn)
+            if (this.Thing.GetVictim() != this.pawn)
             {
                 yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch).FailOnForbidden(TargetIndex.A);
                 yield return Toils_General.WaitWith(TargetIndex.A, 60, true, true);
                 yield return Toils_Reserve.Release(TargetIndex.A);
-                yield return CT_Toil_GoToBed.BondageIntoBed((Building_Bed)this.Thing, target_pawn);
+                yield return CT_Toils_GoToBed.BondageIntoBed((Building_Bed)this.Thing, target_pawn);
             }
             /*else if (this.Thing.victim != null)
             {
