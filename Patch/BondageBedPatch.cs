@@ -30,6 +30,8 @@ namespace COF_Torture.Patch
             Building_Bed buildingBed = pawn.CurrentBed();
             if (buildingBed != null && buildingBed is Building_TortureBed tortureBed && tortureBed.isUnUsableForOthers())
             {
+                AltitudeLayer AltLayer = buildingBed.def.altitudeLayer;
+                drawLoc.y = AltLayer.AltitudeFor();
                 __result = drawLoc;
                 showBody = tortureBed.showVictimBody;
                 return false;

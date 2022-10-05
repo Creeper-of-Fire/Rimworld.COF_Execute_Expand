@@ -15,8 +15,14 @@ namespace COF_Torture.Things
 {
     public class Building_TortureBed : Building_Bed, IThingHolder
     {
-        private Pawn victim;
-        public Pawn GetVictim() => victim;
+        private Pawn victimAlive;
+        private Pawn victimDead;
+        public Pawn GetVictim()
+        {
+            if (victimAlive != null) return victimAlive;
+            return victimDead;
+        }
+
         private Corpse corpseInBuilding;
         private bool isUsing; //isUsing只表示是否在被处刑使用，娱乐使用并不会触发它
 
@@ -33,8 +39,17 @@ namespace COF_Torture.Things
 
         public bool isUsed; //isUsed表示这个道具是否被使用过（指是否有人死在里面），会影响道具的图片显示
         public bool isSafe = true; //是否安全
-        public Building_TortureBed_Def Def => (Building_TortureBed_Def)this.def;
-        public Vector3 shiftPawnDrawPos => new Vector3(0, 0, Def.shiftPawnDrawPosZ);
+
+        public Vector3 shiftPawnDrawPos
+        {
+            get
+            {
+                if (def is Building_TortureBed_Def Def)
+                    return new Vector3(0, 0, Def.shiftPawnDrawPosZ);
+                else
+                    return Vector3.zero;
+            }
+        }
 
         private List<Pawn> lastOwnerList;
 
@@ -53,17 +68,11 @@ namespace COF_Torture.Things
 
         public Building_TortureBed() =>
             this.corpseContainer = (ThingOwner)new ThingOwner<Pawn>((IThingHolder)this, false);
-
-        public new bool Medical
-        {
-            get => false;
-            set { return; }
-        }
-
+        
         public override void ExposeData()
         {
             base.ExposeData();
-            Scribe_References.Look<Pawn>(ref this.victim, "victim");
+            Scribe_References.Look<Pawn>(ref this.victimAlive, "victim");
             Scribe_Values.Look<bool>(ref this.isUsing, "isUsing");
             Scribe_Values.Look<bool>(ref this.isUsed, "isUsed");
             Scribe_Values.Look<bool>(ref this.isSafe, "isSafe", defaultValue: ModSettingMain.Instance.Setting.isSafe);
@@ -74,7 +83,7 @@ namespace COF_Torture.Things
         {
             base.SpawnSetup(map, respawningAfterLoad);
             isSafe = ModSettingMain.Instance.Setting.isSafe;
-            //this.Medical = false;
+            this.Medical = false;
         }
 
         public override void Destroy(DestroyMode mode = DestroyMode.Vanish)
@@ -99,42 +108,25 @@ namespace COF_Torture.Things
         {
             base.TickRare();
             //这里会降低性能，其实不太好
-            //CheckTicks++;
-            //if (CheckTicks >= 60)
-            //{
-            //    CheckTicks = 0;
-            if (!isUnUsableForOthers())
+            if (victimAlive != null || !isUsing)
                 return;
-            /*if (victim != null)
+            if (this.corpseContainer == null)
+                this.corpseContainer = new ThingOwner<Corpse>();
+            //foreach (var thing in this.Map.spawnedThings)
+            foreach (var thing in this.Map.listerThings.ThingsInGroup(ThingRequestGroup.Corpse))
+                //TODO 测试这两个分别的性能
             {
-                if (victim.Dead)
+                if (thing is Corpse cp)
                 {
-                    victim = null;
-                    isUsing = false;
-                }
-                else
-                {
-                    if (victim.jobs != null && victim.jobs.curJob.def == JobDefOf.Wait_Downed)
+                    if (cp.InnerPawn == victimDead)
                     {
-                        //Job job = JobMaker.MakeJob(COF_Torture.Jobs.JobDefOf.UseBondageAlone,
-                        //    (LocalTargetInfo)(Verse.Thing)this);
-                        //job.count = 1;
-                        Log.Error("[COF_TORTURE]被束缚的殖民者突然倒地，试图进行修复（很可能是殖民者被传送了或者" + this + "的所有者发生变更）");
-                        Pawn_HealthTracker victimHealth = victim.health;
-                        victim.jobs.ClearQueuedJobs();
-                        victim.jobs.StopAll();
-                        //RemoveVictim();
-                        victim = victimHealth.hediffSet.pawn;
-                        Jobs.CT_Toils_GoToBed.BugFixBondageIntoBed(this, victim);
+                        if (cp.Spawned)
+                            cp.DeSpawn();
+                        corpseContainer.TryAdd(cp);
+                        corpseInBuilding = cp;
                     }
                 }
             }
-            else
-            {
-                Log.Error("[COF_TORTURE]机器" + this + "正在运行，理论上应该有被注册的使用者，实际上没有");
-                isUsing = false;
-            }*/
-            //}
         }
 
         public void SetVictim(Pawn pawn)
@@ -145,12 +137,12 @@ namespace COF_Torture.Things
 
             void SetVictimPlace(Pawn p)
             {
-                if (victim == null)
+                if (victimAlive == null)
                 {
-                    this.victim = p;
+                    this.victimAlive = p;
                     lastOwnerList = new List<Pawn>(OwnersForReading);
                     OwnersForReading.Clear();
-                    this.CompAssignableToPawn.TryAssignPawn(victim);
+                    this.CompAssignableToPawn.TryAssignPawn(victimAlive);
                 }
             }
 
@@ -181,54 +173,42 @@ namespace COF_Torture.Things
 
         public void KillVictim()
         {
-            KillVictimDirect(victim);
-            victim = null;
+            victimDead = victimAlive;
+            KillVictimDirect(victimAlive);
+            victimAlive = null;
         }
 
-        public static void KillVictimDirect(Pawn corpse)
+        public static void KillVictimDirect(Pawn pawn)
         {
-            if (SettingPatch.RimJobWorldIsActive && corpse.story.traits.HasTrait(TraitDefOf.Masochist))
+            if (SettingPatch.RimJobWorldIsActive && pawn.story.traits.HasTrait(TraitDefOf.Masochist))
             {
                 var execute = Damages.DamageDefOf.Execute_Licentious;
                 var dInfo = new DamageInfo(execute, 1);
-                var dHediff = HediffMaker.MakeHediff(Hediffs.HediffDefOf.COF_Torture_Licentious, corpse);
-                corpse.Kill(dInfo, dHediff);
+                var dHediff = HediffMaker.MakeHediff(Hediffs.HediffDefOf.COF_Torture_Licentious, pawn);
+                pawn.Kill(dInfo, dHediff);
             }
             else
             {
                 var execute = Damages.DamageDefOf.Execute;
                 var dInfo = new DamageInfo(execute, 1);
-                var dHediff = HediffMaker.MakeHediff(Hediffs.HediffDefOf.COF_Torture_Fixed, corpse);
-                corpse.Kill(dInfo, dHediff);
+                var dHediff = HediffMaker.MakeHediff(Hediffs.HediffDefOf.COF_Torture_Fixed, pawn);
+                pawn.Kill(dInfo, dHediff);
             }
         }
 
         public void ReleaseCorpse()
         {
-            List<Pawn> corpseList = new List<Pawn>();
-            Log.Message(corpseInBuilding+"ReleaseCorpse");
+            Log.Message(corpseInBuilding + "ReleaseCorpse");
             if (this.corpseContainer.Count > 0)
-            {
-                foreach (var thing in this.corpseContainer)
-                {
-                    var corpse = (Pawn)thing;
-                    corpseList.Add(corpse);
-                    Log.Message("Add"+corpse);
-                }
-
                 this.corpseContainer.TryDropAll(this.Position, this.Map, ThingPlaceMode.Near);
-            }
-
             this.corpseContainer.ClearAndDestroyContents();
-            foreach (var corpse in corpseList)
-            {
-                KillVictimDirect(corpse);
-            }
+            victimDead = null;
+            corpseInBuilding = null;
         }
-        
+
         public void ShouldNotDie()
         {
-            var bloodLoss = victim.health.hediffSet.GetFirstHediffOfDef(RimWorld.HediffDefOf.BloodLoss);
+            var bloodLoss = victimAlive.health.hediffSet.GetFirstHediffOfDef(RimWorld.HediffDefOf.BloodLoss);
             if (bloodLoss.Severity > 0.9f)
                 bloodLoss.Severity = 0.9f;
         }
@@ -237,15 +217,15 @@ namespace COF_Torture.Things
         {
             this.isUsing = false;
             this.showVictimBody = true;
-            if (victim != null)
+            if (victimAlive != null)
             {
                 this.ShouldNotDie();
-                if (HediffComp_ExecuteIndicator.ShouldBeDead(victim)) //放下来时如果会立刻死，就改变死因为本comp造成
+                if (HediffComp_ExecuteIndicator.ShouldBeDead(victimAlive)) //放下来时如果会立刻死，就改变死因为本comp造成
                 {
-                    KillVictimDirect(victim);
+                    KillVictimDirect(victimAlive);
                 }
                 else
-                   RemoveVictim();
+                    RemoveVictim();
             }
             else
             {
@@ -261,8 +241,8 @@ namespace COF_Torture.Things
 
         private void RemoveVictimPlace()
         {
-            this.CompAssignableToPawn.TryUnassignPawn(victim);
-            victim = null;
+            this.CompAssignableToPawn.TryUnassignPawn(victimAlive);
+            victimAlive = null;
             OwnersForReading.Clear();
             if (lastOwnerList != null)
                 foreach (Pawn p in lastOwnerList)
@@ -273,7 +253,7 @@ namespace COF_Torture.Things
 
         private void RemoveVictimHediff()
         {
-            if (victim != null)
+            if (victimAlive != null)
             {
                 try
                 {
@@ -299,7 +279,7 @@ namespace COF_Torture.Things
 
                 //try
                 //{
-                foreach (var hediffR in victim.health.hediffSet.hediffs)
+                foreach (var hediffR in victimAlive.health.hediffSet.hediffs)
                 {
                     if (hediffR != null)
                     {
@@ -372,13 +352,15 @@ namespace COF_Torture.Things
             Rot4 north = Rot4.North;
             Vector3 shiftedWithAltitude;
             shiftedWithAltitude = position.ToVector3ShiftedWithAltitude(AltitudeLayer.LayingPawn);
-            if (this.corpseContainer != null)
+            if (this.corpseInBuilding != null)
             {
-                foreach (var pawn in this.corpseContainer)
-                {
-                    pawn.DrawAt(shiftedWithAltitude);
-                }
+                //this.corpseInBuilding.InnerPawn.Drawer.renderer.wiggler.SetToCustomRotation(this.corpseRotation);
+                Corpse corpse = this.corpseInBuilding;
+                position = this.Position;
+                Vector3 drawLoc = position.ToVector3ShiftedWithAltitude(AltitudeLayer.Item) + this.shiftPawnDrawPos;
+                corpse.DrawAt(drawLoc, false);
             }
+
             //if (victim != null)
             //    victim.DrawAt(shiftedWithAltitude+this.shiftPawnDrawPos);
             if (this.graphic == null)
@@ -525,7 +507,7 @@ namespace COF_Torture.Things
 
         public override void DrawGUIOverlay()
         {
-            if (this.Medical || Find.CameraDriver.CurrentZoom != CameraZoomRange.Closest ||
+            if (Medical || Find.CameraDriver.CurrentZoom != CameraZoomRange.Closest ||
                 !this.CompAssignableToPawn.PlayerCanSeeAssignments)
                 return;
             Color defaultThingLabelColor = GenMapUI.DefaultThingLabelColor;
