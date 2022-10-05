@@ -13,17 +13,13 @@ using Verse.AI;
 
 namespace COF_Torture.Things
 {
-    public class Building_TortureBed : Building_Bed, IThingHolder
+    public class Building_TortureBed : Building_Bed
     {
         private Pawn victimAlive;
-        private Pawn victimDead;
         public Pawn GetVictim()
         {
-            if (victimAlive != null) return victimAlive;
-            return victimDead;
+            return victimAlive;
         }
-
-        private Corpse corpseInBuilding;
         private bool isUsing; //isUsing只表示是否在被处刑使用，娱乐使用并不会触发它
 
         public bool isUnUsableForOthers()
@@ -63,12 +59,6 @@ namespace COF_Torture.Things
         public Graphic graphic_blood_top;
         public Graphic graphic_blood_top_using;
         public Texture2D texSafe;
-
-        public ThingOwner corpseContainer;
-
-        public Building_TortureBed() =>
-            this.corpseContainer = (ThingOwner)new ThingOwner<Pawn>((IThingHolder)this, false);
-        
         public override void ExposeData()
         {
             base.ExposeData();
@@ -76,7 +66,6 @@ namespace COF_Torture.Things
             Scribe_Values.Look<bool>(ref this.isUsing, "isUsing");
             Scribe_Values.Look<bool>(ref this.isUsed, "isUsed");
             Scribe_Values.Look<bool>(ref this.isSafe, "isSafe", defaultValue: ModSettingMain.Instance.Setting.isSafe);
-            Scribe_Deep.Look<ThingOwner>(ref this.corpseContainer, "corpseContainer", (object)this);
         }
 
         public override void SpawnSetup(Map map, bool respawningAfterLoad)
@@ -107,26 +96,6 @@ namespace COF_Torture.Things
         public override void TickRare()
         {
             base.TickRare();
-            //这里会降低性能，其实不太好
-            if (victimAlive != null || !isUsing)
-                return;
-            if (this.corpseContainer == null)
-                this.corpseContainer = new ThingOwner<Corpse>();
-            //foreach (var thing in this.Map.spawnedThings)
-            foreach (var thing in this.Map.listerThings.ThingsInGroup(ThingRequestGroup.Corpse))
-                //TODO 测试这两个分别的性能
-            {
-                if (thing is Corpse cp)
-                {
-                    if (cp.InnerPawn == victimDead)
-                    {
-                        if (cp.Spawned)
-                            cp.DeSpawn();
-                        corpseContainer.TryAdd(cp);
-                        corpseInBuilding = cp;
-                    }
-                }
-            }
         }
 
         public void SetVictim(Pawn pawn)
@@ -173,7 +142,6 @@ namespace COF_Torture.Things
 
         public void KillVictim()
         {
-            victimDead = victimAlive;
             KillVictimDirect(victimAlive);
             victimAlive = null;
         }
@@ -196,16 +164,6 @@ namespace COF_Torture.Things
             }
         }
 
-        public void ReleaseCorpse()
-        {
-            Log.Message(corpseInBuilding + "ReleaseCorpse");
-            if (this.corpseContainer.Count > 0)
-                this.corpseContainer.TryDropAll(this.Position, this.Map, ThingPlaceMode.Near);
-            this.corpseContainer.ClearAndDestroyContents();
-            victimDead = null;
-            corpseInBuilding = null;
-        }
-
         public void ShouldNotDie()
         {
             var bloodLoss = victimAlive.health.hediffSet.GetFirstHediffOfDef(RimWorld.HediffDefOf.BloodLoss);
@@ -226,10 +184,6 @@ namespace COF_Torture.Things
                 }
                 else
                     RemoveVictim();
-            }
-            else
-            {
-                ReleaseCorpse();
             }
         }
 
@@ -352,15 +306,6 @@ namespace COF_Torture.Things
             Rot4 north = Rot4.North;
             Vector3 shiftedWithAltitude;
             shiftedWithAltitude = position.ToVector3ShiftedWithAltitude(AltitudeLayer.LayingPawn);
-            if (this.corpseInBuilding != null)
-            {
-                //this.corpseInBuilding.InnerPawn.Drawer.renderer.wiggler.SetToCustomRotation(this.corpseRotation);
-                Corpse corpse = this.corpseInBuilding;
-                position = this.Position;
-                Vector3 drawLoc = position.ToVector3ShiftedWithAltitude(AltitudeLayer.Item) + this.shiftPawnDrawPos;
-                corpse.DrawAt(drawLoc, false);
-            }
-
             //if (victim != null)
             //    victim.DrawAt(shiftedWithAltitude+this.shiftPawnDrawPos);
             if (this.graphic == null)
@@ -575,16 +520,6 @@ namespace COF_Torture.Things
                 ro.toggleAction = () => isSafe = !isSafe;
                 yield return ro;
             }
-        }
-
-        public void GetChildHolders(List<IThingHolder> outChildren)
-        {
-            ThingOwnerUtility.AppendThingHoldersFromThings(outChildren, (IList<Thing>)this.GetDirectlyHeldThings());
-        }
-
-        public ThingOwner GetDirectlyHeldThings()
-        {
-            return this.corpseContainer;
         }
     }
 }
