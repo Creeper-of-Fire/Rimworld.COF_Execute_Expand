@@ -35,7 +35,7 @@ namespace COF_Torture.Jobs
             initAction = (Action)(() =>
             {
                 Things.Building_TortureBed thing = (Things.Building_TortureBed)Thing;
-                thing.ReleaseContainer();
+                thing.ReleaseVictim();
                 MoteMaker.ThrowText(Thing.PositionHeld.ToVector3(), Thing.MapHeld, (string)"CT_Release".Translate(), 4f);
             }),
             defaultCompleteMode = ToilCompleteMode.Instant

@@ -26,16 +26,17 @@ namespace COF_Torture.Patch
         [HarmonyPatch(typeof(PawnRenderer), "GetBodyPos")]
         private static bool Prefix(PawnRenderer __instance, ref Vector3 __result, Vector3 drawLoc, out bool showBody)
         {
-            var pawn = (Pawn)Traverse.Create(__instance).Field("pawn").GetValue();
-            Building_Bed buildingBed = pawn.CurrentBed();
-            if (buildingBed != null && buildingBed is Building_TortureBed tortureBed && tortureBed.isUnUsableForOthers())
+            var ___pawn = (Pawn)Traverse.Create(__instance).Field("pawn").GetValue();
+            Building_Bed buildingBed = ___pawn.CurrentBed();
+            if (buildingBed != null && buildingBed is Building_TortureBed tortureBed &&
+                tortureBed.isUnUsableForOthers())
             {
-                AltitudeLayer AltLayer = buildingBed.def.altitudeLayer;
-                drawLoc.y = AltLayer.AltitudeFor();
+                drawLoc.y = ___pawn.Position.ToVector3ShiftedWithAltitude(AltitudeLayer.LayingPawn).y;
                 __result = drawLoc;
                 showBody = tortureBed.showVictimBody;
                 return false;
             }
+
             showBody = buildingBed == null || buildingBed.def.building.bed_showSleeperBody;
             return true;
             /*Vector3 bodyPos;

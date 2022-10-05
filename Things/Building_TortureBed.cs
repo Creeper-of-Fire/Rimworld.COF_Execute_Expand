@@ -16,27 +16,15 @@ namespace COF_Torture.Things
     public class Building_TortureBed : Building_Bed
     {
         private Pawn victimAlive;
-        public Pawn GetVictim()
-        {
-            return victimAlive;
-        }
-        private bool isUsing; //isUsing只表示是否在被处刑使用，娱乐使用并不会触发它
+        public Pawn GetVictim() => victimAlive;
 
-        public bool isUnUsableForOthers()
-        {
-            if (isUsing)
-                return true;
-            /*if (victim != null)
-                return true;
-            if (corpseContainer.Any)
-                return true;*/
-            return false;
-        }
+        private bool isUsing; //isUsing只表示是否在被处刑使用，娱乐使用并不会触发它
+        public bool isUnUsableForOthers() => isUsing;
 
         public bool isUsed; //isUsed表示这个道具是否被使用过（指是否有人死在里面），会影响道具的图片显示
         public bool isSafe = true; //是否安全
 
-        public Vector3 shiftPawnDrawPos
+        /*public Vector3 shiftPawnDrawPos
         {
             get
             {
@@ -45,7 +33,7 @@ namespace COF_Torture.Things
                 else
                     return Vector3.zero;
             }
-        }
+        }*/
 
         private List<Pawn> lastOwnerList;
 
@@ -59,6 +47,7 @@ namespace COF_Torture.Things
         public Graphic graphic_blood_top;
         public Graphic graphic_blood_top_using;
         public Texture2D texSafe;
+
         public override void ExposeData()
         {
             base.ExposeData();
@@ -75,27 +64,15 @@ namespace COF_Torture.Things
             this.Medical = false;
         }
 
-        public override void Destroy(DestroyMode mode = DestroyMode.Vanish)
-        {
-            base.Destroy(mode);
-        }
-
         public override void DeSpawn(DestroyMode mode = DestroyMode.Vanish)
         {
             //如果床上面有囚犯
             if (isUnUsableForOthers())
             {
-                this.ReleaseContainer();
+                this.ReleaseVictim();
             }
 
             base.DeSpawn(mode);
-            //TryRemoveHediffFromAllPawns();
-        }
-
-
-        public override void TickRare()
-        {
-            base.TickRare();
         }
 
         public void SetVictim(Pawn pawn)
@@ -131,59 +108,50 @@ namespace COF_Torture.Things
             }
         }
 
-        /*public void DrawCorpse()
-        {
-            Vector3 drawLoc = this.DrawPos + this.shiftPawnDrawPos;
-            Rot4 rotation2 = this.Rotation;
-            if (rotation2 == Rot4.East || rotation2 == Rot4.West)
-                drawLoc.z += 0.2f;
-            victim.Drawer.renderer.RenderPawnAt(drawLoc, neverAimWeapon: true);
-        }*/
-
         public void KillVictim()
         {
+            RemoveVictimHediff();
             KillVictimDirect(victimAlive);
-            victimAlive = null;
-        }
-
-        public static void KillVictimDirect(Pawn pawn)
-        {
-            if (SettingPatch.RimJobWorldIsActive && pawn.story.traits.HasTrait(TraitDefOf.Masochist))
+            RemoveVictimPlace(); 
+            void KillVictimDirect(Pawn pawn)
             {
-                var execute = Damages.DamageDefOf.Execute_Licentious;
-                var dInfo = new DamageInfo(execute, 1);
-                var dHediff = HediffMaker.MakeHediff(Hediffs.HediffDefOf.COF_Torture_Licentious, pawn);
-                pawn.Kill(dInfo, dHediff);
-            }
-            else
-            {
-                var execute = Damages.DamageDefOf.Execute;
-                var dInfo = new DamageInfo(execute, 1);
-                var dHediff = HediffMaker.MakeHediff(Hediffs.HediffDefOf.COF_Torture_Fixed, pawn);
-                pawn.Kill(dInfo, dHediff);
+                if (SettingPatch.RimJobWorldIsActive && pawn.story.traits.HasTrait(TraitDefOf.Masochist))
+                {
+                    var execute = Damages.DamageDefOf.Execute_Licentious;
+                    var dInfo = new DamageInfo(execute, 1);
+                    var dHediff = HediffMaker.MakeHediff(Hediffs.HediffDefOf.COF_Torture_Licentious, pawn);
+                    pawn.Kill(dInfo, dHediff);
+                }
+                else
+                {
+                    var execute = Damages.DamageDefOf.Execute;
+                    var dInfo = new DamageInfo(execute, 1);
+                    var dHediff = HediffMaker.MakeHediff(Hediffs.HediffDefOf.COF_Torture_Fixed, pawn);
+                    pawn.Kill(dInfo, dHediff);
+                }
             }
         }
+        
 
-        public void ShouldNotDie()
-        {
-            var bloodLoss = victimAlive.health.hediffSet.GetFirstHediffOfDef(RimWorld.HediffDefOf.BloodLoss);
-            if (bloodLoss.Severity > 0.9f)
-                bloodLoss.Severity = 0.9f;
-        }
-
-        public void ReleaseContainer()
+        public void ReleaseVictim()
         {
             this.isUsing = false;
             this.showVictimBody = true;
             if (victimAlive != null)
             {
-                this.ShouldNotDie();
+                ShouldNotDie();
                 if (HediffComp_ExecuteIndicator.ShouldBeDead(victimAlive)) //放下来时如果会立刻死，就改变死因为本comp造成
                 {
-                    KillVictimDirect(victimAlive);
+                    KillVictim();
                 }
                 else
                     RemoveVictim();
+            } 
+            void ShouldNotDie()
+            {
+                var bloodLoss = victimAlive.health.hediffSet.GetFirstHediffOfDef(RimWorld.HediffDefOf.BloodLoss);
+                if (bloodLoss.Severity > 0.9f)
+                    bloodLoss.Severity = 0.9f;
             }
         }
 
@@ -209,27 +177,21 @@ namespace COF_Torture.Things
         {
             if (victimAlive != null)
             {
-                try
+                /*var crebb = this.GetComps<COF_Torture.Component.CompEffectForBondage>();
+                if (crebb == null)
                 {
-                    var crebb = this.GetComps<COF_Torture.Component.CompEffectForBondage>();
-                    if (crebb == null)
+                    Log.Error("[COF_TORTURE]" + this + " Can not find compEffectForBondage");
+                }
+                else
+                {
+                    foreach (var e in crebb)
                     {
-                        Log.Error("[COF_TORTURE]" + this + " Can not find compEffectForBondage");
+                        e.RemoveEffect(); //解除使用者
                     }
-                    else
-                    {
-                        foreach (var e in crebb)
-                        {
-                            e.RemoveEffect(); //解除使用者
-                        }
 
-                        this.isUsing = false;
-                    }
-                }
-                catch
-                {
-                    Log.Message("[COF_TORTURE]try move effect by component, but component can't removeEffect.");
-                }
+                    this.isUsing = false;
+                }*/
+
 
                 //try
                 //{
@@ -247,25 +209,10 @@ namespace COF_Torture.Things
                             if (ht.giver == this)
                             {
                                 ht.giver = null;
-                                //Log.Message("[COF_TORTURE]发现没有被component.RemoveEffect去除的hediff" + ht + "。尝试去除");
-                                //victim.health.RemoveHediff(hediffR);
+                                //victimAlive.health.hediffSet.hediffs.Remove(ht);
                             }
                     }
                 }
-                //}
-                /*catch
-                {
-                    try
-                    {
-                        TryRemoveHediffFromAllPawns();
-                    }
-                    catch
-                    {
-                        Log.Message("[COF_TORTURE]try to remove all pawn's hediff, and can't remove Effect.");
-                    }
-
-                    Log.Message("[COF_TORTURE]has victim, but can't removeEffect.");
-                }*/
             }
             else
             {
@@ -293,7 +240,7 @@ namespace COF_Torture.Things
                         if (hT.giver == this)
                         {
                             hT.giver = null;
-                            aps.health.RemoveHediff(hT);
+                            //aps.health.RemoveHediff(hT);
                         }
                 }
             }

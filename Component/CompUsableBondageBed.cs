@@ -37,7 +37,7 @@ namespace COF_Torture.Component
                 else if (ParentBed.isUnUsableForOthers())
                 {
                     //不可用，则执行释放逻辑
-                    if (!pawn.CanReserve((LocalTargetInfo)(Verse.Thing)ParentBed))
+                    if (!pawn.CanReserve((LocalTargetInfo)(Verse.Thing)ParentBed)&&!pawn.CanReserve((LocalTargetInfo)(Verse.Thing)pawn))
                         yield return new FloatMenuOption(
                             (string)(usableBondageBed.FloatMenuOptionLabel(pawn) + " (" +
                                      "CT_Reserved".Translate() + ")"), (Action)null, MenuOptionPriority.DisabledOption);
