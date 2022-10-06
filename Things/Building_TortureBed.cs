@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using COF_Torture.Component;
 using COF_Torture.Hediffs;
+using COF_Torture.Jobs;
 using COF_Torture.ModSetting;
 using COF_Torture.Patch;
 using RimWorld;
@@ -10,6 +11,7 @@ using RimWorld.QuestGen;
 using UnityEngine;
 using Verse;
 using Verse.AI;
+using JobDefOf = RimWorld.JobDefOf;
 
 namespace COF_Torture.Things
 {
@@ -47,6 +49,7 @@ namespace COF_Torture.Things
         public Graphic graphic_blood_top;
         public Graphic graphic_blood_top_using;
         public Texture2D texSafe;
+        public Texture2D texPodEject;
 
         public override void ExposeData()
         {
@@ -73,6 +76,36 @@ namespace COF_Torture.Things
             }
 
             base.DeSpawn(mode);
+        }
+
+        public override void TickRare()
+        {
+            base.TickRare();
+            //if (!isUsing)
+            //    return;
+            if (victimAlive != null)
+            {
+                if (victimAlive.Dead)
+                {
+                    
+                }
+                else
+                {
+                    if (victimAlive.jobs != null && victimAlive.jobs.curJob.def == JobDefOf.Wait_Downed)
+                    {
+                        //Job job = JobMaker.MakeJob(COF_Torture.Jobs.JobDefOf.UseBondageAlone,
+                        //    (LocalTargetInfo)(Verse.Thing)this);
+                        //job.count = 1;
+                        Log.Message("[COF_TORTURE]被束缚的殖民者突然倒地，试图进行修复（很可能是殖民者被传送了或者" + this + "的所有者发生变更）");
+                        Pawn_HealthTracker victimHealth = victimAlive.health;
+                        victimAlive.jobs.ClearQueuedJobs();
+                        victimAlive.jobs.StopAll();
+                        //RemoveVictim();
+                        victimAlive = victimHealth.hediffSet.pawn;
+                        CT_Toils_GoToBed.BugFixBondageIntoBed(this, victimAlive);
+                    }
+                }
+            }
         }
 
         public void SetVictim(Pawn pawn)
@@ -364,6 +397,7 @@ namespace COF_Torture.Things
 
             this.graphic = gph;
             texSafe = ContentFinder<Texture2D>.Get("COF_Torture/UI/isSafe");
+            texPodEject = ContentFinder<Texture2D>.Get("COF_Torture/UI/PodEject");
         }
 
         private void trySetGraphicFor5(Graphic gph, string texPath, Vector2 dS)
@@ -461,14 +495,24 @@ namespace COF_Torture.Things
 
             if (Faction == Faction.OfPlayer)
             {
-                var ro = new Command_Toggle();
-                ro.defaultLabel = "CT_isSafe".Translate();
-                ro.defaultDesc = "CT_isSafeDesc".Translate();
-                ro.hotKey = KeyBindingDefOf.Misc4;
-                ro.icon = texSafe;
-                ro.isActive = () => isSafe;
-                ro.toggleAction = () => isSafe = !isSafe;
-                yield return ro;
+                var SafeMode = new Command_Toggle();
+                SafeMode.defaultLabel = "CT_isSafe".Translate();
+                SafeMode.defaultDesc = "CT_isSafeDesc".Translate();
+                SafeMode.hotKey = KeyBindingDefOf.Misc4;
+                SafeMode.icon = texSafe;
+                SafeMode.isActive = () => isSafe;
+                SafeMode.toggleAction = () => isSafe = !isSafe;
+                yield return SafeMode;
+                if (victimAlive != null)
+                {
+                    var Release = new Command_Action();
+                    Release.defaultLabel = "CT_Release".Translate();
+                    Release.defaultDesc = "CT_Release_BondageBed".Translate();
+                    Release.hotKey = KeyBindingDefOf.Misc5;
+                    Release.icon = texPodEject;
+                    Release.action = this.ReleaseVictim;
+                    yield return Release;
+                }
             }
         }
     }

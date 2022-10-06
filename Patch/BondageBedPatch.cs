@@ -33,7 +33,7 @@ namespace COF_Torture.Patch
             {
                 drawLoc.y = ___pawn.Position.ToVector3ShiftedWithAltitude(AltitudeLayer.LayingPawn).y;
                 __result = drawLoc;
-                showBody = tortureBed.showVictimBody;
+                showBody = buildingBed.def.building.bed_showSleeperBody && tortureBed.showVictimBody;
                 return false;
             }
 

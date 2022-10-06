@@ -41,12 +41,16 @@ namespace COF_Torture.ModSetting
             ls.CheckboxLabeled("殖民者在处刑过程中不会死亡", ref Setting.isImmortal, "建筑物默认启用安全模式");
            
             ls.GapLine(20f);
-            ls.Label("自动补充".Translate());
+            ls.Label("Satisfy Hunger And Thirty".Translate());
             ls.CheckboxLabeled("殖民者在刑具上会获得饮食和水的补充", ref Setting.isFeed, "殖民者在刑具上会获得饮食和水的补充"); 
             
             ls.GapLine(20f);
-            ls.Label("保持头颅".Translate());
+            ls.Label("Hold Head".Translate());
             ls.CheckboxLabeled("殖民者不会被绞肉机破坏头颅", ref Setting.leftHead, "殖民者不会被绞肉机破坏头颅"); 
+            
+            ls.GapLine(20f);
+            ls.Label("remove temp injuries".Translate());
+            ls.CheckboxLabeled("中止处刑时同时移除临时伤口", ref Setting.isRemoveTempInjuries, "中止处刑时同时移除临时伤口"); 
 
             ls.GapLine(20f);
             Text.Font = GameFont.Medium;
@@ -80,6 +84,7 @@ namespace COF_Torture.ModSetting
         public bool isFeed = true;
         public bool leftHead = true;
         public bool isImmortal = true;
+        public bool isRemoveTempInjuries = true;
         //public float testFloat = 1f;
         public int executeHours = 2500;
         public UnityEngine.Vector2 scrollPos = UnityEngine.Vector2.zero;//这玩意哪来的？我怎么一觉醒来多了这行代码？
@@ -94,6 +99,7 @@ namespace COF_Torture.ModSetting
             Scribe_Values.Look(ref isFeed, "isFeed", true);
             Scribe_Values.Look(ref leftHead, "leftHead", true);
             Scribe_Values.Look(ref isImmortal, "isImmortal", true);
+            Scribe_Values.Look(ref isRemoveTempInjuries, "isRemoveTempInjuries", true);
             Scribe_Values.Look(ref topTransparency, "topTransparency", 1f);
             Scribe_Values.Look(ref executeHours, "executeHours", 4);
         }
@@ -104,6 +110,7 @@ namespace COF_Torture.ModSetting
             isFeed = true;
             leftHead = true;
             isImmortal = true;
+            isRemoveTempInjuries = true;
             topTransparency = 1f;
             //testInt = 2500;
         }

@@ -25,7 +25,7 @@ namespace COF_Torture.Jobs
         protected override IEnumerable<Toil> MakeNewToils()
         {
             bool hasBed = this.Bed != null;
-            yield return CT_Toils_Laying.LayDown(TargetIndex.A, hasBed, false,
+            yield return Toils_LayDown.LayDown(TargetIndex.A, hasBed, false,
                 noBedLayingPosture: PawnPosture.LayingInBed);
         }
 

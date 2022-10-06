@@ -1,3 +1,4 @@
+using COF_Torture.ModSetting;
 using COF_Torture.Things;
 using Verse;
 
@@ -19,6 +20,16 @@ namespace COF_Torture.Hediffs
                 return base.TendableNow(ignoreTimer);
             else
                 return false;
+        }
+        
+        public override bool ShouldRemove
+        {
+            get
+            {
+                if (ModSettingMain.Instance.Setting.isRemoveTempInjuries && giver == null)
+                    return true;
+                return base.ShouldRemove;
+            }
         }
     }
 }
