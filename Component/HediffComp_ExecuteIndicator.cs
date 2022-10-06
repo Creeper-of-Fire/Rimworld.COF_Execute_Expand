@@ -85,9 +85,11 @@ namespace COF_Torture.Component
             this.ticksLeftToCount = this.Props.ticksToCount; //重置计时器
             ButcherProcess(); //如果是绞肉机，处理绞肉机的效果
             SeverityProcess(this.Props.ticksToCount);
-            if (!ModSettingMain.Instance.Setting.isImmortal && ShouldBeDead(this.Pawn)) //如果会死，就改变死因为本comp造成
+            if (!ModSettingMain.Instance.Setting.isImmortal) //如果会死，就改变死因为本comp造成
             {
-                KillByExecute();
+                this.Parent.giver.ShouldNotDie();
+                if (ShouldBeDead(this.Pawn))
+                    KillByExecute();
             }
         }
 
@@ -125,7 +127,6 @@ namespace COF_Torture.Component
             return health.ShouldBeDeadFromLethalDamageThreshold();
         }
 
-        
 
         public void KillByExecute()
         {

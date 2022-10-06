@@ -112,7 +112,8 @@ namespace COF_Torture.Things
         {
             RemoveVictimHediff();
             KillVictimDirect(victimAlive);
-            RemoveVictimPlace(); 
+            RemoveVictimPlace();
+
             void KillVictimDirect(Pawn pawn)
             {
                 if (SettingPatch.RimJobWorldIsActive && pawn.story.traits.HasTrait(TraitDefOf.Masochist))
@@ -131,7 +132,7 @@ namespace COF_Torture.Things
                 }
             }
         }
-        
+
 
         public void ReleaseVictim()
         {
@@ -146,13 +147,15 @@ namespace COF_Torture.Things
                 }
                 else
                     RemoveVictim();
-            } 
-            void ShouldNotDie()
-            {
-                var bloodLoss = victimAlive.health.hediffSet.GetFirstHediffOfDef(RimWorld.HediffDefOf.BloodLoss);
+            }
+        }
+
+        public void ShouldNotDie()
+        {
+            var bloodLoss = victimAlive.health.hediffSet.GetFirstHediffOfDef(RimWorld.HediffDefOf.BloodLoss);
+            if (bloodLoss != null)
                 if (bloodLoss.Severity > 0.9f)
                     bloodLoss.Severity = 0.9f;
-            }
         }
 
         private void RemoveVictim()
