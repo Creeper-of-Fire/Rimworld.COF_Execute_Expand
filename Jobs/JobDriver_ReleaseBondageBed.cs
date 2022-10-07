@@ -13,7 +13,7 @@ namespace COF_Torture.Jobs
         //protected Thing Target => this.job.GetTarget(TargetIndex.B).Thing;
 
         public override bool TryMakePreToilReservations(bool errorOnFailed) => true;
-            //this.pawn.Reserve((LocalTargetInfo)this.Thing, this.job, errorOnFailed: errorOnFailed);
+        //this.pawn.Reserve((LocalTargetInfo)this.Thing, this.job, errorOnFailed: errorOnFailed);
 
         protected override IEnumerable<Toil> MakeNewToils()
         {
@@ -30,15 +30,18 @@ namespace COF_Torture.Jobs
             yield return JobDriver_ReleaseBondageBed.ReleaseVictim((Building_Bed)this.Thing);
         }
 
-        public static Toil ReleaseVictim(Building_Bed Thing) => new Toil()
+        public static Toil ReleaseVictim(Building_Bed Thing)
         {
-            initAction = (Action)(() =>
+            var toil = new Toil();
+            toil.initAction = (Action)(() =>
             {
                 Things.Building_TortureBed thing = (Things.Building_TortureBed)Thing;
                 thing.ReleaseVictim();
-                MoteMaker.ThrowText(Thing.PositionHeld.ToVector3(), Thing.MapHeld, (string)"CT_Release".Translate(), 4f);
-            }),
-            defaultCompleteMode = ToilCompleteMode.Instant
-        };
+                MoteMaker.ThrowText(Thing.PositionHeld.ToVector3(), Thing.MapHeld, (string)"CT_Release".Translate(),
+                    4f);
+            });
+            toil.defaultCompleteMode = ToilCompleteMode.Instant;
+            return toil;
+        }
     }
 }

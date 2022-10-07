@@ -32,11 +32,14 @@ namespace COF_Torture.Component
         {
             if (SettingPatch.RimJobWorldIsActive)
             {
+                var execute = Damages.DamageDefOf.Execute_Licentious;
+                return new DamageInfo(execute, 1);
+            }
+            else
+            {
                 var execute = Damages.DamageDefOf.Execute;
                 return new DamageInfo(execute, 1);
             }
-
-            return new DamageInfo();
         }
 
         public virtual IEnumerable<BodyPartRecord> ListOfPart()

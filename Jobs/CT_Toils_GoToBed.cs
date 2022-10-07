@@ -45,7 +45,7 @@ namespace COF_Torture.Jobs
             toil.defaultCompleteMode = ToilCompleteMode.Instant;
             return toil;
         }
-        
+
         public static void BugFixBondageIntoBed(Building_Bed bed, Pawn takee)
         {
             if (bed.Destroyed)
