@@ -9,11 +9,67 @@ namespace COF_Torture.Hediffs
     public class Hediff_Protect : Hediff_WithGiver
     {
         public int tickNext;
+        private float Thirst;
+        private float Rest;
+        private float Food;
+        private float Joy;
+        private float Bladder;
+        private float Hygiene;
+        private const float lowFloatOfNeeds = 0.7f;
 
         public override void PostMake()
         {
             this.Severity = 1f;
             this.SetNextTick();
+        }
+
+        public override void PostAdd(DamageInfo? dinfo)
+        {
+            Food = pawn.needs.food.CurLevel;
+            Joy = pawn.needs.joy.CurLevel;
+            Rest = pawn.needs.rest.CurLevel;
+            Need need;
+            if (SettingPatch.DubsBadHygieneThirstIsActive)
+            {
+                need = pawn.needs.AllNeeds.Find((Predicate<Need>)(x => x.def == SettingPatch.DBHThirst));
+                if (need != null) Thirst = need.CurLevel;
+            }
+
+            if (SettingPatch.DubsBadHygieneIsActive)
+            {
+                need = pawn.needs.AllNeeds.Find((Predicate<Need>)(x => x.def == SettingPatch.Bladder));
+                if (need != null) Bladder = need.CurLevel;
+                need = pawn.needs.AllNeeds.Find((Predicate<Need>)(x => x.def == SettingPatch.Hygiene));
+                if (need != null) Hygiene = need.CurLevel;
+            }
+
+            base.PostAdd(dinfo);
+        }
+
+        public override void PostRemoved()
+        {
+            if (!ModSettingMain.Instance.Setting.isFeed)
+            {
+                pawn.needs.food.CurLevel = Food;
+                pawn.needs.joy.CurLevel = Joy;
+                pawn.needs.rest.CurLevel = Rest;
+                Need need;
+                if (SettingPatch.DubsBadHygieneThirstIsActive)
+                {
+                    need = pawn.needs.AllNeeds.Find((Predicate<Need>)(x => x.def == SettingPatch.DBHThirst));
+                    if (need != null) need.CurLevel = Thirst;
+                }
+
+                if (SettingPatch.DubsBadHygieneIsActive)
+                {
+                    need = pawn.needs.AllNeeds.Find((Predicate<Need>)(x => x.def == SettingPatch.Bladder));
+                    if (need != null) need.CurLevel = Bladder;
+                    need = pawn.needs.AllNeeds.Find((Predicate<Need>)(x => x.def == SettingPatch.Hygiene));
+                    if (need != null) need.CurLevel = Hygiene;
+                }
+            }
+
+            base.PostRemoved();
         }
 
         public override void ExposeData()
@@ -27,14 +83,16 @@ namespace COF_Torture.Hediffs
             if (Find.TickManager.TicksGame < this.tickNext)
                 return;
             //this.HealWounds();
-            if (ModSettingMain.Instance.Setting.isFeed)
-            {
-                this.SatisfyHunger();
-                this.SatisfyThirst();
-            }
+
+            this.SatisfyFood();
+            this.SatisfyJoy();
+            this.SatisfyThirst();
+            this.SatisfyBladder();
+            this.SatisfyHygiene();
+
             this.SetNextTick();
         }
-        
+
         public override bool ShouldRemove
         {
             get
@@ -45,20 +103,50 @@ namespace COF_Torture.Hediffs
             }
         }
 
-        public void SatisfyHunger()
+        public void SatisfyFood()
         {
             Need_Food need = this.pawn.needs.TryGetNeed<Need_Food>();
-            if (need == null || (double)need.CurLevel >= 0.15)
+            if (need == null || (double)need.CurLevel >= lowFloatOfNeeds)
                 return;
             this.pawn.needs.food.CurLevel += need.MaxLevel / 5f;
         }
 
+        public void SatisfyJoy()
+        {
+            Need_Food need = this.pawn.needs.TryGetNeed<Need_Food>();
+            if (need == null || (double)need.CurLevel >= lowFloatOfNeeds)
+                return;
+            this.pawn.needs.food.CurLevel += need.MaxLevel / 5f;
+        }
+        
         public void SatisfyThirst()
+        {
+            if (!SettingPatch.DubsBadHygieneThirstIsActive)
+                return;
+            Need need = this.pawn.needs.AllNeeds.Find((Predicate<Need>)(x => x.def == SettingPatch.DBHThirst));
+            if (need == null || (double)need.CurLevel >= lowFloatOfNeeds)
+                return;
+            float num = need.MaxLevel / 5f;
+            this.pawn.needs.TryGetNeed(need.def).CurLevel += num;
+        }
+
+        public void SatisfyBladder()
         {
             if (!SettingPatch.DubsBadHygieneIsActive)
                 return;
-            Need need = this.pawn.needs.AllNeeds.Find((Predicate<Need>)(x => x.def == SettingPatch.DBHThirst));
-            if (need == null || (double)need.CurLevel >= 0.15)
+            Need need = this.pawn.needs.AllNeeds.Find((Predicate<Need>)(x => x.def == SettingPatch.Hygiene));
+            if (need == null || (double)need.CurLevel >= lowFloatOfNeeds)
+                return;
+            float num = need.MaxLevel / 5f;
+            this.pawn.needs.TryGetNeed(need.def).CurLevel += num;
+        }
+
+        public void SatisfyHygiene()
+        {
+            if (!SettingPatch.DubsBadHygieneIsActive)
+                return;
+            Need need = this.pawn.needs.AllNeeds.Find((Predicate<Need>)(x => x.def == SettingPatch.Bladder));
+            if (need == null || (double)need.CurLevel >= lowFloatOfNeeds)
                 return;
             float num = need.MaxLevel / 5f;
             this.pawn.needs.TryGetNeed(need.def).CurLevel += num;

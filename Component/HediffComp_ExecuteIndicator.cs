@@ -87,10 +87,18 @@ namespace COF_Torture.Component
             SeverityProcess(this.Props.ticksToCount);
             if (!ModSettingMain.Instance.Setting.isImmortal) //如果会死，就改变死因为本comp造成
             {
-                this.Parent.giver.ShouldNotDie();
+                ShouldNotDie(this.Pawn);
                 if (ShouldBeDead(this.Pawn))
                     KillByExecute();
             }
+        }
+        
+        public static void ShouldNotDie(Pawn p)
+        {
+            var bloodLoss = p.health.hediffSet.GetFirstHediffOfDef(RimWorld.HediffDefOf.BloodLoss);
+            if (bloodLoss != null)
+                if (bloodLoss.Severity > 0.9f)
+                    bloodLoss.Severity = 0.9f;
         }
 
         public override void CompPostPostAdd(DamageInfo? dinfo)
@@ -133,7 +141,8 @@ namespace COF_Torture.Component
             if (this.Pawn.Dead)
                 Log.Error("try to kill a dead pawn");
             //Log.Message(this.Parent.giver.GetVictim()+"KillVictim");
-            this.Parent.giver.KillVictim();
+            if (this.Parent.giver is Building_TortureBed bT)
+                bT.KillVictim();
         }
     }
 }

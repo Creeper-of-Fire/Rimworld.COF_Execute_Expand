@@ -26,7 +26,7 @@ namespace COF_Torture.Component
         public HediffCompProperties_ExecuteAddHediff Props => (HediffCompProperties_ExecuteAddHediff)this.props;
         public Hediff_WithGiver Parent => (Hediff_WithGiver)this.parent;
         public int ticksToAdd;
-        public Building_TortureBed giver;
+        public Thing giver;
 
         public static DamageInfo dInfo()
         {

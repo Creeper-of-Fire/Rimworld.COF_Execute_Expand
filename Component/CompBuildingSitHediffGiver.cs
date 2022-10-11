@@ -6,17 +6,17 @@ using Verse;
 
 namespace COF_Torture.Component
 {
-    public class CompProperties_HediffGiver : CompProperties
+    public class CompProperties_BuildingSitHediffGiver : CompProperties
     {
         public HediffDef hediff;
         public BodyPartDef part;
 
-        public CompProperties_HediffGiver() => this.compClass = typeof(CompHediffGiver);
+        public CompProperties_BuildingSitHediffGiver() => this.compClass = typeof(CompBuildingSitHediffGiver);
     }
 
-    public class CompHediffGiver : ThingComp
+    public class CompBuildingSitHediffGiver : ThingComp
     {
-        private CompProperties_HediffGiver Props => (CompProperties_HediffGiver)this.props;
+        private CompProperties_BuildingSitHediffGiver Props => (CompProperties_BuildingSitHediffGiver)this.props;
 
         //private int CompHediffGiverCount ;
 

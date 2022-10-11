@@ -55,8 +55,9 @@
     </ItemGroup>
     <ItemGroup>
         <Compile Include="Component\CompEffectForBondage.cs" />
-        <Compile Include="Component\CompHediffGiver.cs" />
+        <Compile Include="Component\CompBuildingSitHediffGiver.cs" />
         <Compile Include="Component\CompUsableBondageBed.cs" />
+        <Compile Include="Component\HediffComp_ApprealTortureHediff.cs" />
         <Compile Include="Component\HediffComp_ExecuteMincer.cs" />
         <Compile Include="Component\HediffComp_ExecuteAddHediff.cs" />
         <Compile Include="Component\HediffComp_ExecuteIndicator.cs" />
@@ -66,17 +67,18 @@
         <Compile Include="Hediffs\HediffDefOf.cs" />
         <Compile Include="Hediffs\Hediff_ExecuteInjury.cs" />
         <Compile Include="Hediffs\Hediff_Protect.cs" />
-        <Compile Include="Hediffs\Hediff_Protect2.cs" />
         <Compile Include="Hediffs\Hediff_Torture.cs" />
         <Compile Include="Hediffs\Hediff_WithGiver.cs" />
         <Compile Include="Jobs\CT_Toils_GoToBed.cs" />
         <Compile Include="Jobs\JobDefof.cs" />
         <Compile Include="Jobs\JobDriver_Laying.cs" />
-        <Compile Include="Jobs\JobDriver_PlayExecuteBuilding.cs" />
+        <Compile Include="Jobs\JobDriver_PlayExecuteBuilding_Masochist.cs" />
+        <Compile Include="Jobs\JobDriver_PlayExecuteBuilding_Sadism.cs" />
         <Compile Include="Jobs\JobDriver_ReleaseBondageBed.cs" />
         <Compile Include="Jobs\JobDriver_UseBondageBed.cs" />
         <Compile Include="Jobs\JobDriver_UseBondageAlone.cs" />
-        <Compile Include="Jobs\JoyGiver_PlayExecuteBuilding.cs" />
+        <Compile Include="Jobs\JoyGiver_PlayExecuteBuilding_Masochist.cs" />
+        <Compile Include="Jobs\JoyGiver_PlayExecuteBuilding_Sadism.cs" />
         <Compile Include="ModSetting\ModSetting.cs" />
         <Compile Include="Patch\BondageBedPatch.cs" />
         <Compile Include="Patch\LifeContinue.cs" />

@@ -9,12 +9,14 @@ namespace COF_Torture.Patch
     public static class SettingPatch
     {
         public static bool DubsBadHygieneIsActive;
+        public static bool DubsBadHygieneThirstIsActive;
         public static NeedDef DBHThirst;
+        public static NeedDef Hygiene;
+        public static NeedDef Bladder;
         public static NeedDef Sex;
         public static bool RimJobWorldIsActive;
-
-
     }
+
     [StaticConstructorOnStartup]
     public static class MainPatch
     {
@@ -29,8 +31,9 @@ namespace COF_Torture.Patch
 
         private static void ModSettingPatch()
         {
-            SettingPatch.DBHThirst = DefDatabase<NeedDef>.GetNamedSilentFail("DBHThirst");
-            if (SettingPatch.DBHThirst == null)
+            SettingPatch.Hygiene = DefDatabase<NeedDef>.GetNamedSilentFail("Hygiene"); //DUBS卫生
+            SettingPatch.Bladder = DefDatabase<NeedDef>.GetNamedSilentFail("Bladder"); //DUBS膀胱
+            if (SettingPatch.Hygiene == null && SettingPatch.Bladder == null)
             {
                 SettingPatch.DubsBadHygieneIsActive = false;
             }
@@ -39,6 +42,18 @@ namespace COF_Torture.Patch
                 SettingPatch.DubsBadHygieneIsActive = true;
                 Log.Message("[COF_TORTURE]Dubs Bad Hygiene is detected.");
             }
+
+            SettingPatch.DBHThirst = DefDatabase<NeedDef>.GetNamedSilentFail("DBHThirst"); //DUBS口渴
+            if (SettingPatch.DBHThirst == null)
+            {
+                SettingPatch.DubsBadHygieneThirstIsActive = false;
+            }
+            else
+            {
+                SettingPatch.DubsBadHygieneThirstIsActive = true;
+                Log.Message("[COF_TORTURE]Dubs Bad Hygiene Thirst is detected.");
+            }
+
             SettingPatch.Sex = DefDatabase<NeedDef>.GetNamedSilentFail("Sex");
             if (SettingPatch.Sex == null)
             {
@@ -51,5 +66,4 @@ namespace COF_Torture.Patch
             }
         }
     }
-    
 }

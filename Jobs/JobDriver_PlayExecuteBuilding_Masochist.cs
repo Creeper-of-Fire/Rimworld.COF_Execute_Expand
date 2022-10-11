@@ -6,7 +6,7 @@ using Verse.AI;
 
 namespace COF_Torture.Jobs
 {
-    public class JobDriver_PlayExecuteBuilding : JobDriver
+    public class JobDriver_PlayExecuteBuilding_Masochist : JobDriver
     {
         //private const TargetIndex BuildingToPlay = TargetIndex.A;
         
@@ -31,7 +31,7 @@ namespace COF_Torture.Jobs
             }
         }
 
-        public Toil BeingFuck()
+        private Toil BeingFuck()
         {
             Toil beingFuck = new Toil();
             beingFuck.defaultDuration = 3000;

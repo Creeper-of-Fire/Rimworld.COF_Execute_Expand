@@ -173,7 +173,7 @@ namespace COF_Torture.Things
             this.showVictimBody = true;
             if (victimAlive != null)
             {
-                ShouldNotDie();
+                HediffComp_ExecuteIndicator.ShouldNotDie(victimAlive);
                 if (HediffComp_ExecuteIndicator.ShouldBeDead(victimAlive)) //放下来时如果会立刻死，就改变死因为本comp造成
                 {
                     KillVictim();
@@ -181,14 +181,6 @@ namespace COF_Torture.Things
                 else
                     RemoveVictim();
             }
-        }
-
-        public void ShouldNotDie()
-        {
-            var bloodLoss = victimAlive.health.hediffSet.GetFirstHediffOfDef(RimWorld.HediffDefOf.BloodLoss);
-            if (bloodLoss != null)
-                if (bloodLoss.Severity > 0.9f)
-                    bloodLoss.Severity = 0.9f;
         }
 
         private void RemoveVictim()

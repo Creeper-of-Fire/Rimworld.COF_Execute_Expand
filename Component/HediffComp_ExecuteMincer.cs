@@ -25,7 +25,8 @@ namespace COF_Torture.Component
         public BodyPartHeight height;
         public Hediff_WithGiver Parent => (Hediff_WithGiver)this.parent;
         public int ticksToAdd;
-        public Building_TortureBed giverOfHediff;
+        public Thing giverOfHediff;
+        public Building_TortureBed GiverOfHediff => (Building_TortureBed)giverOfHediff;
 
         public float productBar;
         //public List<Hediff_WithGiver> hediffList;
@@ -111,7 +112,7 @@ namespace COF_Torture.Component
             {
                 var comp = Parent.TryGetComp<HediffComp_ExecuteIndicator>();
                 if (comp != null) comp.isButcherDone = true;
-                var building = Parent.giver;
+                var building = GiverOfHediff;
                 if (building != null) building.showVictimBody = false;
                 return;
             }
