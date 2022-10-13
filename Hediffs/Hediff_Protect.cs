@@ -31,15 +31,15 @@ namespace COF_Torture.Hediffs
             Need need;
             if (SettingPatch.DubsBadHygieneThirstIsActive)
             {
-                need = pawn.needs.AllNeeds.Find((Predicate<Need>)(x => x.def == SettingPatch.DBHThirst));
+                need = pawn.needs.AllNeeds.Find((Predicate<Need>)(x => x.def == SettingPatch.DBHThirstNeed));
                 if (need != null) Thirst = need.CurLevel;
             }
 
             if (SettingPatch.DubsBadHygieneIsActive)
             {
-                need = pawn.needs.AllNeeds.Find((Predicate<Need>)(x => x.def == SettingPatch.Bladder));
+                need = pawn.needs.AllNeeds.Find((Predicate<Need>)(x => x.def == SettingPatch.BladderNeed));
                 if (need != null) Bladder = need.CurLevel;
-                need = pawn.needs.AllNeeds.Find((Predicate<Need>)(x => x.def == SettingPatch.Hygiene));
+                need = pawn.needs.AllNeeds.Find((Predicate<Need>)(x => x.def == SettingPatch.HygieneNeed));
                 if (need != null) Hygiene = need.CurLevel;
             }
 
@@ -56,15 +56,15 @@ namespace COF_Torture.Hediffs
                 Need need;
                 if (SettingPatch.DubsBadHygieneThirstIsActive)
                 {
-                    need = pawn.needs.AllNeeds.Find((Predicate<Need>)(x => x.def == SettingPatch.DBHThirst));
+                    need = pawn.needs.AllNeeds.Find((Predicate<Need>)(x => x.def == SettingPatch.DBHThirstNeed));
                     if (need != null) need.CurLevel = Thirst;
                 }
 
                 if (SettingPatch.DubsBadHygieneIsActive)
                 {
-                    need = pawn.needs.AllNeeds.Find((Predicate<Need>)(x => x.def == SettingPatch.Bladder));
+                    need = pawn.needs.AllNeeds.Find((Predicate<Need>)(x => x.def == SettingPatch.BladderNeed));
                     if (need != null) need.CurLevel = Bladder;
-                    need = pawn.needs.AllNeeds.Find((Predicate<Need>)(x => x.def == SettingPatch.Hygiene));
+                    need = pawn.needs.AllNeeds.Find((Predicate<Need>)(x => x.def == SettingPatch.HygieneNeed));
                     if (need != null) need.CurLevel = Hygiene;
                 }
             }
@@ -123,7 +123,7 @@ namespace COF_Torture.Hediffs
         {
             if (!SettingPatch.DubsBadHygieneThirstIsActive)
                 return;
-            Need need = this.pawn.needs.AllNeeds.Find((Predicate<Need>)(x => x.def == SettingPatch.DBHThirst));
+            Need need = this.pawn.needs.AllNeeds.Find((Predicate<Need>)(x => x.def == SettingPatch.DBHThirstNeed));
             if (need == null || (double)need.CurLevel >= lowFloatOfNeeds)
                 return;
             float num = need.MaxLevel / 5f;
@@ -134,7 +134,7 @@ namespace COF_Torture.Hediffs
         {
             if (!SettingPatch.DubsBadHygieneIsActive)
                 return;
-            Need need = this.pawn.needs.AllNeeds.Find((Predicate<Need>)(x => x.def == SettingPatch.Hygiene));
+            Need need = this.pawn.needs.AllNeeds.Find((Predicate<Need>)(x => x.def == SettingPatch.HygieneNeed));
             if (need == null || (double)need.CurLevel >= lowFloatOfNeeds)
                 return;
             float num = need.MaxLevel / 5f;
@@ -145,7 +145,7 @@ namespace COF_Torture.Hediffs
         {
             if (!SettingPatch.DubsBadHygieneIsActive)
                 return;
-            Need need = this.pawn.needs.AllNeeds.Find((Predicate<Need>)(x => x.def == SettingPatch.Bladder));
+            Need need = this.pawn.needs.AllNeeds.Find((Predicate<Need>)(x => x.def == SettingPatch.BladderNeed));
             if (need == null || (double)need.CurLevel >= lowFloatOfNeeds)
                 return;
             float num = need.MaxLevel / 5f;

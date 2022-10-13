@@ -2,7 +2,7 @@ using Verse;
 
 namespace COF_Torture.Component
 {
-    public class HediffComp_SexualHeatWithPain : HediffComp //处理性兴奋，如果性兴奋满值就高潮
+    public class HediffComp_SexualHeatWithPain : HediffComp //通过疼痛获得性兴奋
     {
         public HediffCompProperties_SexualHeatWithPain Props => (HediffCompProperties_SexualHeatWithPain)this.props;
         

@@ -21,7 +21,7 @@ namespace COF_Torture.Component
         public HediffCompProperties_ExecuteAddHediff() => this.compClass = typeof(HediffComp_ExecuteAddHediff);
     }
 
-    public class HediffComp_ExecuteAddHediff : HediffComp
+    public class HediffComp_ExecuteAddHediff : HediffComp//可以给pawn提供hediff的
     {
         public HediffCompProperties_ExecuteAddHediff Props => (HediffCompProperties_ExecuteAddHediff)this.props;
         public Hediff_WithGiver Parent => (Hediff_WithGiver)this.parent;

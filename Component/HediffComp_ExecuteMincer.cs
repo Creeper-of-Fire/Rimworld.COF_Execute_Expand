@@ -19,7 +19,7 @@ namespace COF_Torture.Component
         public HediffCompProperties_ExecuteMincer() => this.compClass = typeof(HediffComp_ExecuteMincer);
     }
 
-    public class HediffComp_ExecuteMincer : HediffComp
+    public class HediffComp_ExecuteMincer : HediffComp//绞肉机的处刑进度，绞肉机不使用executeIndicator
     {
         public HediffCompProperties_ExecuteMincer Props => (HediffCompProperties_ExecuteMincer)this.props;
         public BodyPartHeight height;

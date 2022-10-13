@@ -54,6 +54,7 @@
         </Reference>
     </ItemGroup>
     <ItemGroup>
+        <Compile Include="Component\CompCauseHediff_Apparel.cs" />
         <Compile Include="Component\CompEffectForBondage.cs" />
         <Compile Include="Component\CompBuildingSitHediffGiver.cs" />
         <Compile Include="Component\CompUsableBondageBed.cs" />
@@ -89,6 +90,7 @@
         <Compile Include="Things\BuildingDef.cs" />
         <Compile Include="Things\BuildingDefOf.cs" />
         <Compile Include="Things\Building_TortureBed.cs" />
+        <Compile Include="TortureUtility.cs" />
     </ItemGroup>
     <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
     <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

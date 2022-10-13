@@ -38,31 +38,37 @@ namespace COF_Torture.Component
 
         public void AddEffect()
         {
-            HediffDef hediffDef = this.Props.hediff;
             var t = this.Victim.health;
-            Verse.Hediff hediff = t.hediffSet.GetFirstHediffOfDef(hediffDef);
-            if (hediff == null)
-            {
-                Hediff_WithGiver hediffAdd;
-                if (this.Props.part == null)
-                {
-                    hediffAdd = (Hediff_WithGiver)HediffMaker.MakeHediff(hediffDef, this.Victim);
-                }
-                else
-                {
-                    var bodyPart = t.hediffSet.GetNotMissingParts().FirstOrFallback<BodyPartRecord>(
-                        (Func<BodyPartRecord, bool>)(p => p.def == this.Props.part));
-                    hediffAdd = (Hediff_WithGiver)HediffMaker.MakeHediff(hediffDef, this.Victim, bodyPart);
-                }
 
-                hediffAdd.giver = this.Parent;
-                t.AddHediff(hediffAdd);
-            }
 
+            //给予固定状态
             Hediff_Protect hediffTF =
                 (Hediff_Protect)HediffMaker.MakeHediff(COF_Torture.Hediffs.HediffDefOf.COF_Torture_Fixed, this.Victim);
             hediffTF.giver = this.Parent;
             t.AddHediff(hediffTF);
+
+
+            //给予附加hediff
+            if (this.Props.hediff == null)
+                return;
+            HediffDef hediffDef = this.Props.hediff;
+            Hediff hediff = t.hediffSet.GetFirstHediffOfDef(hediffDef);
+            if (hediff != null)
+                return;
+            Hediff_WithGiver hediffAdd;
+            if (this.Props.part == null)
+            {
+                hediffAdd = (Hediff_WithGiver)HediffMaker.MakeHediff(hediffDef, this.Victim);
+            }
+            else
+            {
+                var bodyPart = t.hediffSet.GetNotMissingParts().FirstOrFallback<BodyPartRecord>(
+                    (Func<BodyPartRecord, bool>)(p => p.def == this.Props.part));
+                hediffAdd = (Hediff_WithGiver)HediffMaker.MakeHediff(hediffDef, this.Victim, bodyPart);
+            }
+
+            hediffAdd.giver = this.Parent;
+            t.AddHediff(hediffAdd);
         }
     }
 }

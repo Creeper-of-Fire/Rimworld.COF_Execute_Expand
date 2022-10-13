@@ -16,9 +16,8 @@ namespace COF_Torture.Component
         //public float severityToDeath = 10.0f;
         public HediffCompProperties_ExecuteIndicator() => this.compClass = typeof(HediffComp_ExecuteIndicator);
     }
-
-    //最重要的comp，处理绝大多数的处刑相关内容——特别是关于殖民者何时死亡
-    public class HediffComp_ExecuteIndicator : HediffComp
+    
+    public class HediffComp_ExecuteIndicator : HediffComp//最重要的comp，处理绝大多数的处刑相关内容——特别是关于殖民者何时死亡
     {
         public HediffCompProperties_ExecuteIndicator Props => (HediffCompProperties_ExecuteIndicator)this.props;
         public Hediff_WithGiver Parent => (Hediff_WithGiver)this.parent;

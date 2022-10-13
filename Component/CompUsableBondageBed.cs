@@ -74,7 +74,7 @@ namespace COF_Torture.Component
                                             (string)"CT_ReleaseAndBound".Translate(pawn.Named(pawn.Name.ToString()),
                                                 victim.Named(victim.Name.ToString())),
                                             new Action(ReleaseAndBoundAction),
-                                            MenuOptionPriority.GoHere);
+                                            MenuOptionPriority.VeryLow);
                                     }
                                     else
                                     {
@@ -82,7 +82,7 @@ namespace COF_Torture.Component
                                         yield return new FloatMenuOption(
                                             (string)"CT_BondageBed".Translate(pawn.Named(pawn.Name.ToString()),
                                                 victim.Named(victim.Name.ToString())), new Action(BondAction),
-                                            MenuOptionPriority.GoHere);
+                                            MenuOptionPriority.VeryLow);
                                     }
                                 }
                             }
