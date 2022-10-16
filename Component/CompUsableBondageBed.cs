@@ -130,7 +130,7 @@ namespace COF_Torture.Component
         }
 
 
-        public override void TryStartUseJob(Pawn pawn, LocalTargetInfo extraTarget)
+        public override void TryStartUseJob(Pawn pawn, LocalTargetInfo extraTarget, bool forced = false)
         {
             if (!pawn.CanReserveAndReach((LocalTargetInfo)(Verse.Thing)this.parent, PathEndMode.Touch, Danger.Some))
                 return;

@@ -32,7 +32,7 @@ namespace COF_Torture.Jobs
 
         public static Toil ReleaseVictim(Building_Bed Thing)
         {
-            var toil = new Toil();
+            var toil = ToilMaker.MakeToil(nameof(ReleaseVictim));
             toil.initAction = (Action)(() =>
             {
                 Things.Building_TortureBed thing = (Things.Building_TortureBed)Thing;

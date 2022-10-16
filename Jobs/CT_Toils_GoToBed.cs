@@ -10,7 +10,7 @@ namespace COF_Torture.Jobs
     {
         public static Toil BondageIntoBed(Building_Bed bed, Pawn takee, Pawn taker = null)
         {
-            var toil = new Toil();
+            var toil = ToilMaker.MakeToil(nameof(BondageIntoBed));
             toil.initAction = (Action)(() =>
             {
                 if (bed.Destroyed)

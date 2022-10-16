@@ -29,7 +29,7 @@ namespace COF_Torture.Jobs
 
         private Toil BeingFuck()
         {
-            Toil beingFuck = new Toil();
+            Toil beingFuck = ToilMaker.MakeToil(nameof(BeingFuck));
             beingFuck.defaultDuration = 3000;
             beingFuck.defaultCompleteMode = ToilCompleteMode.Delay;
             beingFuck.FailOnDestroyedNullOrForbidden<Toil>(TargetIndex.A);
