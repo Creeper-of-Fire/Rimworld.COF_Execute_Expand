@@ -65,6 +65,8 @@
         <Compile Include="Component\HediffComp_OrgasmIndicator.cs" />
         <Compile Include="Component\HediffComp_SexualHeat.cs" />
         <Compile Include="Damages\DamageDefOf.cs" />
+        <Compile Include="Genes\GeneDefOf.cs" />
+        <Compile Include="Genes\Gene_SpeedingRegeneration.cs" />
         <Compile Include="Hediffs\HediffDefOf.cs" />
         <Compile Include="Hediffs\Hediff_ExecuteInjury.cs" />
         <Compile Include="Hediffs\Hediff_Protect.cs" />
@@ -84,12 +86,15 @@
         <Compile Include="Patch\BondageBedPatch.cs" />
         <Compile Include="Patch\LifeContinue.cs" />
         <Compile Include="Patch\MainPatch.cs" />
+        <Compile Include="Patch\MoreCorpseKindsPatch.cs" />
         <Compile Include="Patch\NeverPainDownedPatch.cs" />
         <Compile Include="Patch\TraitWithHediffPatch.cs" />
         <Compile Include="Properties\AssemblyInfo.cs" />
+        <Compile Include="Things\BarbecueCorpse.cs" />
         <Compile Include="Things\BuildingDef.cs" />
         <Compile Include="Things\BuildingDefOf.cs" />
         <Compile Include="Things\Building_TortureBed.cs" />
+        <Compile Include="Things\ThingCategoryDefOf.cs" />
         <Compile Include="TortureUtility.cs" />
     </ItemGroup>
     <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

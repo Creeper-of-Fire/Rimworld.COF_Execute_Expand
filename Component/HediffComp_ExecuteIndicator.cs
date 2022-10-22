@@ -10,7 +10,7 @@ namespace COF_Torture.Component
 {
     public class HediffCompProperties_ExecuteIndicator : HediffCompProperties
     {
-        public int ticksToCount = 100;
+        //public int ticksToCount = 100;
 
         //public int ticksToExecute = 9000;
         //public float severityToDeath = 10.0f;
@@ -29,6 +29,8 @@ namespace COF_Torture.Component
         private float severityToDeath;
 
         public bool isButcherDone;
+        
+        private const int ticksToCount = 120;
         //private Hediff bloodLoss;
 
         public override void CompExposeData()
@@ -37,7 +39,7 @@ namespace COF_Torture.Component
             Scribe_Values.Look(ref isButcherDone, "isButcherDone", false);
         }
 
-        private void SeverityProcess(int ticksToCount)
+        private void SeverityProcess()
         {
             if (severityToDeath <= 0f)
             {
@@ -81,9 +83,9 @@ namespace COF_Torture.Component
             this.ticksLeftToCount--;
             if (this.ticksLeftToCount > 0) //多次CompPostTick执行一次
                 return;
-            this.ticksLeftToCount = this.Props.ticksToCount; //重置计时器
+            this.ticksLeftToCount = ticksToCount; //重置计时器
             ButcherProcess(); //如果是绞肉机，处理绞肉机的效果
-            SeverityProcess(this.Props.ticksToCount);
+            SeverityProcess();
             if (!ModSettingMain.Instance.Setting.isImmortal) //如果会死，就改变死因为本comp造成
             {
                 ShouldNotDie(this.Pawn);

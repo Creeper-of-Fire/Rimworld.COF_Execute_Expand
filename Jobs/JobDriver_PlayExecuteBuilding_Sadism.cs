@@ -6,7 +6,7 @@ using Verse.AI;
 
 namespace COF_Torture.Jobs
 {
-    public class JobDriver_PlayExecuteBuilding_Sadism : JobDriver
+    /*public class JobDriver_PlayExecuteBuilding_Sadism : JobDriver
     {
         //private const TargetIndex BuildingToPlay = TargetIndex.A;
         
@@ -52,5 +52,5 @@ namespace COF_Torture.Jobs
             });
             return beingFuck;
         }
-    }
+    }*/
 }

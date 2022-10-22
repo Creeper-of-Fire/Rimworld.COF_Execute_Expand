@@ -32,6 +32,7 @@ namespace COF_Torture.Patch
                 tortureBed.isUnUsableForOthers())
             {
                 drawLoc.y = ___pawn.Position.ToVector3ShiftedWithAltitude(AltitudeLayer.LayingPawn).y;
+                drawLoc += tortureBed.shiftPawnDrawPos;
                 __result = drawLoc;
                 showBody = buildingBed.def.building.bed_showSleeperBody && tortureBed.showVictimBody;
                 return false;

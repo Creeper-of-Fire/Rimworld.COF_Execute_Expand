@@ -19,21 +19,14 @@ namespace COF_Torture.Component
         private CompProperties_BuildingSitHediffGiver Props => (CompProperties_BuildingSitHediffGiver)this.props;
 
         //private int CompHediffGiverCount ;
-
         public override void CompTickRare()
         {
             base.CompTickRare();
-            //this.CompHediffGiverCount++;
-            // if (this.CompHediffGiverCount > 120)
-            //{
-            //this.CompHediffGiverCount = 0;
             List<Pawn> allPawnsSpawned = this.parent.Map.mapPawns.AllPawnsSpawned;
-            //Log.Message("1");
             foreach (var t in allPawnsSpawned)
             {
                 if (t.Position.Equals(this.parent.Position) && t.jobs != null)
                 {
-                    //Log.Message("2");
                     var a = t.health.hediffSet.GetNotMissingParts()
                         .FirstOrFallback<BodyPartRecord>(
                             (Func<BodyPartRecord, bool>)(p => p.def == this.Props.part));
@@ -50,7 +43,6 @@ namespace COF_Torture.Component
                     }
                 }
             }
-            //}
         }
     }
 }

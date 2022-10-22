@@ -7,6 +7,7 @@ using Verse.AI;
 
 namespace COF_Torture.Jobs
 {
+    
     public class JobDriver_Laying : JobDriver
     {
         public Building_Bed Bed => this.job.GetTarget(TargetIndex.A).Thing as Building_Bed;
@@ -47,11 +48,9 @@ namespace COF_Torture.Jobs
                 return base.ForcedLayingRotation;
             }
         }
-
-        /// <summary>
-        /// 绘制偏移
-        /// </summary>
-        public override Vector3 ForcedBodyOffset
+        
+        //绘制偏移
+        /*public override Vector3 ForcedBodyOffset
         {
             get
             {
@@ -68,6 +67,6 @@ namespace COF_Torture.Jobs
 
                 return base.ForcedBodyOffset;
             }
-        }
+        }*/
     }
 }

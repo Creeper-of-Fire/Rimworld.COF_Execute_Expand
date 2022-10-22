@@ -11,7 +11,11 @@ using RimWorld.QuestGen;
 using UnityEngine;
 using Verse;
 using Verse.AI;
+using HarmonyLib;
+using RimWorld.Planet;
+using Verse.AI.Group;
 using JobDefOf = RimWorld.JobDefOf;
+using Object = UnityEngine.Object;
 
 namespace COF_Torture.Things
 {
@@ -26,7 +30,7 @@ namespace COF_Torture.Things
         public bool isUsed; //isUsed表示这个道具是否被使用过（指是否有人死在里面），会影响道具的图片显示
         public bool isSafe = true; //是否安全
 
-        /*public Vector3 shiftPawnDrawPos
+        public Vector3 shiftPawnDrawPos
         {
             get
             {
@@ -35,7 +39,7 @@ namespace COF_Torture.Things
                 else
                     return Vector3.zero;
             }
-        }*/
+        }
 
         private List<Pawn> lastOwnerList;
 
@@ -87,7 +91,6 @@ namespace COF_Torture.Things
             {
                 if (victimAlive.Dead)
                 {
-                    
                 }
                 else
                 {
@@ -149,23 +152,42 @@ namespace COF_Torture.Things
 
             void KillVictimDirect(Pawn pawn)
             {
+                DamageDef execute;
+                DamageInfo dInfo;
+                Hediff dHediff;
                 if (SettingPatch.RimJobWorldIsActive && pawn.story.traits.HasTrait(TraitDefOf.Masochist))
                 {
-                    var execute = Damages.DamageDefOf.Execute_Licentious;
-                    var dInfo = new DamageInfo(execute, 1);
-                    var dHediff = HediffMaker.MakeHediff(Hediffs.HediffDefOf.COF_Torture_Licentious, pawn);
-                    pawn.Kill(dInfo, dHediff);
+                    execute = Damages.DamageDefOf.Execute_Licentious;
+                    dHediff = HediffMaker.MakeHediff(Hediffs.HediffDefOf.COF_Torture_Licentious, pawn);
                 }
                 else
                 {
-                    var execute = Damages.DamageDefOf.Execute;
-                    var dInfo = new DamageInfo(execute, 1);
-                    var dHediff = HediffMaker.MakeHediff(Hediffs.HediffDefOf.COF_Torture_Fixed, pawn);
+                    execute = Damages.DamageDefOf.Execute;
+                    dHediff = HediffMaker.MakeHediff(Hediffs.HediffDefOf.COF_Torture_Fixed, pawn);
+                }
+                dInfo = new DamageInfo(execute, 1);
+                
+                bool ShouldBeDeathrestingOrInComaInsteadOfDead(Pawn p)
+                {
+                    if (!ModsConfig.BiotechActive || p.genes == null || !p.genes.HasGene(GeneDefOf.Deathless))
+                        return false;
+                    BodyPartRecord brain = p.health.hediffSet.GetBrain();
+                    return brain != null && !p.health.hediffSet.PartIsMissing(brain) && (double) p.health.hediffSet.GetPartHealth(brain) > 0.0;
+                }//这里实际上是SanguophageUtility.ShouldBeDeathrestingOrInComaInsteadOfDead，但是因为ShouldBeDead被改过所以只能重写
+                
+                if (ShouldBeDeathrestingOrInComaInsteadOfDead(pawn))
+                {
+                    var ForceDeathrestOrComa = AccessTools.Method(typeof(Pawn_HealthTracker), "ForceDeathrestOrComa");
+                    ForceDeathrestOrComa.Invoke(pawn.health,new object[]{(object)dInfo,(object)dHediff});
+                }
+                else
+                {
+                    if (pawn.Destroyed)
+                        return;
                     pawn.Kill(dInfo, dHediff);
                 }
             }
         }
-
 
         public void ReleaseVictim()
         {
