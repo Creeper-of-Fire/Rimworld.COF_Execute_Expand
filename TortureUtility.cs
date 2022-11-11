@@ -83,6 +83,10 @@ namespace COF_Torture
 
             Corpse corpse = (Corpse)ThingMaker.MakeThing(cD);
             corpse.InnerPawn = pawn;
+            if (corpse is BarbecueCorpse cookedCorpse)
+            {
+                cookedCorpse.LastPawn = pawn;
+            }
             if (assignedGrave != null)
                 corpse.InnerPawn.ownership.ClaimGrave(assignedGrave);
             if (inBed)
@@ -96,13 +100,16 @@ namespace COF_Torture
             corpseDef.SetStatBaseValue(StatDefOf.Beauty, 5.0f); //TODO 根据pawn的美丽程度修正美观程度
             corpseDef.SetStatBaseValue(StatDefOf.FoodPoisonChanceFixedHuman, 0.0f);
             corpseDef.SetStatBaseValue(StatDefOf.Nutrition, 5.2f * BBQNutritionFactor);
-            corpseDef.defName = "BarbecueCorpse_" + pawnDef.defName;
+            corpseDef.defName = "CT_BarbecueCorpse_" + pawnDef.defName;
             corpseDef.label = (string)"BarbecueCorpseLabel".Translate((NamedArgument)pawnDef.label);
             corpseDef.description = (string)"BarbecueCorpseDesc".Translate((NamedArgument)pawnDef.label);
             //corpseDef.thingCategories.Remove(ThingCategoryDefOf.CorpsesHumanlike);
             //corpseDef.thingCategories.Add(Things.ThingCategoryDefOf.BarbecueCorpsesHumanlike);
             corpseDef.comps.Clear();
             corpseDef.comps.Add((CompProperties)new CompProperties_Forbiddable());
+            corpseDef.ingestible = new IngestibleProperties();
+            corpseDef.tickerType = TickerType.Rare;
+            corpseDef.ingestible.parent = pawnDef;
             IngestibleProperties ingestible = corpseDef.ingestible;
             ingestible.foodType = FoodTypeFlags.Meal;
             ingestible.sourceDef = pawnDef;
@@ -110,10 +117,22 @@ namespace COF_Torture
                 ingestible.preferability = FoodPreferability.MealFine; //TODO 根据pawn的美丽程度修正味道
             else
                 ingestible.preferability = FoodPreferability.NeverForNutrition;
-            ingestible.tasteThought = null; // ThoughtDefOf.AteHumanlikeMeatAsIngredient;
+            ingestible.maxNumToIngestAtOnce = 1;
+            ingestible.ingestEffect = EffecterDefOf.EatMeat;
+            ingestible.ingestSound = SoundDefOf.RawMeat_Eat;
+            ingestible.tasteThought = ThoughtDefOf.AteFineMeal; // ThoughtDefOf.AteHumanlikeMeatAsIngredient;
             ingestible.specialThoughtDirect = null; //pawnDef.race.FleshType.ateDirect;
             ingestible.specialThoughtAsIngredient = null;
             ingestible.ateEvent = HistoryEventDefOf.AteHumanMeatAsIngredient;
+            
+            //ingestible.foodType = FoodTypeFlags.Corpse;
+            //ingestible.sourceDef = thingDef1;
+            //ingestible.preferability = thingDef1.race.IsFlesh ? FoodPreferability.DesperateOnly : FoodPreferability.NeverForNutrition;
+            //DirectXmlCrossRefLoader.RegisterObjectWantsCrossRef((object) ingestible, "tasteThought", ThoughtDefOf.AteCorpse.defName);
+            //ingestible.maxNumToIngestAtOnce = 1;
+            //ingestible.ingestEffect = EffecterDefOf.EatMeat;
+            //ingestible.ingestSound = SoundDefOf.RawMeat_Eat;
+            //ingestible.specialThoughtDirect = thingDef1.race.FleshType.ateDirect;
         }
         private static float CalculateMarketValue(ThingDef raceDef)
         {

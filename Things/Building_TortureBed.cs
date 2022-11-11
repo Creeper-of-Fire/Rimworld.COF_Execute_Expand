@@ -46,7 +46,7 @@ namespace COF_Torture.Things
         public bool showVictimBody = true;
         //private int CheckTicks;
 
-        public Graphic graphic; //必定绘制
+        public Graphic graphic; //获取，但是不绘制，因为想不到怎么绘制比较好
         public Graphic graphic_top;
         public Graphic graphic_top_using;
         public Graphic graphic_blood;
@@ -165,20 +165,22 @@ namespace COF_Torture.Things
                     execute = Damages.DamageDefOf.Execute;
                     dHediff = HediffMaker.MakeHediff(Hediffs.HediffDefOf.COF_Torture_Fixed, pawn);
                 }
+
                 dInfo = new DamageInfo(execute, 1);
-                
+
                 bool ShouldBeDeathrestingOrInComaInsteadOfDead(Pawn p)
                 {
                     if (!ModsConfig.BiotechActive || p.genes == null || !p.genes.HasGene(GeneDefOf.Deathless))
                         return false;
                     BodyPartRecord brain = p.health.hediffSet.GetBrain();
-                    return brain != null && !p.health.hediffSet.PartIsMissing(brain) && (double) p.health.hediffSet.GetPartHealth(brain) > 0.0;
-                }//这里实际上是SanguophageUtility.ShouldBeDeathrestingOrInComaInsteadOfDead，但是因为ShouldBeDead被改过所以只能重写
-                
+                    return brain != null && !p.health.hediffSet.PartIsMissing(brain) &&
+                           (double)p.health.hediffSet.GetPartHealth(brain) > 0.0;
+                } //这里实际上是SanguophageUtility.ShouldBeDeathrestingOrInComaInsteadOfDead，但是因为ShouldBeDead被改过所以只能重写
+
                 if (ShouldBeDeathrestingOrInComaInsteadOfDead(pawn))
                 {
                     var ForceDeathrestOrComa = AccessTools.Method(typeof(Pawn_HealthTracker), "ForceDeathrestOrComa");
-                    ForceDeathrestOrComa.Invoke(pawn.health,new object[]{(object)dInfo,(object)dHediff});
+                    ForceDeathrestOrComa.Invoke(pawn.health, new object[] { (object)dInfo, (object)dHediff });
                 }
                 else
                 {
@@ -312,7 +314,7 @@ namespace COF_Torture.Things
             }
 
             shiftedWithAltitude = position.ToVector3ShiftedWithAltitude(AltitudeLayer.Building);
-            graphic.Draw(shiftedWithAltitude, Rot4.South, (Thing)this);
+            //graphic.Draw(shiftedWithAltitude, north, (Thing)this);
             if (isUnUsableForOthers())
             {
                 //关上的盖子
@@ -347,24 +349,29 @@ namespace COF_Torture.Things
         }
 
         private static void trySetGraphicSingle(Graphic gph, string texPath, Vector2 dS, ref Graphic graphic_change,
-            bool isTrans = false)
+            bool isMulti = false, bool isTrans = false, bool isBlood = false)
         {
-            if (graphic_change == null)
+            if (graphic_change != null)
+                return;
+            var texture2D = ContentFinder<Texture2D>.Get(texPath, false);
+            if (texture2D == null)
+                return;
+            var shader = ShaderDatabase.CutoutComplex;
+            var color = isBlood ? Color.white : gph.color;
+            Graphic gph_temp;
+            if (isMulti)
+                gph_temp = GraphicDatabase.Get<Graphic_Multi>(texPath, shader, dS, color);
+            else
+                gph_temp = GraphicDatabase.Get<Graphic_Single>(texPath, shader, dS, color);
+            graphic_change = gph_temp;
+            if (isTrans)
             {
-                Shader shader = ShaderDatabase.Transparent;
-                gph.path = texPath;
-                var isExist = ContentFinder<Texture2D>.Get(gph.path, false);
-                if (isExist != null)
-                {
-                    if (isTrans)
-                        graphic_change = gph.GetColoredVersion(shader, new Color(1f, 1f, 1f,
-                            ModSettingMain.Instance.Setting.topTransparency), Color.black);
-                    else
-                        graphic_change = gph.GetCopy(dS, null);
-                }
-
-                //Log.Message("2");
+                color.a = ModSettingMain.Instance.Setting.topTransparency;
             }
+            graphic_change = graphic_change.GetColoredVersion(ShaderDatabase.Transparent, color, Color.white);
+
+            Log.Message("1" + graphic_change + shader);
+            //Log.Message("2");
         }
 
         private void trySetGraphic()
@@ -372,55 +379,34 @@ namespace COF_Torture.Things
             string texPath = this.Graphic.path;
             var dS = this.Graphic.drawSize;
             var gph = this.Graphic.GetCopy(dS, null);
-            trySetGraphicFor5(gph, texPath, dS);
-            gph.path = texPath;
+            trySetGraphicFor6(gph, texPath, dS);
             //Log.Message("0");
             if (this.def.rotatable)
             {
-                string rot1 = null, rot2 = null;
-                if (this.Rotation == Rot4.West)
-                {
-                    rot1 = "_west";
-                    rot2 = "_east";
-                }
-
-                if (this.Rotation == Rot4.South)
-                {
-                    rot1 = "_south";
-                    rot2 = "_north";
-                }
-
-                if (this.Rotation == Rot4.East)
-                {
-                    rot1 = "_east";
-                    rot2 = "_west";
-                }
-
-                if (this.Rotation == Rot4.North)
-                {
-                    rot1 = "_north";
-                    rot2 = "_south";
-                }
-
                 //Log.Message("1");
-                trySetGraphicFor5(gph, texPath + rot2, dS);
-                gph.path = texPath;
-                trySetGraphicFor5(gph, texPath + rot1, dS);
-                gph.path = texPath;
+                trySetGraphicFor6(gph, texPath, dS, isRotatable: true);
             }
 
-            this.graphic = gph;
             texSafe = ContentFinder<Texture2D>.Get("COF_Torture/UI/isSafe");
             texPodEject = ContentFinder<Texture2D>.Get("COF_Torture/UI/PodEject");
         }
 
-        private void trySetGraphicFor5(Graphic gph, string texPath, Vector2 dS)
+        private void trySetGraphicFor6(Graphic gph, string texPath, Vector2 dS, bool isRotatable = true)
         {
-            trySetGraphicSingle(gph, texPath + "_top", dS, ref this.graphic_top);
-            trySetGraphicSingle(gph, texPath + "_top_using", dS, ref this.graphic_top_using, true);
-            trySetGraphicSingle(gph, texPath + "_blood", dS, ref this.graphic_blood);
-            trySetGraphicSingle(gph, texPath + "_blood_to", dS, ref this.graphic_blood_top);
-            trySetGraphicSingle(gph, texPath + "_blood_top_using", dS, ref this.graphic_blood_top_using, true);
+            if (isRotatable)
+                this.graphic = this.Graphic;
+            else
+                trySetGraphicSingle(gph, texPath + "_south", dS, ref this.graphic);
+            trySetGraphicSingle(gph, texPath + "_top", dS, ref this.graphic_top,
+                isMulti: isRotatable);
+            trySetGraphicSingle(gph, texPath + "_top_using", dS, ref this.graphic_top_using,
+                isTrans: true, isMulti: isRotatable);
+            trySetGraphicSingle(gph, texPath + "_blood", dS, ref this.graphic_blood,
+                isBlood: true, isMulti: isRotatable);
+            trySetGraphicSingle(gph, texPath + "_blood_top", dS, ref this.graphic_blood_top,
+                isBlood: true, isMulti: isRotatable);
+            trySetGraphicSingle(gph, texPath + "_blood_top_using", dS, ref this.graphic_blood_top_using,
+                isTrans: true, isBlood: true, isMulti: isRotatable);
         }
 
 

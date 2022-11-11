@@ -56,12 +56,15 @@ namespace COF_Torture.Component
                 severityAdd = severityToDeath /
                               ((float)ModSettingMain.Instance.Setting.executeHours * 2500 / ticksToCount);
             //上面为初始化严重度相关设置
-            if ((double)this.parent.Severity >= (double)severityToDeath && isButcherDone)
+            if ((double)this.parent.Severity >= (double)severityToDeath)
             {
                 var a = (Building_TortureBed)this.Parent.giver;
                 a.isUsed = true;
-                if (this.Parent.giver is Building_TortureBed bT && !bT.isSafe)
-                    this.KillByExecute();
+                if (isButcherDone)
+                {
+                    if (this.Parent.giver is Building_TortureBed bT && !bT.isSafe)
+                        this.KillByExecute();
+                }
             }
             else
             {

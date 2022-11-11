@@ -29,6 +29,7 @@ namespace COF_Torture.Hediffs
         public static HediffDef COF_Torture_Fixed;
         public static HediffDef COF_Torture_Licentious;
         public static HediffDef COF_Torture_Mincer_Execute;
+        public static HediffDef COF_Torture_Barbecued;
     }
 
 }

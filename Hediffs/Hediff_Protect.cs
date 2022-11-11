@@ -25,9 +25,9 @@ namespace COF_Torture.Hediffs
 
         public override void PostAdd(DamageInfo? dinfo)
         {
-            Food = pawn.needs.food.CurLevel;
-            Joy = pawn.needs.joy.CurLevel;
-            Rest = pawn.needs.rest.CurLevel;
+            if (pawn.needs.food != null) Food = pawn.needs.food.CurLevel;
+            if (pawn.needs.joy != null) Joy = pawn.needs.joy.CurLevel;
+            if (pawn.needs.rest != null) Rest = pawn.needs.rest.CurLevel;
             Need need;
             if (SettingPatch.DubsBadHygieneThirstIsActive)
             {
@@ -42,6 +42,7 @@ namespace COF_Torture.Hediffs
                 need = pawn.needs.AllNeeds.Find((Predicate<Need>)(x => x.def == SettingPatch.HygieneNeed));
                 if (need != null) Hygiene = need.CurLevel;
             }
+            //Log.Message(""+Food+Joy+Rest);
 
             base.PostAdd(dinfo);
         }
@@ -50,9 +51,9 @@ namespace COF_Torture.Hediffs
         {
             if (!ModSettingMain.Instance.Setting.isFeed)
             {
-                pawn.needs.food.CurLevel = Food;
-                pawn.needs.joy.CurLevel = Joy;
-                pawn.needs.rest.CurLevel = Rest;
+                if (pawn.needs.food != null) pawn.needs.food.CurLevel = Food;
+                if (pawn.needs.joy != null) pawn.needs.joy.CurLevel = Joy;
+                if (pawn.needs.rest != null) pawn.needs.rest.CurLevel = Rest;
                 Need need;
                 if (SettingPatch.DubsBadHygieneThirstIsActive)
                 {
@@ -118,7 +119,7 @@ namespace COF_Torture.Hediffs
                 return;
             this.pawn.needs.food.CurLevel += need.MaxLevel / 5f;
         }
-        
+
         public void SatisfyThirst()
         {
             if (!SettingPatch.DubsBadHygieneThirstIsActive)

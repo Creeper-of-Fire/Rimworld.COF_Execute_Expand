@@ -9,50 +9,38 @@ namespace COF_Torture.Things
 {
     public class BarbecueCorpse : Corpse
     {
-        /*public override Color DrawColor
+        public Pawn LastPawn;
+        public override void ExposeData()
         {
-            get
-            {
-                var a = Color.yellow;
-                a.a = 0.7f;
-                return a;
-            }
-            set => this.SetColor(value);
-        }*/
-        /*public override IEnumerable<Thing> ButcherProducts(
-            Pawn butcher,
-            float efficiency)
+            base.ExposeData();
+            Scribe_References.Look<Pawn>(ref this.LastPawn, "LastPawn");
+        }
+
+        public override void Tick()
         {
-            foreach (Thing butcherProduct in this.InnerPawn.ButcherProducts(butcher, efficiency))
-            {
-                if (butcherProduct.def == InnerPawn.RaceProps.leatherDef)
-                    continue;
-                if (butcherProduct.def == InnerPawn.RaceProps.meatDef)
-                {
-                    butcherProduct.stackCount = (int)(butcherProduct.stackCount * TortureUtility.BBQNutritionFactor);
-                    yield return butcherProduct;
-                }
+            base.Tick();
+            //Log.Message(""+InnerPawn.story?.SkinColor);
+            //Log.Message(""+InnerPawn.story?.SkinColorOverriden);
+        }
 
-                yield return butcherProduct;
-            }
+        public override void PostMake()
+        {
+            base.PostMake();
+        }
 
-            //if (this.InnerPawn.RaceProps.BloodDef != null)
-            //    FilthMaker.TryMakeFilth(butcher.Position, butcher.Map, this.InnerPawn.RaceProps.BloodDef, this.InnerPawn.LabelIndefinite());
-            if (this.InnerPawn.RaceProps.Humanlike)
-            {
-                Find.HistoryEventsManager.RecordEvent(new HistoryEvent(HistoryEventDefOf.ButcheredHuman,
-                    new SignalArgs(butcher.Named(HistoryEventArgsNames.Doer),
-                        this.InnerPawn.Named(HistoryEventArgsNames.Victim))));
-                TaleRecorder.RecordTale(TaleDefOf.ButcheredHumanlikeCorpse, (object)butcher);
-            }
-        }*/
+        public override void Destroy(DestroyMode mode = DestroyMode.Vanish)
+        {
+            
+            base.Destroy(mode);
+        }
+
         protected override void IngestedCalculateAmounts(
             Pawn ingester,
             float nutritionWanted,
             out int numTaken,
             out float nutritionIngested)
         {
-            BodyPartRecord bodyPartRecord = this.GetBestBodyPartToEat(ingester, nutritionWanted);
+            BodyPartRecord bodyPartRecord = this.GetBestBodyPartToEat(ingester, nutritionWanted/TortureUtility.BBQNutritionFactor);
             if (bodyPartRecord == null)
             {
                 Log.Error(ingester.ToString() + " ate " + (object)this +
@@ -81,7 +69,7 @@ namespace COF_Torture.Things
                 numTaken = 0;
             }
 
-            nutritionIngested = bodyPartNutrition;
+            nutritionIngested = bodyPartNutrition*TortureUtility.BBQNutritionFactor;
         }
         private BodyPartRecord GetBestBodyPartToEat(Pawn ingester, float nutritionWanted)
         {
