@@ -43,7 +43,7 @@ namespace COF_Torture.Component
                                      "CT_Reserved".Translate() + ")"), (Action)null, MenuOptionPriority.DisabledOption);
                     else
                         yield return new FloatMenuOption(
-                            (string)"CT_Release_BondageBed".Translate((NamedArgument)ParentBed.GetVictim().Label),
+                            (string)"CT_Release_BondageBed".Translate((NamedArgument)ParentBed.victim.Label),
                             new Action(ReleaseAction), MenuOptionPriority.GoHere);
                 }
                 else

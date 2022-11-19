@@ -30,7 +30,7 @@ namespace COF_Torture.Jobs
             }
 
             this.FailOnDestroyedOrNull(TargetIndex.A);
-            if (this.Thing.GetVictim() != this.pawn)
+            if (this.Thing.victim != this.pawn)
             {
                 yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch).FailOnForbidden(TargetIndex.A);
                 yield return Toils_General.WaitWith(TargetIndex.A, 60, true, true);

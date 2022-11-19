@@ -173,6 +173,13 @@ namespace COF_Torture
         bool inExecuteProgress { get; }
         void startExecuteProgress();
         void stopExecuteProgress();
+        Pawn victim { get; }
+    }
+
+    public interface IExecuteEffector
+    {
+        void startExecuteProcess();
+        void stopExecuteProcess();
     }
 
     public interface IWithGiver

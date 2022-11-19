@@ -67,8 +67,7 @@
         <Compile Include="Component\CompBuildingSitHediffGiver.cs" />
         <Compile Include="Component\CompUsableBondageBed.cs" />
         <Compile Include="Component\HediffComp_SwitchAbleSeverity.cs" />
-        <Compile Include="Component\HediffComp_ExecuteIndicatorAddHediff.cs" />
-        <Compile Include="Component\HediffComp_ExecuteIndicatorMincer.cs" />
+        <Compile Include="Component\HediffComp_ExecuteIndicatorWithEffector.cs" />
         <Compile Include="Component\HediffComp_ExecuteMincer.cs" />
         <Compile Include="Component\HediffComp_ExecuteAddHediff.cs" />
         <Compile Include="Component\HediffComp_ExecuteIndicator.cs" />

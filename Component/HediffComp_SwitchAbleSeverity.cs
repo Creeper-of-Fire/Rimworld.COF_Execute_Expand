@@ -43,7 +43,11 @@ namespace COF_Torture.Component
 
         public override IEnumerable<Gizmo> CompGetGizmos()
         {
-            return base.CompGetGizmos();
+            if (ModSettingMain.Instance.Setting.controlMenuOn) yield break;
+            foreach (var command in this.Gizmo_StageUpAndDown())
+            {
+                yield return command;
+            }
         }
 
         public void upStage()

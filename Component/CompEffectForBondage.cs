@@ -16,7 +16,7 @@ namespace COF_Torture.Component
     {
         public CompProperties_EffectForBondage Props => (CompProperties_EffectForBondage)this.props;
         public COF_Torture.Things.Building_TortureBed Parent => (COF_Torture.Things.Building_TortureBed)this.parent;
-        public Pawn Victim => this.Parent.GetVictim();
+        public Pawn Victim => this.Parent.victim;
 
         /*public void RemoveEffect()
         {

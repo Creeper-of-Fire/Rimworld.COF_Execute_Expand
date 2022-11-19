@@ -21,7 +21,7 @@ namespace COF_Torture.Component
         public HediffCompProperties_ExecuteAddHediff() => this.compClass = typeof(HediffComp_ExecuteAddHediff);
     }
 
-    public class HediffComp_ExecuteAddHediff : HediffComp //可以给pawn提供hediff的
+    public class HediffComp_ExecuteAddHediff : HediffComp, IExecuteEffector
     {
         public HediffCompProperties_ExecuteAddHediff Props => (HediffCompProperties_ExecuteAddHediff)this.props;
         public Hediff_WithGiver Parent => (Hediff_WithGiver)this.parent;
@@ -117,7 +117,7 @@ namespace COF_Torture.Component
 
             if (this.Parent.Giver is Building_TortureBed bT && bT.isSafe)
             {
-                if (Pawn.health.hediffSet.GetPartHealth(part) <(double) h.Severity)
+                if (Pawn.health.hediffSet.GetPartHealth(part) < (double)h.Severity)
                 {
                     return false;
                 }
@@ -152,15 +152,6 @@ namespace COF_Torture.Component
              }
              return h;
          }*/
-
-        public void StartProcess()
-        {
-            for (int i = 0; i < this.Props.addHediffNumInt; i++)
-            {
-                addHediff();
-            }
-        }
-
         public override void CompPostTick(ref float severityAdjustment)
         {
             base.CompPostTick(ref severityAdjustment);
@@ -171,6 +162,21 @@ namespace COF_Torture.Component
                 ticksToAdd = 0;
                 addHediff();
             }
+        }
+
+        public void startExecuteProcess()
+        {
+            for (int i = 0; i < this.Props.addHediffNumInt; i++)
+            {
+                addHediff();
+            }
+
+            this.isInProgress = true;
+        }
+
+        public void stopExecuteProcess()
+        {
+            this.isInProgress = false;
         }
     }
 }

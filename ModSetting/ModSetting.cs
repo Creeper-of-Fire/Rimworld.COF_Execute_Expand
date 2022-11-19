@@ -57,6 +57,10 @@ namespace COF_Torture.ModSetting
             ls.CheckboxLabeled("处刑一旦开始就无法释放殖民者", ref Setting.isNoWayBack); 
             
             ls.GapLine(20f);
+            ls.Label("ControlMenu".Translate());
+            ls.CheckboxLabeled("使用菜单管理而非按钮管理殖民者身上的刑具", ref Setting.controlMenuOn); 
+            
+            ls.GapLine(20f);
             ls.Label("刑具误启动概率（每小时）".Translate());
             ls.Label(Setting.mistakeStartUp.ToStringPercent());
             Setting.mistakeStartUp = ls.Slider(Setting.mistakeStartUp, 0f, 1f);
@@ -97,6 +101,7 @@ namespace COF_Torture.ModSetting
         public UnityEngine.Vector2 scrollPos = UnityEngine.Vector2.zero;//这玩意哪来的？我怎么一觉醒来多了这行代码？
         public float topTransparency = 1.0f;
         public float mistakeStartUp = 0.0f;
+        public bool controlMenuOn = true;
 
         public override void ExposeData()
         {
@@ -107,6 +112,7 @@ namespace COF_Torture.ModSetting
             Scribe_Values.Look(ref isImmortal, "isImmortal", true);
             Scribe_Values.Look(ref isRemoveTempInjuries, "isRemoveTempInjuries", true);
             Scribe_Values.Look(ref isNoWayBack, "isNoWayBack", false);
+            Scribe_Values.Look(ref controlMenuOn,"controlMenuOn",true);
             Scribe_Values.Look(ref topTransparency, "topTransparency", 1f);
             Scribe_Values.Look(ref mistakeStartUp, "mistakeStartUp", 0f);
             Scribe_Values.Look(ref executeHours, "executeHours", 4);
@@ -122,6 +128,7 @@ namespace COF_Torture.ModSetting
             isNoWayBack = false;
             topTransparency = 1f;
             mistakeStartUp = 0f;
+            controlMenuOn = true;
             //testInt = 2500;
         }
     }

@@ -103,16 +103,6 @@ namespace COF_Torture.Component
                     bloodLoss.Severity = 0.9f;
         }
 
-        public override void CompPostPostAdd(DamageInfo? dinfo)
-        {
-            base.CompPostPostAdd(dinfo);
-        }
-
-        public override void CompPostPostRemoved()
-        {
-            base.CompPostPostRemoved();
-        }
-
         public static bool ShouldBeDead(Pawn pawn)
         {
             var health = pawn.health;
@@ -149,11 +139,11 @@ namespace COF_Torture.Component
 
         public override IEnumerable<Gizmo> CompGetGizmos()
         {
-            if (base.CompGetGizmos() != null)
-                foreach (var gizmo in base.CompGetGizmos())
-                {
-                    yield return gizmo;
-                }
+            if (ModSettingMain.Instance.Setting.controlMenuOn) yield break;
+            foreach (var command in this.Gizmo_StartAndStopExecute())
+            {
+                yield return command;
+            }
         }
 
         public virtual void StartProgress()

@@ -19,7 +19,7 @@ namespace COF_Torture.Component
         public HediffCompProperties_ExecuteMincer() => this.compClass = typeof(HediffComp_ExecuteMincer);
     }
 
-    public class HediffComp_ExecuteMincer : HediffComp //绞肉机的处刑进度，绞肉机不使用executeIndicator
+    public class HediffComp_ExecuteMincer : HediffComp, IExecuteEffector
     {
         public HediffCompProperties_ExecuteMincer Props => (HediffCompProperties_ExecuteMincer)this.props;
         public BodyPartHeight height;
@@ -30,12 +30,15 @@ namespace COF_Torture.Component
         public int initialParts;
 
         public float productBar;
+
+        public bool isInProgress;
         //public List<Hediff_WithGiver> hediffList;
 
         public override void CompExposeData()
         {
             base.CompExposeData();
-            Scribe_Values.Look<int>(ref initialParts, "initialParts");
+            Scribe_Values.Look(ref initialParts, "initialParts");
+            Scribe_Values.Look(ref isInProgress, "isInProgress", false);
         }
 
         public static bool notBone(BodyPartRecord part)
@@ -164,19 +167,21 @@ namespace COF_Torture.Component
         public override void CompPostTick(ref float severityAdjustment)
         {
             //base.CompPostTick(ref severityAdjustment);
+            if (!isInProgress) return;
             ticksToAdd++;
             if (ticksToAdd >= this.Props.ticksToAdd)
             {
                 ticksToAdd = 0;
                 if (initialParts > 0)
                 {
-                    var severity = (1-(float)AllPartsNotBone().Count() / initialParts)*this.Parent.def.lethalSeverity;
-                    Log.Message(severity.ToString());
-                    severity=Mathf.Min(severity, this.Parent.def.lethalSeverity);
-                    severity=Mathf.Max(severity, 0.01f);
+                    var severity = (1 - (float)AllPartsNotBone().Count() / initialParts) *
+                                   this.Parent.def.lethalSeverity;
+                    //Log.Message(severity.ToString());
+                    severity = Mathf.Min(severity, this.Parent.def.lethalSeverity);
+                    severity = Mathf.Max(severity, 0.01f);
                     this.Parent.Severity = severity;
                 }
-                
+
                 addHediff();
                 productMeat();
             }
@@ -216,6 +221,15 @@ namespace COF_Torture.Component
                     this.Parent.Giver.Map, ThingPlaceMode.Near,
                     out Thing _);
             }
+        }
+        public void startExecuteProcess()
+        {
+            this.isInProgress = true;
+        }
+
+        public void stopExecuteProcess()
+        {
+            this.isInProgress = false;
         }
     }
 }

@@ -164,6 +164,11 @@ namespace COF_Torture.Hediffs
                 {
                     yield return gizmo;
                 }
+            if (ModSettingMain.Instance.Setting.controlMenuOn) yield break;
+            foreach (var command in this.Gizmo_ReleaseBondageBed())
+            {
+                yield return command;
+            }
         }
     }
 }
