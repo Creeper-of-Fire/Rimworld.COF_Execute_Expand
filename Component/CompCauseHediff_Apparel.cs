@@ -1,4 +1,5 @@
 using System;
+using COF_Torture.Hediffs;
 using RimWorld;
 using Verse;
 
@@ -13,9 +14,15 @@ namespace COF_Torture.Component
             base.Notify_Equipped(pawn);
             if (pawn.health.hediffSet.GetFirstHediffOfDef(this.Props.hediff) != null)
                 return;
-            pawn.health.AddHediff(this.Props.hediff,
-                pawn.health.hediffSet.GetNotMissingParts()
-                    .FirstOrFallback<BodyPartRecord>((Func<BodyPartRecord, bool>)(p => p.def == this.Props.part)));
+            var part = pawn.health.hediffSet.GetNotMissingParts()
+                .FirstOrFallback<BodyPartRecord>((Func<BodyPartRecord, bool>)(p => p.def == this.Props.part));
+            var h = HediffMaker.MakeHediff(this.Props.hediff, pawn, part);
+            if (h is IWithGiver hg)
+            {
+                hg.Giver = this.parent;
+            }
+
+            pawn.health.AddHediff(h, part);
         }
 
         public override void Notify_Unequipped(Pawn pawn)

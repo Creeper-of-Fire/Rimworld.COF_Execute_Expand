@@ -1,8 +1,10 @@
+using System.Collections.Generic;
 using COF_Torture.Hediffs;
 using COF_Torture.ModSetting;
 using COF_Torture.Patch;
 using COF_Torture.Things;
 using RimWorld;
+using UnityEngine;
 using Verse;
 using HediffDefOf = RimWorld.HediffDefOf;
 
@@ -16,8 +18,8 @@ namespace COF_Torture.Component
         //public float severityToDeath = 10.0f;
         public HediffCompProperties_ExecuteIndicator() => this.compClass = typeof(HediffComp_ExecuteIndicator);
     }
-    
-    public class HediffComp_ExecuteIndicator : HediffComp//最重要的comp，处理绝大多数的处刑相关内容——特别是关于殖民者何时死亡
+
+    public class HediffComp_ExecuteIndicator : HediffComp //最重要的comp，处理绝大多数的处刑相关内容——特别是关于殖民者何时死亡
     {
         public HediffCompProperties_ExecuteIndicator Props => (HediffCompProperties_ExecuteIndicator)this.props;
         public Hediff_WithGiver Parent => (Hediff_WithGiver)this.parent;
@@ -28,18 +30,18 @@ namespace COF_Torture.Component
 
         private float severityToDeath;
 
-        public bool isButcherDone;
-        
+        public bool isInProgress;
+
         private const int ticksToCount = 120;
         //private Hediff bloodLoss;
 
         public override void CompExposeData()
         {
             base.CompExposeData();
-            Scribe_Values.Look(ref isButcherDone, "isButcherDone", false);
+            Scribe_Values.Look(ref isInProgress, "isInProgress", false);
         }
 
-        private void SeverityProcess()
+        public virtual void SeverityProcess()
         {
             if (severityToDeath <= 0f)
             {
@@ -58,13 +60,10 @@ namespace COF_Torture.Component
             //上面为初始化严重度相关设置
             if ((double)this.parent.Severity >= (double)severityToDeath)
             {
-                var a = (Building_TortureBed)this.Parent.giver;
+                var a = (Building_TortureBed)this.Parent.Giver;
                 a.isUsed = true;
-                if (isButcherDone)
-                {
-                    if (this.Parent.giver is Building_TortureBed bT && !bT.isSafe)
-                        this.KillByExecute();
-                }
+                if (this.Parent.Giver is Building_TortureBed bT && !bT.isSafe)
+                    this.KillByExecute();
             }
             else
             {
@@ -72,22 +71,21 @@ namespace COF_Torture.Component
             }
         }
 
-        private void ButcherProcess()
-        {
-            if (isButcherDone == false && Parent.def != COF_Torture.Hediffs.HediffDefOf.COF_Torture_Mincer_Execute)
-            {
-                isButcherDone = true;
-            }
-        }
-
         public override void CompPostTick(ref float severityAdjustment)
         {
             base.CompPostTick(ref severityAdjustment);
+            if (ModSettingMain.Instance.Setting.mistakeStartUp != 0.0f)
+                if (this.Pawn.IsHashIntervalTick(2500))
+                {
+                    if (ModSettingMain.Instance.Setting.mistakeStartUp >= Random.value)
+                        StartProgress();
+                }
+
+            if (!isInProgress) return;
             this.ticksLeftToCount--;
             if (this.ticksLeftToCount > 0) //多次CompPostTick执行一次
                 return;
             this.ticksLeftToCount = ticksToCount; //重置计时器
-            ButcherProcess(); //如果是绞肉机，处理绞肉机的效果
             SeverityProcess();
             if (!ModSettingMain.Instance.Setting.isImmortal) //如果会死，就改变死因为本comp造成
             {
@@ -96,7 +94,7 @@ namespace COF_Torture.Component
                     KillByExecute();
             }
         }
-        
+
         public static void ShouldNotDie(Pawn p)
         {
             var bloodLoss = p.health.hediffSet.GetFirstHediffOfDef(RimWorld.HediffDefOf.BloodLoss);
@@ -145,8 +143,29 @@ namespace COF_Torture.Component
             if (this.Pawn.Dead)
                 Log.Error("try to kill a dead pawn");
             //Log.Message(this.Parent.giver.GetVictim()+"KillVictim");
-            if (this.Parent.giver is Building_TortureBed bT)
+            if (this.Parent.Giver is Building_TortureBed bT)
                 bT.KillVictim();
+        }
+
+        public override IEnumerable<Gizmo> CompGetGizmos()
+        {
+            if (base.CompGetGizmos() != null)
+                foreach (var gizmo in base.CompGetGizmos())
+                {
+                    yield return gizmo;
+                }
+        }
+
+        public virtual void StartProgress()
+        {
+            this.Parent.GiverAsInterface.startExecuteProgress();
+            isInProgress = true;
+        }
+
+        public virtual void StopProgress()
+        {
+            this.Parent.GiverAsInterface.stopExecuteProgress();
+            isInProgress = false;
         }
     }
 }

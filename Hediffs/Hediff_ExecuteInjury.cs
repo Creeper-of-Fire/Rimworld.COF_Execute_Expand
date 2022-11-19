@@ -4,9 +4,9 @@ using Verse;
 
 namespace COF_Torture.Hediffs
 {
-    public class Hediff_ExecuteInjury: Hediff_Injury
+    public class Hediff_ExecuteInjury : Hediff_Injury, IWithGiver
     {
-        public Thing giver;//懒得多重继承，摆烂了
+        protected Thing giver; //懒得多重继承，摆烂了
 
         public override void ExposeData()
         {
@@ -21,7 +21,7 @@ namespace COF_Torture.Hediffs
             else
                 return false;
         }
-        
+
         public override bool ShouldRemove
         {
             get
@@ -30,6 +30,18 @@ namespace COF_Torture.Hediffs
                     return true;
                 return base.ShouldRemove;
             }
+        }
+
+        public Thing Giver
+        {
+            get => this.giver;
+            set => this.giver = value;
+        }
+
+        public ITortureThing GiverAsInterface
+        {
+            get => (ITortureThing)giver;
+            set => giver = (Thing)value;
         }
     }
 }

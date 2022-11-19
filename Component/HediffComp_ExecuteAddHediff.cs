@@ -21,12 +21,20 @@ namespace COF_Torture.Component
         public HediffCompProperties_ExecuteAddHediff() => this.compClass = typeof(HediffComp_ExecuteAddHediff);
     }
 
-    public class HediffComp_ExecuteAddHediff : HediffComp//可以给pawn提供hediff的
+    public class HediffComp_ExecuteAddHediff : HediffComp //可以给pawn提供hediff的
     {
         public HediffCompProperties_ExecuteAddHediff Props => (HediffCompProperties_ExecuteAddHediff)this.props;
         public Hediff_WithGiver Parent => (Hediff_WithGiver)this.parent;
         public int ticksToAdd;
         public Thing giver;
+
+        public bool isInProgress;
+
+        public override void CompExposeData()
+        {
+            base.CompExposeData();
+            Scribe_Values.Look(ref isInProgress, "isInProgress", false);
+        }
 
         public static DamageInfo dInfo()
         {
@@ -71,12 +79,12 @@ namespace COF_Torture.Component
 
         public virtual void addHediff(int depth = 0)
         {
-            depth ++;
-            if (depth>=10)
+            depth++;
+            if (depth >= 10)
                 return;
             if (giver == null)
             {
-                giver = this.Parent.giver;
+                giver = this.Parent.Giver;
             }
 
             BodyPartRecord part = ListOfPart().RandomElement();
@@ -88,9 +96,9 @@ namespace COF_Torture.Component
             h.Severity = this.Props.severityToAdd.RandomInRange;
             if (Pawn.health.hediffSet.GetHediffCount(hDef) < this.Props.addHediffNumMax)
             {
-                if (isAddAble(hDef, part, h))
+                if (isAddAble(part, h))
                 {
-                    h.giver = giver;
+                    h.Giver = giver;
                     Pawn.health.AddHediff(h, part, dInfo());
                 }
 
@@ -98,7 +106,7 @@ namespace COF_Torture.Component
             }
         }
 
-        private bool isAddAble(HediffDef hDef, BodyPartRecord part, Hediff_ExecuteInjury h)
+        private bool isAddAble(BodyPartRecord part, Hediff_Injury h)
         {
             if (part == null)
                 return false;
@@ -107,22 +115,24 @@ namespace COF_Torture.Component
                 return false;
             }
 
-            if (this.Parent.giver is Building_TortureBed bT && bT.isSafe)
+            if (this.Parent.Giver is Building_TortureBed bT && bT.isSafe)
             {
-                if (part.def == BodyPartDefOf.Torso && Pawn.health.hediffSet.GetPartHealth(part) <= h.Severity)
+                if (Pawn.health.hediffSet.GetPartHealth(part) <(double) h.Severity)
                 {
                     return false;
                 }
-
-                if (Pawn.health.WouldDieAfterAddingHediff(hDef, part, h.Severity))
+                /*if (part.def == BodyPartDefOf.Torso && Pawn.health.hediffSet.GetPartHealth(part) <= h.Severity)
                 {
                     return false;
-                }
-
-                if (Pawn.health.WouldLosePartAfterAddingHediff(hDef, part, h.Severity))
+                }*/
+                /*if (Pawn.health.WouldDieAfterAddingHediff(hDef, part, h.Severity))
                 {
                     return false;
-                }
+                }*/
+                /*if (Pawn.health.WouldLosePartAfterAddingHediff(hDef, part, h.Severity))
+                {
+                    return false;
+                }*/
             }
 
             return true;
@@ -143,10 +153,8 @@ namespace COF_Torture.Component
              return h;
          }*/
 
-
-        public override void CompPostPostAdd(DamageInfo? dinfo)
+        public void StartProcess()
         {
-            base.CompPostPostAdd(dinfo);
             for (int i = 0; i < this.Props.addHediffNumInt; i++)
             {
                 addHediff();
@@ -156,6 +164,7 @@ namespace COF_Torture.Component
         public override void CompPostTick(ref float severityAdjustment)
         {
             base.CompPostTick(ref severityAdjustment);
+            if (!isInProgress) return;
             ticksToAdd++;
             if (ticksToAdd >= this.Props.ticksToAdd)
             {

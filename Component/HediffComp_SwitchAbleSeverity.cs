@@ -10,14 +10,14 @@ using Verse;
 
 namespace COF_Torture.Component
 {
-    public class HediffCompProperties_ApparelTortureHediff : HediffCompProperties
+    public class HediffCompProperties_SwitchAbleSeverity : HediffCompProperties
     {
-        public HediffCompProperties_ApparelTortureHediff() => this.compClass = typeof(HediffComp_ApparelTortureHediff);
+        public HediffCompProperties_SwitchAbleSeverity() => this.compClass = typeof(HediffComp_SwitchAbleSeverity);
     }
 
-    public class HediffComp_ApparelTortureHediff : HediffComp
+    public class HediffComp_SwitchAbleSeverity : HediffComp
     {
-        public HediffCompProperties_ApparelTortureHediff Props => (HediffCompProperties_ApparelTortureHediff)this.props;
+        public HediffCompProperties_SwitchAbleSeverity Props => (HediffCompProperties_SwitchAbleSeverity)this.props;
         public int stageLimit;
         public int stageMax => parent.def.stages.Count - 1;
 
@@ -43,26 +43,7 @@ namespace COF_Torture.Component
 
         public override IEnumerable<Gizmo> CompGetGizmos()
         {
-            {
-                var stageUp = new Command_Action();
-                stageUp.defaultLabel = "CT_stageUp".Translate();
-                stageUp.defaultDesc = "CT_stageUp_desc".Translate();
-                stageUp.icon = ContentFinder<Texture2D>.Get("COF_Torture/UI/SwitchStage");
-                stageUp.action = this.upStage;
-                if (this.stageLimit >= this.stageMax)
-                    stageUp.Disable();
-                yield return stageUp;
-            }
-            {
-                var stageDown = new Command_Action();
-                stageDown.defaultLabel = "CT_stageDown".Translate();
-                stageDown.defaultDesc = "CT_stageDown_desc".Translate();
-                stageDown.icon = ContentFinder<Texture2D>.Get("COF_Torture/UI/SwitchStage");
-                stageDown.action = this.downStage;
-                if (this.stageLimit <= 0)
-                    stageDown.Disable();
-                yield return stageDown;
-            }
+            return base.CompGetGizmos();
         }
 
         public void upStage()

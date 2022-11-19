@@ -1,12 +1,14 @@
 using System;
+using System.Collections.Generic;
 using COF_Torture.ModSetting;
 using COF_Torture.Patch;
+using COF_Torture.Things;
 using RimWorld;
 using Verse;
 
 namespace COF_Torture.Hediffs
 {
-    public class Hediff_Protect : Hediff_WithGiver
+    public class Hediff_Fixed : Hediff_WithGiver
     {
         public int tickNext;
         private float Thirst;
@@ -98,7 +100,7 @@ namespace COF_Torture.Hediffs
         {
             get
             {
-                if (giver == null)
+                if (Giver == null)
                     return true;
                 return base.ShouldRemove;
             }
@@ -154,5 +156,14 @@ namespace COF_Torture.Hediffs
         }
 
         public void SetNextTick() => this.tickNext = Find.TickManager.TicksGame + 1000;
+
+        public override IEnumerable<Gizmo> GetGizmos()
+        {
+            if (base.GetGizmos() != null)
+                foreach (var gizmo in base.GetGizmos())
+                {
+                    yield return gizmo;
+                }
+        }
     }
 }

@@ -29,7 +29,7 @@ namespace COF_Torture.Patch
             var ___pawn = (Pawn)Traverse.Create(__instance).Field("pawn").GetValue();
             Building_Bed buildingBed = ___pawn.CurrentBed();
             if (buildingBed != null && buildingBed is Building_TortureBed tortureBed &&
-                tortureBed.isUnUsableForOthers())
+                tortureBed.hasVictim)
             {
                 drawLoc.y = ___pawn.Position.ToVector3ShiftedWithAltitude(AltitudeLayer.LayingPawn).y;
                 drawLoc += tortureBed.shiftPawnDrawPos;

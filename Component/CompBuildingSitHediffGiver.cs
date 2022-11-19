@@ -31,13 +31,13 @@ namespace COF_Torture.Component
                         .FirstOrFallback<BodyPartRecord>(
                             (Func<BodyPartRecord, bool>)(p => p.def == this.Props.part));
                     Hediff_WithGiver h = (Hediff_WithGiver)HediffMaker.MakeHediff(this.Props.hediff, t, a);
-                    h.giver = (Building_TortureBed)this.parent;
+                    h.Giver = (Building_TortureBed)this.parent;
                     t.health.AddHediff(h);
                 }
                 else
                 {
                     var h = (Hediff_WithGiver)t.health.hediffSet.GetFirstHediffOfDef(this.Props.hediff);
-                    if (h != null && h.giver == this.parent)
+                    if (h != null && h.Giver == this.parent)
                     {
                         t.health.RemoveHediff(h);
                     }

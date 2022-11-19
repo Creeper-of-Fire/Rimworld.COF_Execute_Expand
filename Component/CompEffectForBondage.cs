@@ -42,9 +42,9 @@ namespace COF_Torture.Component
 
 
             //给予固定状态
-            Hediff_Protect hediffTF =
-                (Hediff_Protect)HediffMaker.MakeHediff(COF_Torture.Hediffs.HediffDefOf.COF_Torture_Fixed, this.Victim);
-            hediffTF.giver = this.Parent;
+            Hediff_Fixed hediffTF =
+                (Hediff_Fixed)HediffMaker.MakeHediff(COF_Torture.Hediffs.HediffDefOf.COF_Torture_Fixed, this.Victim);
+            hediffTF.Giver = this.Parent;
             t.AddHediff(hediffTF);
 
 
@@ -67,7 +67,7 @@ namespace COF_Torture.Component
                 hediffAdd = (Hediff_WithGiver)HediffMaker.MakeHediff(hediffDef, this.Victim, bodyPart);
             }
 
-            hediffAdd.giver = this.Parent;
+            hediffAdd.Giver = this.Parent;
             t.AddHediff(hediffAdd);
         }
     }

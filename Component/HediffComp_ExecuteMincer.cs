@@ -19,7 +19,7 @@ namespace COF_Torture.Component
         public HediffCompProperties_ExecuteMincer() => this.compClass = typeof(HediffComp_ExecuteMincer);
     }
 
-    public class HediffComp_ExecuteMincer : HediffComp//绞肉机的处刑进度，绞肉机不使用executeIndicator
+    public class HediffComp_ExecuteMincer : HediffComp //绞肉机的处刑进度，绞肉机不使用executeIndicator
     {
         public HediffCompProperties_ExecuteMincer Props => (HediffCompProperties_ExecuteMincer)this.props;
         public BodyPartHeight height;
@@ -27,21 +27,35 @@ namespace COF_Torture.Component
         public int ticksToAdd;
         public Thing giverOfHediff;
         public Building_TortureBed GiverOfHediff => (Building_TortureBed)giverOfHediff;
+        public int initialParts;
 
         public float productBar;
         //public List<Hediff_WithGiver> hediffList;
+
+        public override void CompExposeData()
+        {
+            base.CompExposeData();
+            Scribe_Values.Look<int>(ref initialParts, "initialParts");
+        }
+
+        public static bool notBone(BodyPartRecord part)
+        {
+            if (part.def.destroyableByDamage)
+                if (part.def != BodyPartDefOf.Torso)
+                    if ((!part.IsInGroup(BodyPartGroupDefOf.FullHead) && part.def != BodyPartDefOf.Neck) ||
+                        !ModSettingMain.Instance.Setting.leftHead)
+                        if ((double)part.coverageAbs > 0.0)
+                            return true;
+            return false;
+        }
 
         public static bool notOnlyBone(List<BodyPartRecord> partsHave)
         {
             bool notOnly = false;
             foreach (var p in partsHave)
             {
-                if (p.def.destroyableByDamage)
-                    if (p.def != BodyPartDefOf.Torso)
-                        if ((!p.IsInGroup(BodyPartGroupDefOf.FullHead) && p.def != BodyPartDefOf.Neck) ||
-                            !ModSettingMain.Instance.Setting.leftHead)
-                            if ((double)p.coverageAbs > 0.0)
-                                notOnly = true;
+                if (notBone(p))
+                    notOnly = true;
             }
 
             return notOnly;
@@ -104,13 +118,13 @@ namespace COF_Torture.Component
         {
             if (giverOfHediff == null)
             {
-                giverOfHediff = this.Parent.giver;
+                giverOfHediff = this.Parent.Giver;
             }
 
             var parts = ListOfPart().ToList();
             if (!parts.Any())
             {
-                var comp = Parent.TryGetComp<HediffComp_ExecuteIndicator>();
+                var comp = Parent.TryGetComp<HediffComp_ExecuteIndicatorMincer>();
                 if (comp != null) comp.isButcherDone = true;
                 var building = GiverOfHediff;
                 if (building != null) building.showVictimBody = false;
@@ -127,7 +141,7 @@ namespace COF_Torture.Component
             h.Severity = this.Props.severityToAdd.RandomInRange;
             if (part != null && (double)part.coverageAbs > 0.0)
             {
-                h.giver = giverOfHediff;
+                h.Giver = giverOfHediff;
                 Pawn.health.AddHediff(h, part, dInfo());
                 productBar += h.Severity * Props.meatPerSeverity;
                 return;
@@ -149,16 +163,41 @@ namespace COF_Torture.Component
 
         public override void CompPostTick(ref float severityAdjustment)
         {
-            base.CompPostTick(ref severityAdjustment);
+            //base.CompPostTick(ref severityAdjustment);
             ticksToAdd++;
             if (ticksToAdd >= this.Props.ticksToAdd)
             {
                 ticksToAdd = 0;
+                if (initialParts > 0)
+                {
+                    var severity = (1-(float)AllPartsNotBone().Count() / initialParts)*this.Parent.def.lethalSeverity;
+                    Log.Message(severity.ToString());
+                    severity=Mathf.Min(severity, this.Parent.def.lethalSeverity);
+                    severity=Mathf.Max(severity, 0.01f);
+                    this.Parent.Severity = severity;
+                }
+                
                 addHediff();
                 productMeat();
             }
             else
                 return;
+        }
+
+        public IEnumerable<BodyPartRecord> AllPartsNotBone()
+        {
+            var partsHave = Pawn.health.hediffSet.GetNotMissingParts().ToList();
+            foreach (var p in partsHave)
+            {
+                if (notBone(p))
+                    yield return p;
+            }
+        }
+
+        public override void CompPostPostAdd(DamageInfo? dinfo)
+        {
+            base.CompPostPostAdd(dinfo);
+            initialParts = AllPartsNotBone().Count();
         }
 
         public void productMeat()
@@ -173,8 +212,8 @@ namespace COF_Torture.Component
                 Thing thing = ThingMaker.MakeThing(Pawn.RaceProps.meatDef);
                 thing.stackCount = (int)productBar;
                 productBar -= (int)productBar;
-                GenPlace.TryPlaceThing(thing, this.Parent.giver.Position + (new IntVec3(0, 0, -2)),
-                    this.Parent.giver.Map, ThingPlaceMode.Near,
+                GenPlace.TryPlaceThing(thing, this.Parent.Giver.Position + (new IntVec3(0, 0, -2)),
+                    this.Parent.Giver.Map, ThingPlaceMode.Near,
                     out Thing _);
             }
         }

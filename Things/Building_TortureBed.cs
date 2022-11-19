@@ -1,31 +1,39 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using COF_Torture.Component;
-using COF_Torture.Hediffs;
 using COF_Torture.Jobs;
 using COF_Torture.ModSetting;
 using COF_Torture.Patch;
 using RimWorld;
-using RimWorld.QuestGen;
 using UnityEngine;
 using Verse;
-using Verse.AI;
 using HarmonyLib;
-using RimWorld.Planet;
-using Verse.AI.Group;
 using JobDefOf = RimWorld.JobDefOf;
-using Object = UnityEngine.Object;
 
 namespace COF_Torture.Things
 {
-    public class Building_TortureBed : Building_Bed
+    public class Building_TortureBed : Building_Bed, ITortureThing
     {
         private Pawn victimAlive;
         public Pawn GetVictim() => victimAlive;
 
-        private bool isUsing; //isUsing只表示是否在被处刑使用，娱乐使用并不会触发它
-        public bool isUnUsableForOthers() => isUsing;
+        private bool _inExecuteProgress; //isUsing只表示是否在被处刑使用，娱乐使用并不会触发它
+        public bool hasVictim => !victimAlive.DestroyedOrNull();
+
+        public bool inExecuteProgress
+        {
+            get => _inExecuteProgress;
+        }
+
+        public void startExecuteProgress()
+        {
+            _inExecuteProgress = true;
+        }
+
+        public void stopExecuteProgress()
+        {
+            _inExecuteProgress = false;
+        }
 
         public bool isUsed; //isUsed表示这个道具是否被使用过（指是否有人死在里面），会影响道具的图片显示
         public bool isSafe = true; //是否安全
@@ -52,14 +60,12 @@ namespace COF_Torture.Things
         public Graphic graphic_blood;
         public Graphic graphic_blood_top;
         public Graphic graphic_blood_top_using;
-        public Texture2D texSafe;
-        public Texture2D texPodEject;
 
         public override void ExposeData()
         {
             base.ExposeData();
             Scribe_References.Look<Pawn>(ref this.victimAlive, "victim");
-            Scribe_Values.Look<bool>(ref this.isUsing, "isUsing");
+            Scribe_Values.Look<bool>(ref this._inExecuteProgress, "isProcessing");
             Scribe_Values.Look<bool>(ref this.isUsed, "isUsed");
             Scribe_Values.Look<bool>(ref this.isSafe, "isSafe", defaultValue: ModSettingMain.Instance.Setting.isSafe);
         }
@@ -74,7 +80,7 @@ namespace COF_Torture.Things
         public override void DeSpawn(DestroyMode mode = DestroyMode.Vanish)
         {
             //如果床上面有囚犯
-            if (isUnUsableForOthers())
+            if (hasVictim)
             {
                 this.ReleaseVictim();
             }
@@ -89,10 +95,7 @@ namespace COF_Torture.Things
             //    return;
             if (victimAlive != null)
             {
-                if (victimAlive.Dead)
-                {
-                }
-                else
+                if (!victimAlive.Dead)
                 {
                     if (victimAlive.jobs != null && victimAlive.jobs.curJob.def == JobDefOf.Wait_Downed)
                     {
@@ -108,6 +111,9 @@ namespace COF_Torture.Things
                         CT_Toils_GoToBed.BugFixBondageIntoBed(this, victimAlive);
                     }
                 }
+                else
+                {
+                }
             }
         }
 
@@ -115,7 +121,7 @@ namespace COF_Torture.Things
         {
             SetVictimPlace(pawn);
             SetVictimHediff();
-            this.isUsing = true;
+            //this.isUsing = true;
 
             void SetVictimPlace(Pawn p)
             {
@@ -146,9 +152,9 @@ namespace COF_Torture.Things
 
         public void KillVictim()
         {
-            RemoveVictimHediff();
+            //RemoveVictimHediff();
             KillVictimDirect(victimAlive);
-            RemoveVictimPlace();
+            //RemoveVictimPlace();
 
             void KillVictimDirect(Pawn pawn)
             {
@@ -193,17 +199,18 @@ namespace COF_Torture.Things
 
         public void ReleaseVictim()
         {
-            this.isUsing = false;
+            this._inExecuteProgress = false;
             this.showVictimBody = true;
             if (victimAlive != null)
             {
                 HediffComp_ExecuteIndicator.ShouldNotDie(victimAlive);
+                this.RemoveVictimHediff();
                 if (HediffComp_ExecuteIndicator.ShouldBeDead(victimAlive)) //放下来时如果会立刻死，就改变死因为本comp造成
                 {
                     KillVictim();
                 }
-                else
-                    RemoveVictim();
+
+                this.RemoveVictimPlace();
             }
         }
 
@@ -251,20 +258,18 @@ namespace COF_Torture.Things
                 {
                     if (hediffR != null)
                     {
-                        if (hediffR is Hediff_ExecuteInjury it && it.giver != null)
+                        if (hediffR is IWithGiver hg && hg.Giver != null)
                         {
-                            it.giver = null;
+                            if (hg.Giver == this)
+                            {
+                                hg.Giver = null;
+                            }
                             //Log.Message("[COF_TORTURE]发现有主hediff" + hediffR + "已经去除主人");
                         }
-
-                        if (hediffR is Hediff_WithGiver ht && ht.giver != null)
-                            if (ht.giver == this)
-                            {
-                                ht.giver = null;
-                                //victimAlive.health.hediffSet.hediffs.Remove(ht);
-                            }
                     }
                 }
+
+                victimAlive.health.HealthTick();
             }
             else
             {
@@ -288,11 +293,10 @@ namespace COF_Torture.Things
             {
                 foreach (var hediffR in aps.health.hediffSet.hediffs)
                 {
-                    if (hediffR is Hediff_WithGiver hT && hT.giver != null)
-                        if (hT.giver == this)
+                    if (hediffR is IWithGiver hg && hg.Giver != null)
+                        if (hg.Giver == this)
                         {
-                            hT.giver = null;
-                            //aps.health.RemoveHediff(hT);
+                            hg.Giver = null;
                         }
                 }
             }
@@ -315,7 +319,7 @@ namespace COF_Torture.Things
 
             shiftedWithAltitude = position.ToVector3ShiftedWithAltitude(AltitudeLayer.Building);
             //graphic.Draw(shiftedWithAltitude, north, (Thing)this);
-            if (isUnUsableForOthers())
+            if (inExecuteProgress)
             {
                 //关上的盖子
                 shiftedWithAltitude = position.ToVector3ShiftedWithAltitude(AltitudeLayer.PawnRope);
@@ -333,7 +337,7 @@ namespace COF_Torture.Things
                 //底部的血液
                 shiftedWithAltitude = position.ToVector3ShiftedWithAltitude(AltitudeLayer.BuildingOnTop);
                 graphic_blood?.Draw(shiftedWithAltitude, north, (Thing)this);
-                if (isUnUsableForOthers())
+                if (inExecuteProgress)
                 {
                     //关上的盖子上的血液
                     shiftedWithAltitude = position.ToVector3ShiftedWithAltitude(AltitudeLayer.Projectile);
@@ -368,9 +372,10 @@ namespace COF_Torture.Things
             {
                 color.a = ModSettingMain.Instance.Setting.topTransparency;
             }
+
             graphic_change = graphic_change.GetColoredVersion(ShaderDatabase.Transparent, color, Color.white);
 
-            Log.Message("1" + graphic_change + shader);
+            //Log.Message("1" + graphic_change + shader);
             //Log.Message("2");
         }
 
@@ -386,9 +391,6 @@ namespace COF_Torture.Things
                 //Log.Message("1");
                 trySetGraphicFor6(gph, texPath, dS, isRotatable: true);
             }
-
-            texSafe = ContentFinder<Texture2D>.Get("COF_Torture/UI/isSafe");
-            texPodEject = ContentFinder<Texture2D>.Get("COF_Torture/UI/PodEject");
         }
 
         private void trySetGraphicFor6(Graphic gph, string texPath, Vector2 dS, bool isRotatable = true)
@@ -442,7 +444,7 @@ namespace COF_Torture.Things
             Color defaultThingLabelColor = GenMapUI.DefaultThingLabelColor;
             if (!this.OwnersForReading.Any<Pawn>())
                 GenMapUI.DrawThingLabel((Thing)this, (string)"Unowned".Translate(), defaultThingLabelColor);
-            else if (this.OwnersForReading.Count == 1 && !this.isUsing)
+            else if (this.OwnersForReading.Count == 1 && !this.hasVictim)
             {
                 if (this.OwnersForReading[0].InBed() && this.OwnersForReading[0].CurrentBed() == this)
                     return;
@@ -459,7 +461,7 @@ namespace COF_Torture.Things
                 {
                     if (ct.defaultLabel == "CommandBedSetForPrisonersLabel".Translate())
                     {
-                        if (isUnUsableForOthers())
+                        if (hasVictim)
                         {
                             gizmo.Disable("CT_CommandBondageBedDisableToSetWhenUsing".Translate());
                         }
@@ -475,7 +477,7 @@ namespace COF_Torture.Things
                 {
                     if (ca.defaultLabel == "CommandThingSetOwnerLabel".Translate())
                     {
-                        if (isUnUsableForOthers())
+                        if (hasVictim)
                         {
                             gizmo.Disable("CT_CommandBondageBedDisableToSetWhenUsing".Translate());
                         }
@@ -484,7 +486,7 @@ namespace COF_Torture.Things
 
                 if (ModsConfig.IdeologyActive && gizmo is Command_SetBedOwnerType)
                 {
-                    if (isUnUsableForOthers())
+                    if (hasVictim)
                     {
                         gizmo.Disable("CT_CommandBondageBedDisableToSetWhenUsing".Translate());
                     }
@@ -499,17 +501,17 @@ namespace COF_Torture.Things
                 SafeMode.defaultLabel = "CT_isSafe".Translate();
                 SafeMode.defaultDesc = "CT_isSafeDesc".Translate();
                 SafeMode.hotKey = KeyBindingDefOf.Misc4;
-                SafeMode.icon = texSafe;
+                SafeMode.icon = GizmoIcon.texSkull;
                 SafeMode.isActive = () => isSafe;
                 SafeMode.toggleAction = () => isSafe = !isSafe;
                 yield return SafeMode;
-                if (victimAlive != null)
+                if (!ModSettingMain.Instance.Setting.isNoWayBack && victimAlive != null)
                 {
                     var Release = new Command_Action();
                     Release.defaultLabel = "CT_Release".Translate();
                     Release.defaultDesc = "CT_Release_BondageBed".Translate();
                     Release.hotKey = KeyBindingDefOf.Misc5;
-                    Release.icon = texPodEject;
+                    Release.icon = GizmoIcon.texPodEject;
                     Release.action = this.ReleaseVictim;
                     yield return Release;
                 }

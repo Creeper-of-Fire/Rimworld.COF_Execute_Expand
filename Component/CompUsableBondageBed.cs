@@ -34,7 +34,7 @@ namespace COF_Torture.Component
                     yield return new FloatMenuOption(
                         (string)(usableBondageBed.FloatMenuOptionLabel(pawn) + " (" + "CT_Forbid".Translate() + ")"),
                         (Action)null, MenuOptionPriority.DisabledOption);
-                else if (ParentBed.isUnUsableForOthers())
+                else if (ParentBed.inExecuteProgress)
                 {
                     //不可用，则执行释放逻辑
                     if (!pawn.CanReserve((LocalTargetInfo)(Verse.Thing)ParentBed)&&!pawn.CanReserve((LocalTargetInfo)(Verse.Thing)pawn))

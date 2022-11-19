@@ -30,10 +30,10 @@ namespace COF_Torture.Jobs
                 yield break;
             }
             yield return Toils_Goto.GotoThing(TargetIndex.B, PathEndMode.ClosestTouch);
-            Hediff_Protect hediffFixed = (Hediff_Protect)target_pawn.health.hediffSet.GetFirstHediffOfDef(COF_Torture.Hediffs.HediffDefOf.COF_Torture_Fixed);
+            Hediff_Fixed hediffFixed = (Hediff_Fixed)target_pawn.health.hediffSet.GetFirstHediffOfDef(COF_Torture.Hediffs.HediffDefOf.COF_Torture_Fixed);
             if (hediffFixed != null)
             {
-                Building_Bed That_bed = (Building_Bed) hediffFixed.giver;
+                Building_Bed That_bed = (Building_Bed) hediffFixed.Giver;
                 if (That_bed != null)
                     yield return JobDriver_ReleaseBondageBed.ReleaseVictim(That_bed);
                 else

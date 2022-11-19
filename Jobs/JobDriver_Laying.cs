@@ -48,7 +48,7 @@ namespace COF_Torture.Jobs
                 return base.ForcedLayingRotation;
             }
         }
-        
+
         //绘制偏移
         /*public override Vector3 ForcedBodyOffset
         {

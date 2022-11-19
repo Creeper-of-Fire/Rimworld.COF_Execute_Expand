@@ -1,3 +1,4 @@
+using COF_Torture.Component;
 using Verse;
 
 namespace COF_Torture.Hediffs
@@ -37,7 +38,7 @@ namespace COF_Torture.Hediffs
         {
             get
             {
-                if (giver == null)
+                if (Giver == null)
                     return true;
                 return base.ShouldRemove;
             }
@@ -47,6 +48,33 @@ namespace COF_Torture.Hediffs
         public override bool CauseDeathNow()
         {
             return false;
+        }
+
+        /*public override string LabelBase
+        {
+            get
+            {
+                var labelInBrackets = base.LabelInBrackets;
+                if (!labelInBrackets.NullOrEmpty())
+                    return labelInBrackets;
+                else
+                    return base.LabelBase;
+            }
+        }*/
+
+        public override string LabelInBrackets
+        {
+            get
+            {
+                string labelInBrackets = base.LabelInBrackets;
+                string stringPercent = (this.Severity/this.def.lethalSeverity).ToStringPercent("F0");
+                if (this.TryGetComp<HediffComp_ExecuteIndicator>() == null)
+                    return labelInBrackets;
+                if (labelInBrackets.NullOrEmpty())
+                    return stringPercent;
+                else
+                    return labelInBrackets + " " + stringPercent;
+            }
         }
     }
 }

@@ -34,28 +34,36 @@ namespace COF_Torture.ModSetting
 
             ls.GapLine(20f);
             ls.Label("Safe Mode Is Default".Translate());
-            ls.CheckboxLabeled("建筑物默认启用安全模式", ref Setting.isSafe, "建筑物默认启用安全模式");
+            ls.CheckboxLabeled("建筑物默认启用安全模式", ref Setting.isSafe);
             
             ls.GapLine(20f);
-            ls.Label("Immortal in execution".Translate());
-            ls.CheckboxLabeled("殖民者在处刑过程中不会死亡", ref Setting.isImmortal, "建筑物默认启用安全模式");
+            ls.Label("Immortal In Execution".Translate());
+            ls.CheckboxLabeled("殖民者在处刑过程中不会死亡", ref Setting.isImmortal);
            
             ls.GapLine(20f);
             ls.Label("Satisfy Hunger And Thirty".Translate());
-            ls.CheckboxLabeled("殖民者在刑具上会获得饮食和水的补充", ref Setting.isFeed, "殖民者在刑具上会获得饮食和水的补充"); 
+            ls.CheckboxLabeled("殖民者在刑具上会获得饮食和水的补充", ref Setting.isFeed); 
             
             ls.GapLine(20f);
             ls.Label("Hold Head".Translate());
-            ls.CheckboxLabeled("殖民者不会被绞肉机破坏头颅", ref Setting.leftHead, "殖民者不会被绞肉机破坏头颅"); 
+            ls.CheckboxLabeled("殖民者不会被绞肉机破坏头颅", ref Setting.leftHead); 
             
             ls.GapLine(20f);
-            ls.Label("remove temp injuries".Translate());
-            ls.CheckboxLabeled("中止处刑时同时移除临时伤口", ref Setting.isRemoveTempInjuries, "中止处刑时同时移除临时伤口"); 
+            ls.Label("Remove Temp Injuries".Translate());
+            ls.CheckboxLabeled("中止处刑时同时移除临时伤口", ref Setting.isRemoveTempInjuries); 
+            
+            ls.GapLine(20f);
+            ls.Label("No Way Back".Translate());
+            ls.CheckboxLabeled("处刑一旦开始就无法释放殖民者", ref Setting.isNoWayBack); 
+            
+            ls.GapLine(20f);
+            ls.Label("刑具误启动概率（每小时）".Translate());
+            ls.Label(Setting.mistakeStartUp.ToStringPercent());
+            Setting.mistakeStartUp = ls.Slider(Setting.mistakeStartUp, 0f, 1f);
 
             ls.GapLine(20f);
-            Text.Font = GameFont.Medium;
             ls.Label("盖子透明度（请重进存档以应用）".Translate());
-            ls.Label(Setting.topTransparency.ToString());
+            ls.Label(Setting.topTransparency.ToStringPercent());
             Setting.topTransparency = ls.Slider(Setting.topTransparency, 0f, 1f);
             
             Text.Font = GameFont.Small;
@@ -78,19 +86,17 @@ namespace COF_Torture.ModSetting
 
     public class ModSetting : ModSettings
     {
-        #region param
-
         public bool isSafe = true;
         public bool isFeed = true;
         public bool leftHead = true;
         public bool isImmortal = true;
         public bool isRemoveTempInjuries = true;
+        public bool isNoWayBack = false;
         //public float testFloat = 1f;
         public int executeHours = 2500;
         public UnityEngine.Vector2 scrollPos = UnityEngine.Vector2.zero;//这玩意哪来的？我怎么一觉醒来多了这行代码？
         public float topTransparency = 1.0f;
-
-        #endregion
+        public float mistakeStartUp = 0.0f;
 
         public override void ExposeData()
         {
@@ -100,7 +106,9 @@ namespace COF_Torture.ModSetting
             Scribe_Values.Look(ref leftHead, "leftHead", true);
             Scribe_Values.Look(ref isImmortal, "isImmortal", true);
             Scribe_Values.Look(ref isRemoveTempInjuries, "isRemoveTempInjuries", true);
+            Scribe_Values.Look(ref isNoWayBack, "isNoWayBack", false);
             Scribe_Values.Look(ref topTransparency, "topTransparency", 1f);
+            Scribe_Values.Look(ref mistakeStartUp, "mistakeStartUp", 0f);
             Scribe_Values.Look(ref executeHours, "executeHours", 4);
         }
 
@@ -111,7 +119,9 @@ namespace COF_Torture.ModSetting
             leftHead = true;
             isImmortal = true;
             isRemoveTempInjuries = true;
+            isNoWayBack = false;
             topTransparency = 1f;
+            mistakeStartUp = 0f;
             //testInt = 2500;
         }
     }

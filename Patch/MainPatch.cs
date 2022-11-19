@@ -60,6 +60,7 @@ namespace COF_Torture.Patch
             if (SettingPatch.SexNeed == null)
             {
                 SettingPatch.RimJobWorldIsActive = false;
+                Log.Message("[COF_TORTURE]没有发现RJW，这会导致Orgasm和Licentious被禁用从而报错。并不影响游戏正常运行。");
             }
             else
             {

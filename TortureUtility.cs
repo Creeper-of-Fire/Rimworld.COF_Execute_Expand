@@ -1,15 +1,28 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
+using COF_Torture.Component;
+using COF_Torture.Hediffs;
+using COF_Torture.ModSetting;
 using COF_Torture.Patch;
 using COF_Torture.Things;
+using HarmonyLib;
 using RimWorld;
 using UnityEngine;
 using Verse;
-using ThingCategoryDefOf = RimWorld.ThingCategoryDefOf;
+using Verse.Sound;
 
 namespace COF_Torture
 {
+    [StaticConstructorOnStartup]
+    public static class GizmoIcon
+    {
+        public static readonly Texture2D texSkull = ContentFinder<Texture2D>.Get("COF_Torture/UI/isSafe");
+        public static readonly Texture2D texPodEject = ContentFinder<Texture2D>.Get("COF_Torture/UI/PodEject");
+    }
+
     public static class TortureUtility
     {
         public const float satisfySexNeedWhenOrgasm = 0.2f;
@@ -58,15 +71,6 @@ namespace COF_Torture
             }
         }
 
-        public static void a()
-        {
-            foreach (var def in ThingDefGenerator_Buildings.ImpliedBlueprintAndFrameDefs()
-                         .Concat(ThingDefGenerator_Meat.ImpliedMeatDefs())
-                         .Concat(ThingDefGenerator_Techprints.ImpliedTechprintDefs())
-                         .Concat(ThingDefGenerator_Corpses.ImpliedCorpseDefs()))
-                DefGenerator.AddImpliedDef(def);
-        }
-
         public static Corpse MakeCorpse_DifferentKind(this Pawn pawn, Building_Grave assignedGrave, bool inBed,
             float bedRotation)
         {
@@ -87,6 +91,7 @@ namespace COF_Torture
             {
                 cookedCorpse.LastPawn = pawn;
             }
+
             if (assignedGrave != null)
                 corpse.InnerPawn.ownership.ClaimGrave(assignedGrave);
             if (inBed)
@@ -124,7 +129,7 @@ namespace COF_Torture
             ingestible.specialThoughtDirect = null; //pawnDef.race.FleshType.ateDirect;
             ingestible.specialThoughtAsIngredient = null;
             ingestible.ateEvent = HistoryEventDefOf.AteHumanMeatAsIngredient;
-            
+
             //ingestible.foodType = FoodTypeFlags.Corpse;
             //ingestible.sourceDef = thingDef1;
             //ingestible.preferability = thingDef1.race.IsFlesh ? FoodPreferability.DesperateOnly : FoodPreferability.NeverForNutrition;
@@ -134,6 +139,7 @@ namespace COF_Torture
             //ingestible.ingestSound = SoundDefOf.RawMeat_Eat;
             //ingestible.specialThoughtDirect = thingDef1.race.FleshType.ateDirect;
         }
+
         private static float CalculateMarketValue(ThingDef raceDef)
         {
             float num1 = 0.0f;
@@ -158,5 +164,20 @@ namespace COF_Torture
 
             return num1 * 0.6f;
         }
+    }
+
+    public interface ITortureThing
+    {
+        void ReleaseVictim();
+        void SetVictim(Pawn pawn);
+        bool inExecuteProgress { get; }
+        void startExecuteProgress();
+        void stopExecuteProgress();
+    }
+
+    public interface IWithGiver
+    {
+        Thing Giver { get; set; }
+        ITortureThing GiverAsInterface { get; set; }
     }
 }

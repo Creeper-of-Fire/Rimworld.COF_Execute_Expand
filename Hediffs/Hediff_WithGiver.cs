@@ -3,9 +3,9 @@ using Verse;
 
 namespace COF_Torture.Hediffs
 {
-    public class Hediff_WithGiver : HediffWithComps
+    public class Hediff_WithGiver : HediffWithComps, IWithGiver
     {
-        public Thing giver;
+        private Thing giver;
 
         public override void ExposeData()
         {
@@ -20,5 +20,22 @@ namespace COF_Torture.Hediffs
             else
                 return false;
         }
+
+        public Thing Giver
+        {
+            get => this.giver;
+            set => this.giver = value;
+        }
+
+        public ITortureThing GiverAsInterface
+        {
+            get => (ITortureThing)giver;
+            set => giver = (Thing)value;
+        }
+    }
+
+    public abstract class WithGiver
+    {
+        public Thing giver;
     }
 }
