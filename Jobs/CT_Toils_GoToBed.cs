@@ -46,6 +46,11 @@ namespace COF_Torture.Jobs
             return toil;
         }
 
+        /// <summary>
+        /// Pawn出现bug时，使用这个把它瞬移到床上
+        /// </summary>
+        /// <param name="bed">床</param>
+        /// <param name="takee">出现bug的Pawn</param>
         public static void BugFixBondageIntoBed(Building_Bed bed, Pawn takee)
         {
             if (bed.Destroyed)

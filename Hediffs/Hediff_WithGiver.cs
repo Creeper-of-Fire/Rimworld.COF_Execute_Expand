@@ -1,4 +1,3 @@
-using COF_Torture.Things;
 using Verse;
 
 namespace COF_Torture.Hediffs

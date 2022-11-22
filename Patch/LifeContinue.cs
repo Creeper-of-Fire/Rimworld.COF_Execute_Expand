@@ -1,5 +1,4 @@
 using COF_Torture.Hediffs;
-using COF_Torture.ModSetting;
 using HarmonyLib;
 using Verse;
 

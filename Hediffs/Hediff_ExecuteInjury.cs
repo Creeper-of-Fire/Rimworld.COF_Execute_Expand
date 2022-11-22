@@ -1,12 +1,11 @@
 using COF_Torture.ModSetting;
-using COF_Torture.Things;
 using Verse;
 
 namespace COF_Torture.Hediffs
 {
     public class Hediff_ExecuteInjury : Hediff_Injury, IWithGiver
     {
-        protected Thing giver; //懒得多重继承，摆烂了
+        protected Thing giver;
 
         public override void ExposeData()
         {

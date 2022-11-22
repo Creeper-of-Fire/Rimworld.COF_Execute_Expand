@@ -1,9 +1,3 @@
-using System;
-using System.Collections.Generic;
-using RimWorld;
-using Verse;
-using Verse.AI;
-
 namespace COF_Torture.Jobs
 {
     /*public class JobDriver_PlayExecuteBuilding_Sadism : JobDriver

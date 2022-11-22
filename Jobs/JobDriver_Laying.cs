@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using COF_Torture.Things;
 using RimWorld;
-using UnityEngine;
 using Verse;
 using Verse.AI;
 
@@ -29,10 +28,7 @@ namespace COF_Torture.Jobs
             yield return Toils_LayDown.LayDown(TargetIndex.A, hasBed, false,
                 noBedLayingPosture: PawnPosture.LayingInBed);
         }
-
-        /// <summary>
-        /// 旋转
-        /// </summary>
+        
         public override Rot4 ForcedLayingRotation
         {
             get
@@ -40,8 +36,7 @@ namespace COF_Torture.Jobs
                 Building_TortureBed thing = (Building_TortureBed)job.GetTarget(TargetIndex.A).Thing;
                 if (thing != null)
                 {
-                    var d = thing.def as Building_TortureBed_Def;
-                    if (d != null)
+                    if (thing.def is Building_TortureBedDef d)
                         return d.pawnUsingRot;
                 }
 

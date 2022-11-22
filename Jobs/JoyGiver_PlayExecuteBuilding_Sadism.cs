@@ -1,8 +1,3 @@
-using COF_Torture.Things;
-using RimWorld;
-using Verse;
-using Verse.AI;
-
 namespace COF_Torture.Jobs
 {
     /*public class JoyGiver_PlayExecuteBuilding_Sadism : JoyGiver_InteractBuilding

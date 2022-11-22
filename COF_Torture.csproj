@@ -66,18 +66,24 @@
         <Compile Include="Component\CompEffectForBondage.cs" />
         <Compile Include="Component\CompBuildingSitHediffGiver.cs" />
         <Compile Include="Component\CompUsableBondageBed.cs" />
+        <Compile Include="Component\HediffComp_BecomePermanent.cs" />
+        <Compile Include="Component\HediffComp_ExecuteEffector_AddHediff.cs" />
+        <Compile Include="Component\HediffComp_ExecuteEffector.cs" />
         <Compile Include="Component\HediffComp_SwitchAbleSeverity.cs" />
         <Compile Include="Component\HediffComp_ExecuteIndicatorWithEffector.cs" />
-        <Compile Include="Component\HediffComp_ExecuteMincer.cs" />
-        <Compile Include="Component\HediffComp_ExecuteAddHediff.cs" />
         <Compile Include="Component\HediffComp_ExecuteIndicator.cs" />
         <Compile Include="Component\HediffComp_OrgasmIndicator.cs" />
         <Compile Include="Component\HediffComp_SexualHeat.cs" />
         <Compile Include="Damages\DamageDefOf.cs" />
-        <Compile Include="Dialog_TortureThingManager.cs" />
+        <Compile Include="Dialog\DialogUtility.cs" />
+        <Compile Include="Dialog\Dialog_AbuseMenu.cs" />
+        <Compile Include="Dialog\Dialog_TortureThingManager.cs" />
+        <Compile Include="Dialog\Gizmo_List.cs" />
         <Compile Include="Genes\GeneDefOf.cs" />
         <Compile Include="Genes\Gene_SpeedingRegeneration.cs" />
         <Compile Include="Hediffs\HediffDefOf.cs" />
+        <Compile Include="Hediffs\HediffWithBodyPartGroupsDef.cs" />
+        <Compile Include="Hediffs\Hediff_AbuseInjury.cs" />
         <Compile Include="Hediffs\Hediff_ExecuteInjury.cs" />
         <Compile Include="Hediffs\Hediff_Fixed.cs" />
         <Compile Include="Hediffs\Hediff_Torture.cs" />
@@ -108,9 +114,6 @@
         <Compile Include="Things\Building_TortureBed.cs" />
         <Compile Include="Things\ThingCategoryDefOf.cs" />
         <Compile Include="TortureUtility.cs" />
-    </ItemGroup>
-    <ItemGroup>
-      <Folder Include="Dialog" />
     </ItemGroup>
     <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
     <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

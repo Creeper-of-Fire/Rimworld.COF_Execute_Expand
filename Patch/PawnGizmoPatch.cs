@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using COF_Torture.Dialog;
 using COF_Torture.ModSetting;
 using HarmonyLib;
 using UnityEngine;
@@ -16,6 +17,19 @@ namespace COF_Torture.Patch
         {
             foreach (Gizmo gizmo in __result)
                 yield return gizmo;
+
+            Command_Action command = new Command_Action();
+            command.defaultLabel = "CT_AbuseMenu".Translate();
+            command.icon = ContentFinder<Texture2D>.Get("UI/Commands/LaunchReport");
+            command.defaultDesc = "CT_AbuseMenuDesc".Translate();
+            command.action = delegate
+            {
+                var Dialog = new Dialog_AbuseMenu(__instance);
+                Find.WindowStack.Add(Dialog);
+            };
+            yield return command;
+
+
             if (!ModSettingMain.Instance.Setting.controlMenuOn) yield break;
             foreach (var h in __instance.health.hediffSet.hediffs)
             {

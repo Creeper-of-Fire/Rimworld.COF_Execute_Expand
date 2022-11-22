@@ -1,13 +1,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using COF_Torture.Component;
+using COF_Torture.Dialog;
 using COF_Torture.Jobs;
 using COF_Torture.ModSetting;
-using COF_Torture.Patch;
 using RimWorld;
 using UnityEngine;
 using Verse;
-using HarmonyLib;
 using JobDefOf = RimWorld.JobDefOf;
 
 namespace COF_Torture.Things
@@ -16,8 +15,8 @@ namespace COF_Torture.Things
     {
         private Pawn _victim;
         //public Pawn GetVictim() => victimAlive;
-
-        private bool _inExecuteProgress; //isUsing只表示是否在被处刑使用，娱乐使用并不会触发它
+        
+        private bool _inExecuteProgress;
         public bool hasVictim => !_victim.DestroyedOrNull();
 
         public bool inExecuteProgress => _inExecuteProgress;
@@ -34,14 +33,20 @@ namespace COF_Torture.Things
             _inExecuteProgress = false;
         }
 
-        public bool isUsed; //isUsed表示这个道具是否被使用过（指是否有人死在里面），会影响道具的图片显示
-        public bool isSafe = true; //是否安全
+        /// <summary>
+        /// isUsed表示这个道具是否被使用过（指是否有人死在里面），会影响道具的图片显示
+        /// </summary>
+        public bool isUsed;
+        /// <summary>
+        /// 安全模式是否启用
+        /// </summary>
+        public bool isSafe = true;
 
         public Vector3 shiftPawnDrawPos
         {
             get
             {
-                if (def is Building_TortureBed_Def Def)
+                if (def is Building_TortureBedDef Def)
                     return new Vector3(0, 0, Def.shiftPawnDrawPosZ);
                 else
                     return Vector3.zero;
@@ -64,7 +69,7 @@ namespace COF_Torture.Things
         {
             base.ExposeData();
             Scribe_References.Look<Pawn>(ref this._victim, "victim");
-            Scribe_Values.Look<bool>(ref this._inExecuteProgress, "isProcessing");
+            Scribe_Values.Look<bool>(ref this._inExecuteProgress, "_inExecuteProgress");
             Scribe_Values.Look<bool>(ref this.isUsed, "isUsed");
             Scribe_Values.Look<bool>(ref this.isSafe, "isSafe", defaultValue: ModSettingMain.Instance.Setting.isSafe);
         }
@@ -110,9 +115,6 @@ namespace COF_Torture.Things
                         CT_Toils_GoToBed.BugFixBondageIntoBed(this, _victim);
                     }
                 }
-                else
-                {
-                }
             }
         }
 
@@ -148,69 +150,19 @@ namespace COF_Torture.Things
                 }
             }
         }
-
-        public void KillVictim()
-        {
-            //RemoveVictimHediff();
-            KillVictimDirect(_victim);
-            //RemoveVictimPlace();
-
-            void KillVictimDirect(Pawn pawn)
-            {
-                DamageDef execute;
-                DamageInfo dInfo;
-                Hediff dHediff;
-                if (SettingPatch.RimJobWorldIsActive && pawn.story.traits.HasTrait(TraitDefOf.Masochist))
-                {
-                    execute = Damages.DamageDefOf.Execute_Licentious;
-                    dHediff = HediffMaker.MakeHediff(Hediffs.HediffDefOf.COF_Torture_Licentious, pawn);
-                }
-                else
-                {
-                    execute = Damages.DamageDefOf.Execute;
-                    dHediff = HediffMaker.MakeHediff(Hediffs.HediffDefOf.COF_Torture_Fixed, pawn);
-                }
-
-                dInfo = new DamageInfo(execute, 1);
-
-                bool ShouldBeDeathrestingOrInComaInsteadOfDead(Pawn p)
-                {
-                    if (!ModsConfig.BiotechActive || p.genes == null || !p.genes.HasGene(GeneDefOf.Deathless))
-                        return false;
-                    BodyPartRecord brain = p.health.hediffSet.GetBrain();
-                    return brain != null && !p.health.hediffSet.PartIsMissing(brain) &&
-                           (double)p.health.hediffSet.GetPartHealth(brain) > 0.0;
-                } //这里实际上是SanguophageUtility.ShouldBeDeathrestingOrInComaInsteadOfDead，但是因为ShouldBeDead被改过所以只能重写
-
-                if (ShouldBeDeathrestingOrInComaInsteadOfDead(pawn))
-                {
-                    var ForceDeathrestOrComa = AccessTools.Method(typeof(Pawn_HealthTracker), "ForceDeathrestOrComa");
-                    ForceDeathrestOrComa.Invoke(pawn.health, new object[] { (object)dInfo, (object)dHediff });
-                }
-                else
-                {
-                    if (pawn.Destroyed)
-                        return;
-                    pawn.Kill(dInfo, dHediff);
-                }
-            }
-        }
-
         public void ReleaseVictim()
         {
             this._inExecuteProgress = false;
             this.showVictimBody = true;
-            if (_victim != null)
+            if (_victim == null) return;
+            TortureUtility.ShouldNotDie(_victim);
+            this.RemoveVictimHediff();
+            if (TortureUtility.ShouldBeDead(_victim)) //放下来时如果会立刻死，就改变死因为本comp造成
             {
-                HediffComp_ExecuteIndicator.ShouldNotDie(_victim);
-                this.RemoveVictimHediff();
-                if (HediffComp_ExecuteIndicator.ShouldBeDead(_victim)) //放下来时如果会立刻死，就改变死因为本comp造成
-                {
-                    KillVictim();
-                }
-
-                this.RemoveVictimPlace();
+                TortureUtility.KillVictimDirect(_victim);
             }
+
+            this.RemoveVictimPlace();
         }
 
         private void RemoveVictim()
@@ -235,40 +187,18 @@ namespace COF_Torture.Things
         {
             if (_victim != null)
             {
-                /*var crebb = this.GetComps<COF_Torture.Component.CompEffectForBondage>();
-                if (crebb == null)
-                {
-                    Log.Error("[COF_TORTURE]" + this + " Can not find compEffectForBondage");
-                }
-                else
-                {
-                    foreach (var e in crebb)
-                    {
-                        e.RemoveEffect(); //解除使用者
-                    }
-
-                    this.isUsing = false;
-                }*/
-
-
-                //try
-                //{
                 foreach (var hediffR in _victim.health.hediffSet.hediffs)
                 {
-                    if (hediffR != null)
+                    if (hediffR == null) continue;
+                    if (!(hediffR is IWithGiver hg) || hg.Giver == null) continue;
+                    if (hg.Giver == this)
                     {
-                        if (hediffR is IWithGiver hg && hg.Giver != null)
-                        {
-                            if (hg.Giver == this)
-                            {
-                                hg.Giver = null;
-                            }
-                            //Log.Message("[COF_TORTURE]发现有主hediff" + hediffR + "已经去除主人");
-                        }
+                        hg.Giver = null;
                     }
+                    //Log.Message("[COF_TORTURE]发现有主hediff" + hediffR + "已经去除主人");
                 }
 
-                _victim.health.HealthTick();
+                _victim.health.HealthTick();//立即进行一次HediffTick以移除应当消失的Hediff
             }
             else
             {
@@ -292,11 +222,11 @@ namespace COF_Torture.Things
             {
                 foreach (var hediffR in aps.health.hediffSet.hediffs)
                 {
-                    if (hediffR is IWithGiver hg && hg.Giver != null)
-                        if (hg.Giver == this)
-                        {
-                            hg.Giver = null;
-                        }
+                    if (!(hediffR is IWithGiver hg) || hg.Giver == null) continue;
+                    if (hg.Giver == this)
+                    {
+                        hg.Giver = null;
+                    }
                 }
             }
         }

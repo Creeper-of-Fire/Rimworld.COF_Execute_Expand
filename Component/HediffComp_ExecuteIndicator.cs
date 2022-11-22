@@ -1,12 +1,10 @@
 using System.Collections.Generic;
+using COF_Torture.Dialog;
 using COF_Torture.Hediffs;
 using COF_Torture.ModSetting;
-using COF_Torture.Patch;
 using COF_Torture.Things;
-using RimWorld;
 using UnityEngine;
 using Verse;
-using HediffDefOf = RimWorld.HediffDefOf;
 
 namespace COF_Torture.Component
 {
@@ -19,7 +17,10 @@ namespace COF_Torture.Component
         public HediffCompProperties_ExecuteIndicator() => this.compClass = typeof(HediffComp_ExecuteIndicator);
     }
 
-    public class HediffComp_ExecuteIndicator : HediffComp //最重要的comp，处理绝大多数的处刑相关内容——特别是关于殖民者何时死亡
+    /// <summary>
+    /// 处理绝大多数的处刑相关内容——特别是关于殖民者何时死亡
+    /// </summary>
+    public class HediffComp_ExecuteIndicator : HediffComp
     {
         public HediffCompProperties_ExecuteIndicator Props => (HediffCompProperties_ExecuteIndicator)this.props;
         public Hediff_WithGiver Parent => (Hediff_WithGiver)this.parent;
@@ -30,6 +31,9 @@ namespace COF_Torture.Component
 
         private float severityToDeath;
 
+        /// <summary>
+        /// 是否在处刑中
+        /// </summary>
         public bool isInProgress;
 
         private const int ticksToCount = 120;
@@ -40,8 +44,8 @@ namespace COF_Torture.Component
             base.CompExposeData();
             Scribe_Values.Look(ref isInProgress, "isInProgress", false);
         }
-
-        public virtual void SeverityProcess()
+        
+        protected virtual void SeverityProcess()
         {
             if (severityToDeath <= 0f)
             {
@@ -63,7 +67,7 @@ namespace COF_Torture.Component
                 var a = (Building_TortureBed)this.Parent.Giver;
                 a.isUsed = true;
                 if (this.Parent.Giver is Building_TortureBed bT && !bT.isSafe)
-                    this.KillByExecute();
+                    TortureUtility.KillVictimDirect(this.Pawn);
             }
             else
             {
@@ -71,16 +75,24 @@ namespace COF_Torture.Component
             }
         }
 
-        public override void CompPostTick(ref float severityAdjustment)
+        /// <summary>
+        /// 处理是否故障启动
+        /// </summary>
+        // ReSharper disable once MemberCanBePrivate.Global
+        protected void mistakeStartUp()
         {
-            base.CompPostTick(ref severityAdjustment);
             if (ModSettingMain.Instance.Setting.mistakeStartUp != 0.0f)
                 if (this.Pawn.IsHashIntervalTick(2500))
                 {
                     if (ModSettingMain.Instance.Setting.mistakeStartUp >= Random.value)
                         StartProgress();
                 }
+        }
 
+        public override void CompPostTick(ref float severityAdjustment)
+        {
+            base.CompPostTick(ref severityAdjustment);
+            mistakeStartUp();
             if (!isInProgress) return;
             this.ticksLeftToCount--;
             if (this.ticksLeftToCount > 0) //多次CompPostTick执行一次
@@ -89,52 +101,10 @@ namespace COF_Torture.Component
             SeverityProcess();
             if (!ModSettingMain.Instance.Setting.isImmortal) //如果会死，就改变死因为本comp造成
             {
-                ShouldNotDie(this.Pawn);
-                if (ShouldBeDead(this.Pawn))
-                    KillByExecute();
+                TortureUtility.ShouldNotDie(this.Pawn);
+                if (TortureUtility.ShouldBeDead(this.Pawn))
+                    TortureUtility.KillVictimDirect(this.Pawn);
             }
-        }
-
-        public static void ShouldNotDie(Pawn p)
-        {
-            var bloodLoss = p.health.hediffSet.GetFirstHediffOfDef(RimWorld.HediffDefOf.BloodLoss);
-            if (bloodLoss != null)
-                if (bloodLoss.Severity > 0.9f)
-                    bloodLoss.Severity = 0.9f;
-        }
-
-        public static bool ShouldBeDead(Pawn pawn)
-        {
-            var health = pawn.health;
-            if (health.Dead)
-                return true;
-            for (int index = 0; index < health.hediffSet.hediffs.Count; ++index)
-            {
-                if (health.hediffSet.hediffs[index].CauseDeathNow())
-                    return true;
-            }
-
-            if (health.ShouldBeDeadFromRequiredCapacity() != null)
-                return true;
-            if ((double)PawnCapacityUtility.CalculatePartEfficiency(health.hediffSet, pawn.RaceProps.body.corePart) <=
-                0.0)
-            {
-                if (DebugViewSettings.logCauseOfDeath)
-                    Log.Message("CauseOfDeath: zero efficiency of " + pawn.RaceProps.body.corePart.Label);
-                return true;
-            }
-
-            return health.ShouldBeDeadFromLethalDamageThreshold();
-        }
-
-
-        public void KillByExecute()
-        {
-            if (this.Pawn.Dead)
-                Log.Error("try to kill a dead pawn");
-            //Log.Message(this.Parent.giver.GetVictim()+"KillVictim");
-            if (this.Parent.Giver is Building_TortureBed bT)
-                bT.KillVictim();
         }
 
         public override IEnumerable<Gizmo> CompGetGizmos()
@@ -146,12 +116,18 @@ namespace COF_Torture.Component
             }
         }
 
+        /// <summary>
+        /// 开始处刑
+        /// </summary>
         public virtual void StartProgress()
         {
             this.Parent.GiverAsInterface.startExecuteProgress();
             isInProgress = true;
         }
 
+        /// <summary>
+        /// 暂停处刑
+        /// </summary>
         public virtual void StopProgress()
         {
             this.Parent.GiverAsInterface.stopExecuteProgress();

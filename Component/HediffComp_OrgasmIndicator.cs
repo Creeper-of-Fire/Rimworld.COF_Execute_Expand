@@ -1,6 +1,3 @@
-using System;
-using COF_Torture.Patch;
-using RimWorld;
 using Verse;
 
 

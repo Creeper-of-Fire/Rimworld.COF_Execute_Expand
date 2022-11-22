@@ -1,6 +1,4 @@
 using System;
-using COF_Torture.Hediffs;
-using RimWorld;
 using Verse;
 
 namespace COF_Torture.Component

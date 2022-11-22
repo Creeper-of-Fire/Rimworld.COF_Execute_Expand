@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
+using COF_Torture.Dialog;
 using COF_Torture.ModSetting;
 using COF_Torture.Patch;
-using COF_Torture.Things;
 using RimWorld;
 using Verse;
 

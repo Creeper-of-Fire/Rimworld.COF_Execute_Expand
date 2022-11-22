@@ -1,12 +1,5 @@
-using System;
-using System.Collections.Generic;
-using COF_Torture.Hediffs;
-using COF_Torture.ModSetting;
-using COF_Torture.Patch;
 using COF_Torture.Things;
-using RimWorld;
 using Verse;
-using HediffDefOf = RimWorld.HediffDefOf;
 
 namespace COF_Torture.Component
 {
@@ -16,7 +9,7 @@ namespace COF_Torture.Component
 
         public override void StartProgress()
         {
-            var comp = (IExecuteEffector)GetChildComp();
+            var comp = (HediffComp_ExecuteEffector)GetChildComp();
             if (comp != null)
             {
                 comp.startExecuteProcess();
@@ -31,7 +24,7 @@ namespace COF_Torture.Component
 
         public override void StopProgress()
         {
-            var comp = (IExecuteEffector)GetChildComp();
+            var comp = (HediffComp_ExecuteEffector)GetChildComp();
             if (comp != null)
             {
                 comp.stopExecuteProcess();
@@ -54,7 +47,7 @@ namespace COF_Torture.Component
     {
         protected sealed override HediffComp GetChildComp()
         {
-            var comp = this.Parent.TryGetComp<HediffComp_ExecuteAddHediff>();
+            var comp = this.Parent.TryGetComp<HediffComp_ExecuteEffector_AddHediff>();
             return comp;
         }
     }
@@ -76,18 +69,16 @@ namespace COF_Torture.Component
             Scribe_Values.Look(ref isButcherDone, "isButcherDone", false);
         }
 
-        public override void SeverityProcess()
+        protected override void SeverityProcess()
         {
-            if (isButcherDone)
-            {
-                if (this.Parent.Giver is Building_TortureBed bT && !bT.isSafe)
-                    this.KillByExecute();
-            }
+            if (!this.isButcherDone) return;
+            if (this.Parent.Giver is Building_TortureBed bT && !bT.isSafe)
+                TortureUtility.KillVictimDirect(this.Pawn);
         }
 
         protected sealed override HediffComp GetChildComp()
         {
-            var comp = this.Parent.TryGetComp<HediffComp_ExecuteMincer>();
+            var comp = this.Parent.TryGetComp<HediffComp_ExecuteEffector_Mincer>();
             return comp;
         }
     }

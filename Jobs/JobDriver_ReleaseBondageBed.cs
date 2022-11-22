@@ -30,6 +30,9 @@ namespace COF_Torture.Jobs
             yield return JobDriver_ReleaseBondageBed.ReleaseVictim((Building_Bed)this.Thing);
         }
 
+        /// <summary>
+        /// 释放处刑对象
+        /// </summary>
         public static Toil ReleaseVictim(Building_Bed Thing)
         {
             var toil = ToilMaker.MakeToil(nameof(ReleaseVictim));
