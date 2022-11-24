@@ -78,13 +78,13 @@ namespace COF_Torture.Things
             Scribe_References.Look<Pawn>(ref this._victim, "victim");
             Scribe_Values.Look<bool>(ref this._inExecuteProgress, "_inExecuteProgress");
             Scribe_Values.Look<bool>(ref this.isUsed, "isUsed");
-            Scribe_Values.Look<bool>(ref this.isSafe, "isSafe", defaultValue: ModSettingMain.Instance.Setting.isSafe);
+            Scribe_Values.Look<bool>(ref this.isSafe, "isSafe", defaultValue: ModSettingMain.Instance.Setting.isSecurityMode);
         }
 
         public override void SpawnSetup(Map map, bool respawningAfterLoad)
         {
             base.SpawnSetup(map, respawningAfterLoad);
-            isSafe = ModSettingMain.Instance.Setting.isSafe;
+            isSafe = ModSettingMain.Instance.Setting.isSecurityMode;
             this.Medical = false;
         }
 

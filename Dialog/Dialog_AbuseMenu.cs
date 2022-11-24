@@ -185,18 +185,20 @@ namespace COF_Torture.Dialog
                 return ableBodyPartGroupsDict[focusBodyPartGroup].Select(Button_SetJob).ToList();
         }
 
-        private ButtonUnit Button_SetHediff(MaltreatDef hediffDef)
+        private ButtonUnit Button_SetHediff(MaltreatDef hediff)
         {
-            var inactive = this.focusHediff != hediffDef;
+            var inactive = this.focusHediff != hediff;
             var action = new Action(delegate
             {
-                if (this.focusHediff != hediffDef)
-                    this.focusHediff = hediffDef;
+                if (this.focusHediff != hediff)
+                    this.focusHediff = hediff;
                 else
                     this.focusHediff = null;
                 flagShouldRefresh = true;
             });
-            var button = new ButtonUnit(action, hediffDef.GetLabelAction(), hediffDef.GetDescriptionAction(),
+            var button = new ButtonUnit(action, hediff.GetLabelAction(),
+                hediff.GetDescriptionAction() + "\n\n"
+                                              + "CT_Offer".Translate() + hediff.maltreat.enableByBuilding.label,
                 inactive: inactive);
             return button;
         }
@@ -244,10 +246,7 @@ namespace COF_Torture.Dialog
         private ButtonUnit Button_SetJob(BodyPartRecord bodyPart)
         {
             var h = HediffMaker.MakeHediff(this.focusHediff, this.pawn, bodyPart);
-            var actionToDo = new Action(delegate
-            {
-                DoAddHediffJob(h,bodyPart);
-            });
+            var actionToDo = new Action(delegate { DoAddHediffJob(h, bodyPart); });
             var buttonToDo = new ButtonUnit(actionToDo,
                 bodyPart.Label + "," + this.focusHediff.GetLabelAction().Colorize(this.focusHediff.defaultLabelColor),
                 this.focusHediff.GetDescriptionAction());
@@ -314,7 +313,7 @@ namespace COF_Torture.Dialog
             return labels.Values.ToList();
         }
 
-        private void DoAddHediffJob(Hediff hediff,BodyPartRecord bodyPart)
+        private void DoAddHediffJob(Hediff hediff, BodyPartRecord bodyPart)
         {
             pawn.health.AddHediff(hediff, bodyPart, dinfo: new DamageInfo()); //TODO 加入DInfo，把简单的添加转换为Job
         }
@@ -401,194 +400,6 @@ namespace COF_Torture.Dialog
             {
                 menu.Draw(viewRect.NewCol(menu.width));
             }
-
-
-            /*var buttons_BodyPartGroupsCols = new List<List<ButtonInfo>>();
-            var buttons_BodyGroupsColsCount = Math.Ceiling((double)buttons_BodyPartGroups.Count / 10);
-            var aCols = (int)(buttons_BodyPartGroups.Count / buttons_BodyGroupsColsCount); //一竖有多少个
-            for (int i = 0; i < buttons_BodyPartGroups.Count; i += aCols)
-            {
-                buttons_BodyPartGroupsCols.Add(
-                    buttons_BodyPartGroups.Skip(i).Take(aCols).ToList());
-            }
-
-            Text.Font = GameFont.Small;
-
-            Rect outRect = new Rect(inRect);
-            outRect.yMin += StandardMargin;
-            //outRect.yMax -= StandardMargin * 2;
-            //outRect.width -= StandardMargin;
-
-            float MaxButtonHeight = EntryHeight;
-            float MaxWidthHediff = DefButtonWidth;
-            float MaxWidthBodyPartGroup = DefButtonWidth;
-            float MaxWidthBodyPart = DefButtonWidth;
-            float MaxWidthLabel = DefButtonWidth;
-            float DelXSize = DeleteXSize;
-            Calc();
-            var rectAggregatorMainButton = new RectAggregator(Rect.zero, this.GetHashCode());
-            var rectAggregatorLabel = new RectAggregator(Rect.zero, label_TodoList.GetHashCode());
-            var rectAggregatorBodyPart = new RectAggregator(Rect.zero, buttons_BodyParts.GetHashCode());
-            //DelXSize = MaxButtonHeight;
-            //GetSpace();
-            var width = Mathf.Max(rectAggregatorMainButton.Rect.width, outRect.width);
-            var height = Mathf.Max(rectAggregatorMainButton.Rect.height, outRect.height);
-            //var deltaWidth = this.windowRect.width - width;
-            //var deltaHeight = this.windowRect.height - height;
-            //Log.Message(deltaHeight + "" + deltaWidth);
-            DrawButtons();
-
-            void DrawButtons()
-            {
-                RectDivider viewRect = new RectDivider(new Rect(0.0f, 0.0f, width, height), this.GetHashCode());
-                //Log.Message(this.GetHashCode().ToString());
-
-                var rectHediff = viewRect.NewCol(MaxWidthHediff);
-                var rectPartGroupsCols = new List<RectDivider>();
-                for (var index = 0; index < buttons_BodyGroupsColsCount; index++)
-                    rectPartGroupsCols.Add(viewRect.NewCol(MaxWidthBodyPartGroup));
-                var rectToDoListOutRect = viewRect.NewCol(rectAggregatorLabel.Rect.width + StandardMargin);
-
-                Text.Font = GameFont.Small;
-                Widgets.Label(rectHediff.NewRow(MaxButtonHeight), "CT_UsableAbuseList".Translate());
-                foreach (var button in buttons_Hediffs)
-                {
-                    button.Draw(rectHediff.NewRow(MaxButtonHeight));
-                }
-
-                Widgets.DrawLineVertical(rectPartGroupsCols[0].Rect.x - StandardMargin / 2f, viewRect.Rect.y,
-                    outRect.height);
-                for (var index = 0; index < buttons_BodyGroupsColsCount; index++)
-                {
-                    var Col = buttons_BodyPartGroupsCols[index];
-                    var Rect = rectPartGroupsCols[index];
-                    if (index == 0)
-                        Widgets.Label(Rect.NewRow(MaxButtonHeight), "CT_PleaseChooseBodyGroup".Translate());
-                    else
-                        Rect.NewRow(MaxButtonHeight);
-
-                    foreach (var button in Col)
-                    {
-                        button.Draw(Rect.NewRow(MaxButtonHeight));
-                    }
-                }
-                
-                
-
-                var rectPartsOutRect = viewRect.NewCol(rectAggregatorBodyPart.Rect.width + StandardMargin);
-                Widgets.DrawLineVertical(rectPartsOutRect.Rect.x - StandardMargin / 2f,
-                    viewRect.Rect.y, outRect.height);
-                Widgets.Label(rectPartsOutRect.NewRow(MaxButtonHeight), "CT_PleaseChooseBody".Translate());
-
-                rectPartsOutRect = rectPartsOutRect.NewRow(outRect.height);
-                var rectBodyPartView = new RectDivider(
-                    new Rect(0.0f, 0.0f, rectAggregatorBodyPart.Rect.width, rectAggregatorBodyPart.Rect.height),
-                    this.GetHashCode());
-                Widgets.BeginScrollView(rectPartsOutRect.Rect, ref this.scrollPositionBodyParts, rectBodyPartView,
-                    false);
-                foreach (var button in buttons_BodyParts)
-                {
-                    button.Draw(rectBodyPartView.NewRow(MaxButtonHeight));
-                }
-
-                Widgets.EndScrollView();
-
-                Widgets.DrawLineVertical(rectPartsOutRect.Rect.x + rectPartsOutRect.Rect.width - StandardMargin / 2f,
-                    viewRect.Rect.y, outRect.height);
-                
-                
-                Button_ClearToDoList().Draw(rectToDoListOutRect.NewRow(MaxButtonHeight));
-                Button_Close().Draw(rectToDoListOutRect.NewRow(MaxButtonHeight));
-
-                rectToDoListOutRect = rectToDoListOutRect.NewRow(outRect.height);
-                var rectToDoListView = new RectDivider(
-                    new Rect(0.0f, 0.0f, rectAggregatorLabel.Rect.width, rectAggregatorLabel.Rect.height),
-                    this.GetHashCode());
-
-                Widgets.BeginScrollView(rectToDoListOutRect.Rect, ref this.scrollPositionToDoList, rectToDoListView,
-                    false);
-
-                Text.Font = GameFont.Small;
-                var rectToDoListDelButton = rectToDoListView.NewCol(DelXSize, HorizontalJustification.Right);
-                foreach (var stackLabel in label_TodoList)
-                {
-                    var rectLabel = rectToDoListView.NewRow(MaxButtonHeight);
-                    Widgets.Label(rectLabel, stackLabel.Label);
-                    Widgets.DrawHighlightIfMouseover(rectLabel);
-                    var rectButton = rectToDoListDelButton.NewRow(MaxButtonHeight).NewCol(DelXSize).NewRow(DelXSize);
-                    GUI.color = Color.red;
-                    if (Widgets.ButtonImage(rectButton, TexButton.DeleteX))
-                    {
-                        var buttonInfo = this.todoList.Find(info => info.label == stackLabel.Unit.label);
-                        this.todoList.Remove(buttonInfo);
-                    }
-
-                    GUI.color = Color.white;
-                    TooltipHandler.TipRegion(rectButton, "Delete".Translate());
-                }
-
-                Text.Font = GameFont.Small;
-
-                Widgets.EndScrollView();
-            }
-
-            void Calc()
-            {
-                CalcWidth("CT_UsableAbuseList".Translate(), ref MaxWidthHediff, GameFont.Small);
-                foreach (var button in buttons_Hediffs)
-                {
-                    CalcHeight(button, ref MaxButtonHeight, GameFont.Small);
-                    CalcWidth(button, ref MaxWidthHediff, GameFont.Small);
-                }
-
-                Text.Font = GameFont.Small;
-                MaxWidthBodyPartGroup = Mathf.Max(MaxWidthBodyPartGroup,
-                    Text.CalcSize("CT_PleaseChooseBodyGroup".Translate()).y / 2);
-                foreach (var button in buttons_BodyPartGroups)
-                {
-                    CalcHeight(button, ref MaxButtonHeight);
-                    CalcWidth(button, ref MaxWidthBodyPartGroup);
-                }
-
-                CalcWidth("CT_PleaseChooseBody".Translate(), ref MaxWidthBodyPart, GameFont.Small);
-                foreach (var bodyPart in pawn.health.hediffSet.GetNotMissingParts())
-                {
-                    CalcHeight(bodyPart.Label, ref MaxButtonHeight);
-                    CalcWidth(bodyPart.Label, ref MaxWidthBodyPart);
-                }
-
-                foreach (var stackLabel in label_TodoList)
-                {
-                    CalcHeight(stackLabel, ref MaxButtonHeight, GameFont.Small);
-                    CalcWidth(stackLabel, ref MaxWidthLabel, GameFont.Small);
-                }
-                //MaxWidthLabel += DelXSize;
-            }
-
-            void GetSpace()
-            {
-                rectAggregatorMainButton.NewCol(MaxWidthHediff);
-                for (var index = 0; index < buttons_BodyGroupsColsCount; index++)
-                    rectAggregatorMainButton.NewCol(MaxWidthBodyPartGroup);
-                rectAggregatorLabel.NewCol(MaxWidthLabel);
-                rectAggregatorLabel.NewCol(DelXSize);
-                rectAggregatorLabel.NewCol(StandardMargin);
-                rectAggregatorBodyPart.NewCol(MaxWidthBodyPart);
-                rectAggregatorBodyPart.NewCol(StandardMargin);
-
-                rectAggregatorMainButton.NewCol(rectAggregatorLabel.Rect.width);
-                rectAggregatorMainButton.NewCol(rectAggregatorBodyPart.Rect.width);
-
-                var maxRow = Mathf.Max(
-                    buttons_Hediffs.Count + 1, buttons_BodyPartGroupsCols[0].Count + 2
-                );
-                for (var i = 0; i < maxRow; i++)
-                    rectAggregatorMainButton.NewRow(MaxButtonHeight);
-                for (var i = 0; i < buttons_BodyParts.Count + 1; i++)
-                    rectAggregatorBodyPart.NewRow(MaxButtonHeight);
-                for (var i = 0; i < label_TodoList.Count + 2; i++)
-                    rectAggregatorLabel.NewRow(MaxButtonHeight);
-            }*/
         }
     }
 }

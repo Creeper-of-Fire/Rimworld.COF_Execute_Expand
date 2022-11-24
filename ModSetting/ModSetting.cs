@@ -34,7 +34,7 @@ namespace COF_Torture.ModSetting
 
             ls.GapLine(20f);
             ls.Label("Safe Mode Is Default".Translate());
-            ls.CheckboxLabeled("建筑物默认启用安全模式", ref Setting.isSafe);
+            ls.CheckboxLabeled("建筑物默认启用安全模式", ref Setting.isSecurityMode);
             
             ls.GapLine(20f);
             ls.Label("Immortal In Execution".Translate());
@@ -90,7 +90,7 @@ namespace COF_Torture.ModSetting
 
     public class ModSetting : ModSettings
     {
-        public bool isSafe = true;
+        public bool isSecurityMode = false;
         public bool isFeed = true;
         public bool leftHead = true;
         public bool isImmortal = true;
@@ -106,7 +106,7 @@ namespace COF_Torture.ModSetting
         public override void ExposeData()
         {
             base.ExposeData();
-            Scribe_Values.Look(ref isSafe, "isSafe", true); //建筑物初始是否启用安全模式
+            Scribe_Values.Look(ref isSecurityMode, "isSecurityMode", false); //建筑物初始是否启用安全模式
             Scribe_Values.Look(ref isFeed, "isFeed", true);
             Scribe_Values.Look(ref leftHead, "leftHead", true);
             Scribe_Values.Look(ref isImmortal, "isImmortal", true);
@@ -120,7 +120,7 @@ namespace COF_Torture.ModSetting
 
         public void InitData()
         {
-            isSafe = true;
+            isSecurityMode = false;
             isFeed = true;
             leftHead = true;
             isImmortal = true;
