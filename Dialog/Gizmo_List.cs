@@ -6,6 +6,7 @@ using COF_Torture.Things;
 using RimWorld;
 using UnityEngine;
 using Verse;
+using HediffDefOf = COF_Torture.Hediffs.HediffDefOf;
 
 namespace COF_Torture.Dialog
 {
@@ -33,6 +34,68 @@ namespace COF_Torture.Dialog
             SafeMode.isActive = () => ButtonOwner.isSafe;
             SafeMode.toggleAction = () => ButtonOwner.isSafe = !ButtonOwner.isSafe;
             yield return SafeMode;
+        }
+
+        public static IEnumerable<Command> Gizmo_AbuseMenu(this Pawn pawn, IWithGiver hediff)
+        {
+            if (hediff != null)
+            {
+                foreach (var command in Gizmo_AbuseMenu(hediff.GiverAsInterface))
+                {
+                    yield return command;
+                }
+            }
+        }
+
+        public static IEnumerable<Command> Gizmo_AbuseMenu(this ITortureThing thing)
+        {
+            Command_Action command = new Command_Action();
+            command.defaultLabel = "CT_AbuseMenu".Translate();
+            command.icon = ContentFinder<Texture2D>.Get("UI/Commands/LaunchReport");
+            command.defaultDesc = "CT_AbuseMenuDesc".Translate();
+            command.action = delegate
+            {
+                var Dialog = new Dialog_AbuseMenu(thing.victim, thing);
+                Find.WindowStack.Add(Dialog);
+            };
+            yield return command;
+        }
+
+        public static IEnumerable<Command> Gizmo_TortureThingManager(this Pawn pawn)
+        {
+            Command_Action commandAction = new Command_Action();
+            commandAction.defaultLabel = "CT_TortureThingManager".Translate();
+            commandAction.icon = ContentFinder<Texture2D>.Get("UI/Commands/LaunchReport");
+            commandAction.defaultDesc = "CT_TortureThingManagerDesc".Translate();
+            commandAction.action = delegate
+            {
+                bool flag = false;
+                Dialog_TortureThingManager Dialog = new Dialog_TortureThingManager(pawn);
+                foreach (var window in Find.WindowStack.Windows)
+                {
+                    if (window is Dialog_TortureThingManager dialogTortureThingManager)
+                    {
+                        //if (dialogTortureThingManager.pawn == __instance)
+                        Dialog = dialogTortureThingManager;
+                        flag = true;
+                    }
+                }
+
+                if (flag)
+                {
+                    Find.WindowStack.TryRemove(Dialog);
+                }
+                else
+                {
+                    Find.WindowStack.Add(Dialog);
+                }
+            };
+            yield return commandAction;
+        }
+
+        public static IEnumerable<Command> Gizmo_TortureThingManager(this ITortureThing thing)
+        {
+            return Gizmo_TortureThingManager(thing.victim);
         }
 
         /// <summary>
@@ -91,6 +154,53 @@ namespace COF_Torture.Dialog
                 com.hotKey = KeyBindingDefOf.Misc5;
                 com.icon = GizmoIcon.texSkull;
                 com.action = hediffComp.StopProgress;
+            }
+
+            yield return com;
+        }
+
+        /// <summary>
+        /// 开始或者结束处刑
+        /// </summary>
+        /// <param name="tortureThing">处刑建筑物</param>
+        public static IEnumerable<Command> Gizmo_StartAndStopExecute(this ITortureThing tortureThing)
+        {
+            var com = new Command_Action();
+            if (!tortureThing.inExecuteProgress)
+            {
+                com.defaultLabel = "CT_startExecute".Translate();
+                com.defaultDesc = "CT_startExecute".Translate();
+                com.hotKey = KeyBindingDefOf.Misc5;
+                com.icon = GizmoIcon.texSkull;
+                com.action = delegate
+                {
+                    foreach (var iWithGiver in tortureThing.hasGiven)
+                    {
+                        if (iWithGiver is Hediff iHediff)
+                        {
+                            var comp = iHediff.TryGetComp<HediffComp_ExecuteIndicator>();
+                            comp.StartProgress();
+                        }
+                    }
+                };
+            }
+            else
+            {
+                com.defaultLabel = "CT_stopExecute".Translate();
+                com.defaultDesc = "CT_stopExecute".Translate();
+                com.hotKey = KeyBindingDefOf.Misc5;
+                com.icon = GizmoIcon.texSkull;
+                com.action = delegate
+                {
+                    foreach (var iWithGiver in tortureThing.hasGiven)
+                    {
+                        if (iWithGiver is Hediff iHediff)
+                        {
+                            var comp = iHediff.TryGetComp<HediffComp_ExecuteIndicator>();
+                            comp.StopProgress();
+                        }
+                    }
+                };
             }
 
             yield return com;

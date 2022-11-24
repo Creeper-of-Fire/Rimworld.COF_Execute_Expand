@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using UnityEngine;
 using Verse;
 
@@ -7,8 +6,8 @@ namespace COF_Torture.Component
     public class HediffCompProperties_BecomePermanent : HediffCompProperties
     {
         public float WoundCrackingProbabilityPerHour = 0f;
-        [MustTranslate] public string permanentLabel;
-        [MustTranslate] public string permanentLabelExtraDescription;
+        [MustTranslate] public string permanentLabel = "";
+        [MustTranslate] public string permanentLabelExtraDescription="";
 
         public HediffCompProperties_BecomePermanent() => this.compClass = typeof(HediffComp_BecomePermanent);
     }

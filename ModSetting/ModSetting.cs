@@ -101,7 +101,7 @@ namespace COF_Torture.ModSetting
         public UnityEngine.Vector2 scrollPos = UnityEngine.Vector2.zero;//这玩意哪来的？我怎么一觉醒来多了这行代码？
         public float topTransparency = 1.0f;
         public float mistakeStartUp = 0.0f;
-        public bool controlMenuOn = true;
+        public bool controlMenuOn = false;
 
         public override void ExposeData()
         {
@@ -112,7 +112,7 @@ namespace COF_Torture.ModSetting
             Scribe_Values.Look(ref isImmortal, "isImmortal", true);
             Scribe_Values.Look(ref isRemoveTempInjuries, "isRemoveTempInjuries", true);
             Scribe_Values.Look(ref isNoWayBack, "isNoWayBack", false);
-            Scribe_Values.Look(ref controlMenuOn,"controlMenuOn",true);
+            Scribe_Values.Look(ref controlMenuOn,"controlMenuOn",false);
             Scribe_Values.Look(ref topTransparency, "topTransparency", 1f);
             Scribe_Values.Look(ref mistakeStartUp, "mistakeStartUp", 0f);
             Scribe_Values.Look(ref executeHours, "executeHours", 4);
@@ -128,7 +128,7 @@ namespace COF_Torture.ModSetting
             isNoWayBack = false;
             topTransparency = 1f;
             mistakeStartUp = 0f;
-            controlMenuOn = true;
+            controlMenuOn = false;
             //testInt = 2500;
         }
     }

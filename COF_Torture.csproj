@@ -66,6 +66,7 @@
         <Compile Include="Component\CompEffectForBondage.cs" />
         <Compile Include="Component\CompBuildingSitHediffGiver.cs" />
         <Compile Include="Component\CompUsableBondageBed.cs" />
+        <Compile Include="Component\Comp_AffectedByToolChests.cs" />
         <Compile Include="Component\HediffComp_BecomePermanent.cs" />
         <Compile Include="Component\HediffComp_ExecuteEffector_AddHediff.cs" />
         <Compile Include="Component\HediffComp_ExecuteEffector.cs" />
@@ -75,14 +76,18 @@
         <Compile Include="Component\HediffComp_OrgasmIndicator.cs" />
         <Compile Include="Component\HediffComp_SexualHeat.cs" />
         <Compile Include="Damages\DamageDefOf.cs" />
+        <Compile Include="Dialog\ButtonUnit.cs" />
+        <Compile Include="Dialog\DialogUnit.cs" />
         <Compile Include="Dialog\DialogUtility.cs" />
         <Compile Include="Dialog\Dialog_AbuseMenu.cs" />
         <Compile Include="Dialog\Dialog_TortureThingManager.cs" />
         <Compile Include="Dialog\Gizmo_List.cs" />
+        <Compile Include="Dialog\VerticalMenu.cs" />
+        <Compile Include="Dialog\VerticalTitleWithMenu.cs" />
         <Compile Include="Genes\GeneDefOf.cs" />
         <Compile Include="Genes\Gene_SpeedingRegeneration.cs" />
         <Compile Include="Hediffs\HediffDefOf.cs" />
-        <Compile Include="Hediffs\HediffWithBodyPartGroupsDef.cs" />
+        <Compile Include="Hediffs\MaltreatDef.cs" />
         <Compile Include="Hediffs\Hediff_AbuseInjury.cs" />
         <Compile Include="Hediffs\Hediff_ExecuteInjury.cs" />
         <Compile Include="Hediffs\Hediff_Fixed.cs" />
@@ -111,6 +116,7 @@
         <Compile Include="Things\BarbecueCorpse.cs" />
         <Compile Include="Things\BuildingDef.cs" />
         <Compile Include="Things\BuildingDefOf.cs" />
+        <Compile Include="Things\Building_ToolChest.cs" />
         <Compile Include="Things\Building_TortureBed.cs" />
         <Compile Include="Things\ThingCategoryDefOf.cs" />
         <Compile Include="TortureUtility.cs" />

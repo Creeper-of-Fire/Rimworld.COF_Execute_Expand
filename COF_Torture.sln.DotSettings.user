@@ -14,4 +14,5 @@
   &lt;Assembly Path="C:\Program Files (x86)\Steam\steamapps\workshop\content\294100\2206107940\Assemblies\DeathRattle.dll" /&gt;&#xD;
   &lt;Assembly Path="C:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\rjw\1.4\Assemblies\RJW.dll" /&gt;&#xD;
 &lt;/AssemblyExplorer&gt;</s:String>
+	<s:Boolean x:Key="/Default/UserDictionary/Words/=refee/@EntryIndexedValue">True</s:Boolean>
 	</wpf:ResourceDictionary>

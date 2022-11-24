@@ -27,8 +27,8 @@ namespace COF_Torture.Patch
                 __instance.Drawer.renderer.graphics.ResolveAllGraphics();
                 //__instance.story.SkinColorBase = new Color(5, 97, 4);
             }
-            Log.Message(""+__instance.story?.SkinColor);
-            Log.Message(""+__instance.story?.SkinColorOverriden);
+            //Log.Message(""+__instance.story?.SkinColor);
+            //Log.Message(""+__instance.story?.SkinColorOverriden);
             float a;
             if (currentBed != null)
                 a = currentBed.Rotation.AsAngle;

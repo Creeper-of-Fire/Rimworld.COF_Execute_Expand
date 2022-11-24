@@ -1,5 +1,7 @@
 using System.Collections.Generic;
+using System.Linq;
 using COF_Torture.Dialog;
+using COF_Torture.Hediffs;
 using COF_Torture.ModSetting;
 using HarmonyLib;
 using UnityEngine;
@@ -17,54 +19,15 @@ namespace COF_Torture.Patch
         {
             foreach (Gizmo gizmo in __result)
                 yield return gizmo;
-
-            Command_Action command = new Command_Action();
-            command.defaultLabel = "CT_AbuseMenu".Translate();
-            command.icon = ContentFinder<Texture2D>.Get("UI/Commands/LaunchReport");
-            command.defaultDesc = "CT_AbuseMenuDesc".Translate();
-            command.action = delegate
-            {
-                var Dialog = new Dialog_AbuseMenu(__instance);
-                Find.WindowStack.Add(Dialog);
-            };
-            yield return command;
-
+            var ___hediff = __instance.health.hediffSet.GetFirstHediffOfDef(HediffDefOf.COF_Torture_Fixed);
+            foreach (var gizmo in __instance.Gizmo_AbuseMenu((IWithGiver)___hediff))
+                yield return gizmo;
 
             if (!ModSettingMain.Instance.Setting.controlMenuOn) yield break;
-            foreach (var h in __instance.health.hediffSet.hediffs)
+            if (__instance.health.hediffSet.hediffs.OfType<IWithGiver>().Any())
             {
-                if (h is IWithGiver)
-                {
-                    Command_Action commandAction = new Command_Action();
-                    commandAction.defaultLabel = "CT_TortureThingManager".Translate();
-                    commandAction.icon = ContentFinder<Texture2D>.Get("UI/Commands/LaunchReport");
-                    commandAction.defaultDesc = "CT_TortureThingManagerDesc".Translate();
-                    commandAction.action = delegate
-                    {
-                        bool flag = false;
-                        Dialog_TortureThingManager Dialog = new Dialog_TortureThingManager(__instance);
-                        foreach (var window in Find.WindowStack.Windows)
-                        {
-                            if (window is Dialog_TortureThingManager dialogTortureThingManager)
-                            {
-                                //if (dialogTortureThingManager.pawn == __instance)
-                                Dialog = dialogTortureThingManager;
-                                flag = true;
-                            }
-                        }
-
-                        if (flag)
-                        {
-                            Find.WindowStack.TryRemove(Dialog);
-                        }
-                        else
-                        {
-                            Find.WindowStack.Add(Dialog);
-                        }
-                    };
-                    yield return commandAction;
-                    break;
-                }
+                foreach (var gizmo in __instance.Gizmo_TortureThingManager())
+                    yield return gizmo;
             }
         }
     }

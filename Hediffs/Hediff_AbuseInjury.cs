@@ -13,8 +13,8 @@ namespace COF_Torture.Hediffs
         {
             get
             {
-                if (this.def is HediffWithBodyPartGroupsDef hediffWithBodyPartGroups)
-                    return hediffWithBodyPartGroups.ableBodyPartGroupDefs;
+                if (this.def is MaltreatDef hediffWithBodyPartGroups)
+                    return hediffWithBodyPartGroups.maltreat.ableBodyPartGroupDefs;
                 return new List<BodyPartGroupDef>();
             }
         }
@@ -30,7 +30,7 @@ namespace COF_Torture.Hediffs
                         return comp.Props.permanentLabel;
                 }
 
-                return base.LabelBase;
+                return this.def.label;
             }
         }
 
@@ -38,6 +38,11 @@ namespace COF_Torture.Hediffs
         {
             get
             {
+                HediffComp_BecomePermanent comp = this.TryGetComp<HediffComp_BecomePermanent>();
+                if (comp != null && comp.IsPermanent)
+                {
+                    return "";
+                }
                 StringBuilder stringBuilder = new StringBuilder();
                 stringBuilder.Append(base.LabelInBrackets);
                 if (this.sourceHediffDef != null)

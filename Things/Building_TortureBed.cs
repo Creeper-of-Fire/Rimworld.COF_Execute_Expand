@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using System.Linq;
-using COF_Torture.Component;
 using COF_Torture.Dialog;
 using COF_Torture.Jobs;
 using COF_Torture.ModSetting;
+using JetBrains.Annotations;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -13,11 +13,10 @@ namespace COF_Torture.Things
 {
     public class Building_TortureBed : Building_Bed, ITortureThing
     {
-        private Pawn _victim;
         //public Pawn GetVictim() => victimAlive;
-        
+
         private bool _inExecuteProgress;
-        public bool hasVictim => !_victim.DestroyedOrNull();
+        public bool hasVictim => !victim.DestroyedOrNull();
 
         public bool inExecuteProgress => _inExecuteProgress;
 
@@ -25,8 +24,14 @@ namespace COF_Torture.Things
         {
             _inExecuteProgress = true;
         }
-        
-        public Pawn victim => _victim;
+
+        public List<IWithGiver> hasGiven { get; set; } = new List<IWithGiver>();
+
+        public Pawn victim
+        {
+            get => _victim;
+            private set => _victim = value;
+        }
 
         public void stopExecuteProgress()
         {
@@ -37,6 +42,7 @@ namespace COF_Torture.Things
         /// isUsed表示这个道具是否被使用过（指是否有人死在里面），会影响道具的图片显示
         /// </summary>
         public bool isUsed;
+
         /// <summary>
         /// 安全模式是否启用
         /// </summary>
@@ -64,6 +70,7 @@ namespace COF_Torture.Things
         public Graphic graphic_blood;
         public Graphic graphic_blood_top;
         public Graphic graphic_blood_top_using;
+        private Pawn _victim;
 
         public override void ExposeData()
         {
@@ -97,22 +104,22 @@ namespace COF_Torture.Things
             base.TickRare();
             //if (!isUsing)
             //    return;
-            if (_victim != null)
+            if (victim != null)
             {
-                if (!_victim.Dead)
+                if (!victim.Dead)
                 {
-                    if (_victim.jobs != null && _victim.jobs.curJob.def == JobDefOf.Wait_Downed)
+                    if (victim.jobs != null && victim.jobs.curJob.def == JobDefOf.Wait_Downed)
                     {
                         //Job job = JobMaker.MakeJob(COF_Torture.Jobs.JobDefOf.UseBondageAlone,
                         //    (LocalTargetInfo)(Verse.Thing)this);
                         //job.count = 1;
                         Log.Message("[COF_TORTURE]被束缚的殖民者突然倒地，试图进行修复（很可能是殖民者被传送了或者" + this + "的所有者发生变更）");
-                        Pawn_HealthTracker victimHealth = _victim.health;
-                        _victim.jobs.ClearQueuedJobs();
-                        _victim.jobs.StopAll();
+                        Pawn_HealthTracker victimHealth = victim.health;
+                        victim.jobs.ClearQueuedJobs();
+                        victim.jobs.StopAll();
                         //RemoveVictim();
-                        _victim = victimHealth.hediffSet.pawn;
-                        CT_Toils_GoToBed.BugFixBondageIntoBed(this, _victim);
+                        victim = victimHealth.hediffSet.pawn;
+                        CT_Toils_GoToBed.BugFixBondageIntoBed(this, victim);
                     }
                 }
             }
@@ -126,12 +133,12 @@ namespace COF_Torture.Things
 
             void SetVictimPlace(Pawn p)
             {
-                if (_victim == null)
+                if (victim == null)
                 {
-                    this._victim = p;
+                    this.victim = p;
                     lastOwnerList = new List<Pawn>(OwnersForReading);
                     OwnersForReading.Clear();
-                    this.CompAssignableToPawn.TryAssignPawn(_victim);
+                    this.CompAssignableToPawn.TryAssignPawn(victim);
                 }
             }
 
@@ -150,16 +157,17 @@ namespace COF_Torture.Things
                 }
             }
         }
+
         public void ReleaseVictim()
         {
             this._inExecuteProgress = false;
             this.showVictimBody = true;
-            if (_victim == null) return;
-            TortureUtility.ShouldNotDie(_victim);
+            if (victim == null) return;
+            TortureUtility.ShouldNotDie(victim);
             this.RemoveVictimHediff();
-            if (TortureUtility.ShouldBeDead(_victim)) //放下来时如果会立刻死，就改变死因为本comp造成
+            if (TortureUtility.ShouldBeDead(victim)) //放下来时如果会立刻死，就改变死因为本comp造成
             {
-                TortureUtility.KillVictimDirect(_victim);
+                TortureUtility.KillVictimDirect(victim);
             }
 
             this.RemoveVictimPlace();
@@ -173,8 +181,8 @@ namespace COF_Torture.Things
 
         private void RemoveVictimPlace()
         {
-            this.CompAssignableToPawn.TryUnassignPawn(_victim);
-            _victim = null;
+            this.CompAssignableToPawn.TryUnassignPawn(victim);
+            victim = null;
             OwnersForReading.Clear();
             if (lastOwnerList != null)
                 foreach (Pawn p in lastOwnerList)
@@ -185,9 +193,9 @@ namespace COF_Torture.Things
 
         private void RemoveVictimHediff()
         {
-            if (_victim != null)
+            if (victim != null)
             {
-                foreach (var hediffR in _victim.health.hediffSet.hediffs)
+                foreach (var hediffR in victim.health.hediffSet.hediffs)
                 {
                     if (hediffR == null) continue;
                     if (!(hediffR is IWithGiver hg) || hg.Giver == null) continue;
@@ -198,7 +206,7 @@ namespace COF_Torture.Things
                     //Log.Message("[COF_TORTURE]发现有主hediff" + hediffR + "已经去除主人");
                 }
 
-                _victim.health.HealthTick();//立即进行一次HediffTick以移除应当消失的Hediff
+                victim.health.HealthTick(); //立即进行一次HediffTick以移除应当消失的Hediff
             }
             else
             {
@@ -384,46 +392,34 @@ namespace COF_Torture.Things
 
         public override IEnumerable<Gizmo> GetGizmos()
         {
-            foreach (Gizmo gizmo in base.GetGizmos())
+            foreach (var gizmo in base.GetGizmos())
             {
-                if (gizmo is Command_Toggle ct)
+                if (gizmo is Command command)
                 {
-                    if (ct.defaultLabel == "CommandBedSetForPrisonersLabel".Translate())
+                    if (command.defaultLabel == "CommandThingSetOwnerLabel".Translate() && hasVictim)
                     {
-                        if (hasVictim)
-                        {
-                            gizmo.Disable("CT_CommandBondageBedDisableToSetWhenUsing".Translate());
-                        }
+                        //gizmo.Disable("CT_CommandBondageBedDisableToSetWhenUsing".Translate());
+                        continue;
                     }
-
-                    if (ct.defaultLabel == "CommandBedSetAsMedicalLabel".Translate())
+                    if (command.defaultLabel == "CommandBedSetForPrisonersLabel".Translate() && hasVictim)
+                    {
+                        //gizmo.Disable("CT_CommandBondageBedDisableToSetWhenUsing".Translate());
+                        continue;
+                    }
+                    if (command.defaultLabel == "CommandBedSetAsMedicalLabel".Translate())
                     {
                         continue;
                     }
                 }
 
-                if (gizmo is Command_Action ca)
+                if (ModsConfig.IdeologyActive && gizmo is Command_SetBedOwnerType && hasVictim)
                 {
-                    if (ca.defaultLabel == "CommandThingSetOwnerLabel".Translate())
-                    {
-                        if (hasVictim)
-                        {
-                            gizmo.Disable("CT_CommandBondageBedDisableToSetWhenUsing".Translate());
-                        }
-                    }
-                }
-
-                if (ModsConfig.IdeologyActive && gizmo is Command_SetBedOwnerType)
-                {
-                    if (hasVictim)
-                    {
-                        gizmo.Disable("CT_CommandBondageBedDisableToSetWhenUsing".Translate());
-                    }
+                    //gizmo.Disable("CT_CommandBondageBedDisableToSetWhenUsing".Translate());
+                    continue;
                 }
 
                 yield return gizmo;
             }
-            if (ModSettingMain.Instance.Setting.controlMenuOn) yield break;
 
             if (Faction == Faction.OfPlayer)
             {
@@ -431,11 +427,33 @@ namespace COF_Torture.Things
                 {
                     yield return com;
                 }
-                if (!ModSettingMain.Instance.Setting.isNoWayBack && _victim != null)
+
+                if (victim != null)
                 {
-                    foreach (var com in this.Gizmo_ReleaseBondageBed())
+                    foreach (var com in this.Gizmo_StartAndStopExecute())
                     {
                         yield return com;
+                    }
+
+                    foreach (var com in this.Gizmo_AbuseMenu())
+                    {
+                        yield return com;
+                    }
+
+                    if (!ModSettingMain.Instance.Setting.isNoWayBack)
+                    {
+                        foreach (var com in this.Gizmo_ReleaseBondageBed())
+                        {
+                            yield return com;
+                        }
+                    }
+
+                    if (ModSettingMain.Instance.Setting.controlMenuOn)
+                    {
+                        foreach (var com in this.Gizmo_TortureThingManager())
+                        {
+                            yield return com;
+                        }
                     }
                 }
             }

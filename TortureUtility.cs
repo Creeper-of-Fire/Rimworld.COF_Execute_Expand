@@ -266,6 +266,7 @@ namespace COF_Torture
                 }
                 //unfiledGroups.Add(bodyPartGroup.Key);
             }
+
             unfiledParts = unfiledParts.Distinct().ToList();
             ReGroup();
             return regroupedGroups;
@@ -310,6 +311,25 @@ namespace COF_Torture
                 return minGroup;
             }
         }
+
+        /// <summary>
+        /// 转换列表内部数据的类型
+        /// </summary>
+        /// <param name="list1">原列表</param>
+        /// <typeparam name="T1">原类型</typeparam>
+        /// <typeparam name="T2">目标类型</typeparam>
+        /// <returns>转换后列表</returns>
+        public static List<T2> ListReform<T1, T2>(this List<T1> list1)
+        {
+            var list2 = new List<T2>();
+            foreach (var value1 in list1)
+            {
+                if (value1 is T2 value2)
+                    list2.Add(value2);
+            }
+
+            return list2;
+        }
     }
 
     /// <summary>
@@ -342,6 +362,8 @@ namespace COF_Torture
         /// 暂停处刑
         /// </summary>
         void stopExecuteProgress();
+
+        List<IWithGiver> hasGiven { get; set; }
 
         /// <summary>
         /// 处刑对象

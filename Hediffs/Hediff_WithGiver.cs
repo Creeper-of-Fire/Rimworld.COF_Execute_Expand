@@ -23,18 +23,22 @@ namespace COF_Torture.Hediffs
         public Thing Giver
         {
             get => this.giver;
-            set => this.giver = value;
+            set
+            {
+                if (value is ITortureThing iValue)
+                    iValue.hasGiven.Add(this);
+                this.giver = value;
+            }
         }
 
         public ITortureThing GiverAsInterface
         {
             get => (ITortureThing)giver;
-            set => giver = (Thing)value;
+            set
+            {
+                value.hasGiven.Add(this);
+                giver = (Thing)value;
+            }
         }
-    }
-
-    public abstract class WithGiver
-    {
-        public Thing giver;
     }
 }

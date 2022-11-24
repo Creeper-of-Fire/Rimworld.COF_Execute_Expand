@@ -3,10 +3,8 @@ using System.Linq;
 using COF_Torture.Component;
 using COF_Torture.Hediffs;
 using COF_Torture.Things;
-using RimWorld;
 using UnityEngine;
 using Verse;
-using Verse.Sound;
 using static COF_Torture.Dialog.DialogUtility;
 
 namespace COF_Torture.Dialog
@@ -37,11 +35,11 @@ namespace COF_Torture.Dialog
             //this.absorbInputAroundWindow = true;
         }
 
-        private static List<ButtonInfo> TryGetButtons(object ButtonOwner)
+        private static List<ButtonUnit> TryGetButtons(object ButtonOwner)
         {
             try
             {
-                List<ButtonInfo> buttons = new List<ButtonInfo>();
+                List<ButtonUnit> buttons = new List<ButtonUnit>();
                 if (ButtonOwner is Hediff h)
                     buttons = GetButtons(h);
                 else if (ButtonOwner is Thing t)
@@ -53,10 +51,10 @@ namespace COF_Torture.Dialog
                 Log.Error("[COF_Torture]" + ButtonOwner + "拥有错误的类型或其他错误" + ButtonOwner.GetType());
             }
 
-            return new List<ButtonInfo>();
+            return new List<ButtonUnit>();
         }
 
-        private static List<ButtonInfo> GetButtons(Hediff ButtonOwner)
+        private static List<ButtonUnit> GetButtons(Hediff ButtonOwner)
         {
             if (ButtonOwner is Hediff_Fixed hf)
                 return getButtonInfo(hf.Gizmo_ReleaseBondageBed()).ToList();
@@ -66,14 +64,14 @@ namespace COF_Torture.Dialog
             var hcSas = ButtonOwner.TryGetComp<HediffComp_SwitchAbleSeverity>();
             if (hcSas != null)
                 return getButtonInfo(hcSas.Gizmo_StageUpAndDown()).ToList();
-            return new List<ButtonInfo>();
+            return new List<ButtonUnit>();
         }
 
-        private static List<ButtonInfo> GetButtons(Thing ButtonOwner)
+        private static List<ButtonUnit> GetButtons(Thing ButtonOwner)
         {
             if (ButtonOwner is Building_TortureBed btb)
                 return getButtonInfo(btb.Gizmo_SafeMode()).ToList();
-            return new List<ButtonInfo>();
+            return new List<ButtonUnit>();
         }
 
         private static void CalcButtonWidth(object menuColumn, ref float maxButtonWidth)
@@ -249,7 +247,8 @@ namespace COF_Torture.Dialog
                 foreach (var button in TryGetButtons(menuColumn))
                 {
                     var rectButton = columnRect.NewCol(maxButtonWidth, HorizontalJustification.Right);
-                    button.Draw(rectButton,gameFont:GameFont.Tiny);
+                    button.font = GameFont.Tiny;
+                    button.Draw(rectButton);
                 }
 
                 Text.Font = GameFont.Medium;
