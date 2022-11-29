@@ -1,4 +1,6 @@
+using COF_Torture.Data;
 using COF_Torture.Things;
+using COF_Torture.Utility;
 using Verse;
 
 namespace COF_Torture.Component
@@ -18,7 +20,7 @@ namespace COF_Torture.Component
             }
             else
             {
-                Log.Error("[COF_Torture]类型" + this.GetType() + "未找到对应的comp");
+                ModLog.Error("类型" + this.GetType() + "未找到对应的comp");
             }
         }
 
@@ -33,7 +35,7 @@ namespace COF_Torture.Component
             }
             else
             {
-                Log.Error("[COF_Torture]类型" + this.GetType() + "未找到对应的comp");
+                ModLog.Error("类型" + this.GetType() + "未找到对应的comp");
             }
         }
     }

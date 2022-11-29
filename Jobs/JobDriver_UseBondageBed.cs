@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using COF_Torture.Data;
 using COF_Torture.Hediffs;
 using RimWorld;
 using Verse;
@@ -36,7 +37,7 @@ namespace COF_Torture.Jobs
                     yield return JobDriver_ReleaseBondageBed.ReleaseVictim(That_bed);
                 else
                 {
-                    Log.Error("[COF_TORTURE]试图解绑一个殖民者，但是其‘捆绑’状态没有给予者");
+                    ModLog.Error("试图解绑一个殖民者，但是其‘捆绑’状态没有给予者");
                     hediffFixed.Severity = 0.0f;
                 }
             }

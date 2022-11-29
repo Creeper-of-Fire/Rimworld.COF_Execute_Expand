@@ -1,7 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using COF_Torture.Data;
+using COF_Torture.Dialog.Menus;
+using COF_Torture.Dialog.Units;
 using COF_Torture.Hediffs;
+using COF_Torture.Utility;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -23,8 +27,8 @@ namespace COF_Torture.Dialog
         /// <summary>
         /// 所有可用的身体部分
         /// </summary>
-        private Dictionary<BodyPartGroupDef, List<BodyPartRecord>> ableBodyPartGroupsDict =
-            new Dictionary<BodyPartGroupDef, List<BodyPartRecord>>();
+        private Dictionary<string, List<BodyPartRecord>> ableBodyPartGroupsDict =
+            new Dictionary<string, List<BodyPartRecord>>();
 
         /// <summary>
         /// 所有可用的Hediff
@@ -39,12 +43,12 @@ namespace COF_Torture.Dialog
         /// <summary>
         /// 选中的身体部分
         /// </summary>
-        private BodyPartGroupDef focusBodyPartGroup;
+        private string focusBodyPartGroup;
 
         /// <summary>
         /// 预执行的指令（在窗口关闭后执行）
         /// </summary>
-        private readonly List<ButtonUnit> todoList = new List<ButtonUnit>();
+        private readonly List<ButtonTextUnit> todoList = new List<ButtonTextUnit>();
 
         /// <summary>
         /// 菜单
@@ -105,7 +109,7 @@ namespace COF_Torture.Dialog
                 }
                 else if (Prefs.DevMode)
                 {
-                    Log.Message("错误：Dialog_AbuseMenu不应当在不能连接的建筑物上绘制");
+                    ModLog.Message("错误：Dialog_AbuseMenu不应当在不能连接的建筑物上绘制");
                 }
 
                 Set_AbleBodyPartGroups();
@@ -136,23 +140,28 @@ namespace COF_Torture.Dialog
         /// <returns>一个执行了去重的身体部分-身体部件Dictionary</returns>
         private void Set_AbleBodyPartGroups()
         {
-            var ablePartGroupsDict = new Dictionary<BodyPartGroupDef, List<BodyPartRecord>>();
+            var ablePartGroupsDict = new Dictionary<string, List<BodyPartRecord>>();
             foreach (var bodyPart in pawn.health.hediffSet.GetNotMissingParts())
             {
                 foreach (var group in bodyPart.groups)
                 {
-                    ablePartGroupsDict.DictListAdd(group, bodyPart);
+                    if (group.defName == "MiddleFingers" || group.defName == "UpperHead" || group.defName == "Hands")
+                        continue;
+                    if (group.labelShort != null)
+                        ablePartGroupsDict.DictListAdd(group.labelShort, bodyPart);
+                    else
+                        ablePartGroupsDict.DictListAdd(group.label, bodyPart);
                 }
             }
 
-            ableBodyPartGroupsDict = TortureUtility.untieNestedDict(ablePartGroupsDict);
+            ableBodyPartGroupsDict = TortureUtility.untieNestedDict(ablePartGroupsDict, "CT_Others".Translate(), 3);
         }
 
         /// <summary>
         /// 一级菜单，获得所有可选Hediff
         /// </summary>
         /// <returns>Hediff列表，如果没被选中则处于disable状态</returns>
-        private List<ButtonUnit> Buttons_Hediffs()
+        private List<ButtonTextUnit> Buttons_Hediffs()
         {
             return AllHediff.Select(Button_SetHediff).ToList();
         }
@@ -161,9 +170,9 @@ namespace COF_Torture.Dialog
         /// 二级菜单，获得所有可选BodyPartGroup，由focusHediff定义
         /// </summary>
         /// <returns>BodyPartGroup列表，如果没被选中则处于inactive状态</returns>
-        private List<ButtonUnit> Buttons_BodyPartGroups()
+        private List<ButtonTextUnit> Buttons_BodyPartGroups()
         {
-            List<ButtonUnit> list = new List<ButtonUnit>();
+            List<ButtonTextUnit> list = new List<ButtonTextUnit>();
             foreach (var info in ableBodyPartGroupsDict.Keys)
             {
                 list.Add(Button_SetBodyPartGroup(info));
@@ -176,16 +185,16 @@ namespace COF_Torture.Dialog
         /// 三级菜单，获得所有可用BodyPart，由focusHediff和focusBodyPartGroup定义，并且打包为动作
         /// </summary>
         /// <returns>动作列表（由focusHediff和BodyPart参与的动作）</returns>
-        private List<ButtonUnit> Buttons_BodyParts()
+        private List<ButtonTextUnit> Buttons_BodyParts()
         {
             if (this.focusHediff == null || focusBodyPartGroup == null ||
                 !ableBodyPartGroupsDict.ContainsKey(focusBodyPartGroup))
-                return new List<ButtonUnit>();
+                return new List<ButtonTextUnit>();
             else
                 return ableBodyPartGroupsDict[focusBodyPartGroup].Select(Button_SetJob).ToList();
         }
 
-        private ButtonUnit Button_SetHediff(MaltreatDef hediff)
+        private ButtonTextUnit Button_SetHediff(MaltreatDef hediff)
         {
             var inactive = this.focusHediff != hediff;
             var action = new Action(delegate
@@ -196,14 +205,15 @@ namespace COF_Torture.Dialog
                     this.focusHediff = null;
                 flagShouldRefresh = true;
             });
-            var button = new ButtonUnit(action, hediff.GetLabelAction(),
-                hediff.GetDescriptionAction() + "\n\n"
-                                              + "CT_Offer".Translate() + hediff.maltreat.enableByBuilding.label,
-                inactive: inactive);
+            var button = new ButtonTextUnit();
+            button.InitInfo(action, hediff.GetLabelAction(),
+                hediff.GetDescriptionAction()
+                + "\n\n" + "CT_Offer".Translate() + hediff.maltreat.enableByBuilding.label,
+                _inactive: inactive);
             return button;
         }
 
-        private ButtonUnit Button_SetBodyPartGroup(BodyPartGroupDef bodyPartGroupDef)
+        private ButtonTextUnit Button_SetBodyPartGroup(string bodyPartGroupDef)
         {
             var inactive = this.focusBodyPartGroup != bodyPartGroupDef;
             var action = new Action(delegate
@@ -216,144 +226,241 @@ namespace COF_Torture.Dialog
                 //Log.Message("" + focusBodyPartGroup);
             });
 
-            var button = new ButtonUnit(action, bodyPartGroupDef.label, "",
-                disabled: ShouldBodyPartGroupDisabled(bodyPartGroupDef), inactive: inactive);
+            var button = new ButtonTextUnit();
+            button.InitInfo(action, bodyPartGroupDef, "",
+                _disabled: ShouldBodyPartGroupDisabled(bodyPartGroupDef), _inactive: inactive);
             return button;
         }
 
-        private bool ShouldBodyPartGroupDisabled(BodyPartGroupDef bodyPartGroupDef)
+        private bool ShouldBodyPartGroupDisabled(string bodyGroup)
         {
+            bool GroupDisabled = false;
+            bool PartDisabled = false;
             if (focusHediff != null)
             {
-                var list = focusHediff.maltreat.ableBodyPartGroupDefs;
-                if (!list.NullOrEmpty())
+                var listGroup = focusHediff.maltreat.ableBodyPartGroupDefs;
+                if (!listGroup.NullOrEmpty())
                 {
-                    foreach (var def in list)
+                    GroupDisabled = true;
+                    foreach (var def in listGroup)
                     {
-                        if (def.defName == bodyPartGroupDef.defName)
+                        if (def.label == bodyGroup || def.labelShort == bodyGroup)
                         {
-                            return false;
+                            GroupDisabled = false;
                         }
                     }
+                }
 
-                    return true;
+                var listPart = focusHediff.maltreat.ableBodyPartDefs;
+                if (!listPart.NullOrEmpty())
+                {
+                    PartDisabled = true;
+                    foreach (var def in listPart)
+                    {
+                        if (ableBodyPartGroupsDict.ContainsKey(bodyGroup) &&
+                            ableBodyPartGroupsDict[bodyGroup].Exists(record => record.def.defName == def.defName))
+                            PartDisabled = false;
+                    }
                 }
             }
 
-            return false;
+            return GroupDisabled || PartDisabled;
         }
 
-        private ButtonUnit Button_SetJob(BodyPartRecord bodyPart)
+        private bool ShouldBodyPartDisabled(BodyPartRecord bodyPart)
+        {
+            bool PartDisabled = false;
+            if (focusHediff != null)
+            {
+                var listPart = focusHediff.maltreat.ableBodyPartDefs;
+                if (!listPart.NullOrEmpty())
+                {
+                    PartDisabled = true;
+                    foreach (var def in listPart)
+                    {
+                         if (bodyPart.def.defName == def.defName)
+                            PartDisabled = false;
+                    }
+                }
+            }
+
+            return PartDisabled;
+        }
+
+        private ButtonTextUnit Button_SetJob(BodyPartRecord bodyPart)
         {
             var h = HediffMaker.MakeHediff(this.focusHediff, this.pawn, bodyPart);
             var actionToDo = new Action(delegate { DoAddHediffJob(h, bodyPart); });
-            var buttonToDo = new ButtonUnit(actionToDo,
+            var buttonToDo = new ButtonTextUnit();
+            buttonToDo.InitInfo(actionToDo,
                 bodyPart.Label + "," + this.focusHediff.GetLabelAction().Colorize(this.focusHediff.defaultLabelColor),
                 this.focusHediff.GetDescriptionAction());
             var actionButton = new Action(delegate
             {
-                if (this.focusHediff != null && this.focusBodyPartGroup != null)
-                    todoList.Add(buttonToDo);
+                for (var i = 0; i < GenUI.CurrentAdjustmentMultiplier(); i++)
+                {
+                    if (this.focusHediff != null && this.focusBodyPartGroup != null)
+                        todoList.Add(buttonToDo);
+                }
+
                 flagShouldRefresh = true;
             });
-            var buttonButton = new ButtonUnit(actionButton, bodyPart.Label, "");
+            var buttonButton = new ButtonTextUnit();
+            buttonButton.InitInfo(actionButton, bodyPart.Label, "", _disabled: ShouldBodyPartDisabled(bodyPart));
             return buttonButton;
         }
 
-        private ButtonUnit Button_ClearToDoList()
+        private ButtonTextUnit Button_ClearToDoList()
         {
             var action = new Action(delegate
             {
                 this.todoList.Clear();
                 flagShouldRefresh = true;
             });
-            var button = new ButtonUnit(action, "CT_Button_ClearToDoList".Translate(),
+            var button = new ButtonTextUnit();
+            button.InitInfo(action, "CT_Button_ClearToDoList".Translate(),
                 "CT_Button_ClearToDoListDesc".Translate());
             return button;
         }
 
-        private ButtonUnit Button_Close()
+        private ButtonTextUnit Button_Close()
         {
             var action = new Action(delegate
             {
                 foreach (var b in this.todoList)
                 {
-                    b.action();
+                    b.DoAction();
                 }
 
                 this.Close();
             });
-            var button = new ButtonUnit(action,
+            var button = new ButtonTextUnit();
+            button.InitInfo(action,
                 "CT_CloseWindowForSure".Translate(),
                 "CT_CloseWindowForSureDesc".Translate());
             return button;
         }
 
-        private List<UnitStackWithIconButtonEnd> Label_TodoList()
+        private List<LabelWithUnits> Label_TodoList()
         {
-            var labels = new Dictionary<string, UnitStackWithIconButtonEnd>();
-            foreach (var button in todoList)
+            var stacks = UnitStack.stackList(todoList.ListReform<ButtonTextUnit, DialogUnit>());
+            ;
+            var labels = new List<LabelWithUnits>();
+
+            foreach (var stack in stacks)
             {
-                var key = button.label;
-                if (labels.ContainsKey(key))
-                    labels[key].AddStack();
-                else
+                var delButton = new ButtonIconUnit();
+                var action = new Action(delegate
                 {
-                    var label = new UnitStackWithIconButtonEnd(DeleteXSize, button);
-                    label.action = new Action(delegate
+                    for (var i = 0; i < GenUI.CurrentAdjustmentMultiplier(); i++)
                     {
-                        var buttonInfo = this.todoList.Find(info => info.label == label.labelDefault);
-                        this.todoList.Remove(buttonInfo);
-                        flagShouldRefresh = true;
-                    });
-                    labels.Add(key, label);
-                }
+                        var buttonInfo = this.todoList.Find(info => info.label == stack.labelDefault);
+                        if (buttonInfo != null)
+                            this.todoList.Remove(buttonInfo);
+                    }
+
+                    flagShouldRefresh = true;
+                });
+                delButton.InitInfo(action, TexButton.DeleteX, Color.red);
+                var label = new LabelWithUnits();
+                label.InitInfo(delButton, stack.label, stack.desc);
+                labels.Add(label);
             }
 
-            return labels.Values.ToList();
+            return labels;
         }
 
         private void DoAddHediffJob(Hediff hediff, BodyPartRecord bodyPart)
         {
-            pawn.health.AddHediff(hediff, bodyPart, dinfo: new DamageInfo()); //TODO 加入DInfo，把简单的添加转换为Job
+            Hediff_COF_Torture_IsAbusing.AddHediff_COF_Torture_IsAbusing(pawn).AddAction(hediff, bodyPart);
+            //TODO 加入另一个人
         }
 
-        class Menus
+        public class Menus
         {
-            public DialogUnit titleHediffs;
-            public DialogUnit titleBodyGroup;
-            public DialogUnit titleBody;
-            public List<DialogUnit> titleTodoList;
+            public Dialog_AbuseMenu window;
+
+            public List<DialogUnit> titleHediffs = new List<DialogUnit>();
+            public List<DialogUnit> titleBodyGroup = new List<DialogUnit>();
+            public List<DialogUnit> titleBody = new List<DialogUnit>();
+            public List<DialogUnit> titleTodoList = new List<DialogUnit>();
+
             public VerticalTitleWithMenu menu_Hediffs;
             public VerticalTitleWithMenu menu_BodyPartGroups;
             public VerticalTitleWithMenu menu_BodyParts;
             public VerticalTitleWithMenu menu_TodoList;
 
-            public List<VerticalTitleWithMenu> ToList()
+            public List<DialogUnit> buttons_Hediffs;
+            public List<DialogUnit> buttons_BodyPartGroups;
+            public List<DialogUnit> buttons_BodyParts;
+            public List<DialogUnit> label_TodoList;
+
+            public List<VerticalTitleWithMenu> ToMenuList()
             {
                 return new List<VerticalTitleWithMenu>()
                     { menu_Hediffs, menu_BodyPartGroups, menu_BodyParts, menu_TodoList };
             }
+
+            public List<List<DialogUnit>> ToTitleList()
+            {
+                return new List<List<DialogUnit>>()
+                    { titleHediffs, titleBodyGroup, titleBody, titleTodoList };
+            }
+
+            public List<List<DialogUnit>> ToUnitList()
+            {
+                return new List<List<DialogUnit>>()
+                    { buttons_Hediffs, buttons_BodyPartGroups, buttons_BodyParts, label_TodoList };
+            }
         }
+
+        private IEnumerable<DialogUnit> titleHediffs()
+        {
+            var title1 = new LabelUnit();
+            title1.InitInfo("CT_UsableAbuseList".Translate(), "");
+            yield return title1;
+        }
+
+        private IEnumerable<DialogUnit> titleBodyGroup()
+        {
+            var title1 = new LabelUnit();
+            title1.InitInfo("CT_PleaseChooseBodyGroup".Translate(), "");
+            yield return title1;
+        }
+
+        private IEnumerable<DialogUnit> titleBody()
+        {
+            var title1 = new LabelUnit();
+            title1.InitInfo("CT_PleaseChooseBody".Translate(), "");
+            yield return title1;
+        }
+
+        private IEnumerable<DialogUnit> titleTodoList()
+        {
+            yield return Button_Close();
+            yield return Button_ClearToDoList();
+        }
+
 
         private void IntMenus(Menus menus)
         {
-            var buttons_Hediffs = Buttons_Hediffs().ListReform<ButtonUnit, DialogUnit>();
-            var buttons_BodyPartGroups = Buttons_BodyPartGroups().ListReform<ButtonUnit, DialogUnit>();
-            var buttons_BodyParts = Buttons_BodyParts().ListReform<ButtonUnit, DialogUnit>();
-            var label_TodoList = Label_TodoList().ListReform<UnitStackWithIconButtonEnd, DialogUnit>();
-            menus.titleHediffs = new DialogUnit("CT_UsableAbuseList".Translate(), "");
-            menus.titleBodyGroup = new DialogUnit("CT_PleaseChooseBodyGroup".Translate(), "");
-            menus.titleBody = new DialogUnit("CT_PleaseChooseBody".Translate(), "");
-            menus.titleTodoList = new List<DialogUnit> { Button_Close(), Button_ClearToDoList() };
+            menus.buttons_Hediffs = Buttons_Hediffs().ListReform<ButtonTextUnit, DialogUnit>();
+            menus.buttons_BodyPartGroups = Buttons_BodyPartGroups().ListReform<ButtonTextUnit, DialogUnit>();
+            menus.buttons_BodyParts = Buttons_BodyParts().ListReform<ButtonTextUnit, DialogUnit>();
+            menus.label_TodoList = Label_TodoList().ListReform<LabelWithUnits, DialogUnit>();
+            menus.titleHediffs = titleHediffs().ToList();
+            menus.titleBodyGroup = titleBodyGroup().ToList();
+            menus.titleBody = titleBody().ToList();
+            menus.titleTodoList = titleTodoList().ToList();
             menus.menu_Hediffs =
-                new VerticalTitleWithMenu(menus.titleHediffs, new SimpleVerticalMenu(buttons_Hediffs));
+                new VerticalTitleWithMenu(menus.titleHediffs, new SimpleVerticalMenu(menus.buttons_Hediffs));
             menus.menu_BodyPartGroups =
-                new VerticalTitleWithMenu(menus.titleBodyGroup, new SimpleVerticalMenu(buttons_BodyPartGroups, 10));
+                new VerticalTitleWithMenu(menus.titleBodyGroup,
+                    new SimpleVerticalMenu(menus.buttons_BodyPartGroups, 10));
             menus.menu_BodyParts =
-                new VerticalTitleWithMenu(menus.titleBody, new SimpleVerticalMenu(buttons_BodyParts));
+                new VerticalTitleWithMenu(menus.titleBody, new SimpleVerticalMenu(menus.buttons_BodyParts));
             menus.menu_TodoList =
-                new VerticalTitleWithMenu(menus.titleTodoList, new SimpleVerticalMenu(label_TodoList));
+                new VerticalTitleWithMenu(menus.titleTodoList, new SimpleVerticalMenu(menus.label_TodoList));
         }
 
         private void RefreshMenus(Menus menus)
@@ -364,22 +471,18 @@ namespace COF_Torture.Dialog
                     focusBodyPartGroup = null;
             }
 
-            var buttons_Hediffs = Buttons_Hediffs().ListReform<ButtonUnit, IDialogAssembly>();
-            var buttons_BodyPartGroups = Buttons_BodyPartGroups().ListReform<ButtonUnit, IDialogAssembly>();
-            var buttons_BodyParts = Buttons_BodyParts().ListReform<ButtonUnit, IDialogAssembly>();
-            var label_TodoList = Label_TodoList().ListReform<UnitStackWithIconButtonEnd, IDialogAssembly>();
-            menus.titleHediffs = new DialogUnit("CT_UsableAbuseList".Translate(), "");
-            menus.titleBodyGroup = new DialogUnit("CT_PleaseChooseBodyGroup".Translate(), "");
-            menus.titleBody = new DialogUnit("CT_PleaseChooseBody".Translate(), "");
-            menus.titleTodoList = new List<DialogUnit> { Button_Close(), Button_ClearToDoList() };
-            menus.menu_Hediffs.SubMenu.InitInfo(buttons_Hediffs);
-            menus.menu_BodyPartGroups.SubMenu.InitInfo(buttons_BodyPartGroups);
-            menus.menu_BodyParts.SubMenu.InitInfo(buttons_BodyParts);
-            menus.menu_TodoList.SubMenu.InitInfo(label_TodoList);
-            menus.menu_Hediffs.InitInfo();
-            menus.menu_BodyPartGroups.InitInfo();
-            menus.menu_BodyParts.InitInfo();
-            menus.menu_TodoList.InitInfo();
+            menus.buttons_Hediffs.Clear();
+            menus.buttons_BodyPartGroups.Clear();
+            menus.buttons_BodyParts.Clear();
+            menus.label_TodoList.Clear();
+            menus.buttons_Hediffs.InsertRange(0, Buttons_Hediffs());
+            menus.buttons_BodyPartGroups.InsertRange(0, Buttons_BodyPartGroups());
+            menus.buttons_BodyParts.InsertRange(0, Buttons_BodyParts());
+            menus.label_TodoList.InsertRange(0, Label_TodoList());
+            menus.menu_Hediffs.Refresh();
+            menus.menu_BodyPartGroups.Refresh();
+            menus.menu_BodyParts.Refresh();
+            menus.menu_TodoList.Refresh();
         }
 
 
@@ -396,7 +499,7 @@ namespace COF_Torture.Dialog
             outRect.yMax -= StandardMargin * 2;
             RectDivider viewRect = new RectDivider(outRect, this.GetHashCode());
             var menuRects = new List<RectDivider>();
-            foreach (var menu in DialogMenus.ToList())
+            foreach (var menu in DialogMenus.ToMenuList())
             {
                 menu.Draw(viewRect.NewCol(menu.width));
             }

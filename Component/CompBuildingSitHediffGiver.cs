@@ -25,10 +25,10 @@ namespace COF_Torture.Component
             List<Pawn> allPawnsSpawned = this.parent.Map.mapPawns.AllPawnsSpawned;
             foreach (var t in allPawnsSpawned)
             {
-                if (t.Position.Equals(this.parent.Position) && t.jobs != null)
+                if (t.Position.Equals(this.parent.Position) && t.jobs != null && t.pather != null && !t.pather.Moving)
                 {
                     var a = t.health.hediffSet.GetNotMissingParts()
-                        .FirstOrFallback<BodyPartRecord>(
+                        .FirstOrFallback(
                             (Func<BodyPartRecord, bool>)(p => p.def == this.Props.part));
                     Hediff_WithGiver h = (Hediff_WithGiver)HediffMaker.MakeHediff(this.Props.hediff, t, a);
                     h.Giver = (Building_TortureBed)this.parent;

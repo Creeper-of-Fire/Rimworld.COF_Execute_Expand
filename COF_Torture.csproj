@@ -33,11 +33,15 @@
     </PropertyGroup>
     <ItemGroup>
         <Reference Include="0Harmony">
-          <HintPath>..\..\1.4\Assemblies\0Harmony.dll</HintPath>
+          <HintPath>..\0Harmony.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="Assembly-CSharp">
           <HintPath>..\..\..\..\RimWorldWin64_Data\Managed\Assembly-CSharp.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="HugsLib">
+          <HintPath>..\HugsLib.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="System" />
@@ -74,19 +78,23 @@
         <Compile Include="Component\HediffComp_ExecuteIndicatorWithEffector.cs" />
         <Compile Include="Component\HediffComp_ExecuteIndicator.cs" />
         <Compile Include="Component\HediffComp_OrgasmIndicator.cs" />
-        <Compile Include="Component\HediffComp_SexualHeat.cs" />
+        <Compile Include="Component\HediffComp_GetSexualHeat.cs" />
         <Compile Include="Damages\DamageDefOf.cs" />
-        <Compile Include="Dialog\ButtonUnit.cs" />
-        <Compile Include="Dialog\DialogUnit.cs" />
+        <Compile Include="Dialog\Gizmo_List.cs" />
+        <Compile Include="Dialog\Menus\VerticalMenu.cs" />
+        <Compile Include="Dialog\Menus\VerticalTitleWithMenu.cs" />
+        <Compile Include="Dialog\Units\ButtonUnit.cs" />
+        <Compile Include="Dialog\Units\DialogUnit.cs" />
+        <Compile Include="Dialog\Units\LabelUnit.cs" />
         <Compile Include="Dialog\DialogUtility.cs" />
         <Compile Include="Dialog\Dialog_AbuseMenu.cs" />
         <Compile Include="Dialog\Dialog_TortureThingManager.cs" />
-        <Compile Include="Dialog\Gizmo_List.cs" />
-        <Compile Include="Dialog\VerticalMenu.cs" />
-        <Compile Include="Dialog\VerticalTitleWithMenu.cs" />
+        <Compile Include="Dialog\Units\LabelWithUnits.cs" />
         <Compile Include="Genes\GeneDefOf.cs" />
         <Compile Include="Genes\Gene_SpeedingRegeneration.cs" />
         <Compile Include="Hediffs\HediffDefOf.cs" />
+        <Compile Include="Hediffs\Hediff_COF_Torture_IsAbusing.cs" />
+        <Compile Include="Hediffs\Hediff_Orgasm.cs" />
         <Compile Include="Hediffs\MaltreatDef.cs" />
         <Compile Include="Hediffs\Hediff_AbuseInjury.cs" />
         <Compile Include="Hediffs\Hediff_ExecuteInjury.cs" />
@@ -111,6 +119,12 @@
         <Compile Include="Patch\NeverPainDownedPatch.cs" />
         <Compile Include="Patch\PawnGizmoPatch.cs" />
         <Compile Include="Patch\TraitWithHediffPatch.cs" />
+        <Compile Include="Data\DataStore.cs" />
+        <Compile Include="Data\DesignatorsData.cs" />
+        <Compile Include="Data\ModLog.cs" />
+        <Compile Include="Data\PawnData.cs" />
+        <Compile Include="Data\PawnExtend.cs" />
+        <Compile Include="Data\SaveStorage.cs" />
         <Compile Include="Properties\AssemblyInfo.cs" />
         <Compile Include="Things\Apparel_Torture.cs" />
         <Compile Include="Things\BarbecueCorpse.cs" />
@@ -119,7 +133,8 @@
         <Compile Include="Things\Building_ToolChest.cs" />
         <Compile Include="Things\Building_TortureBed.cs" />
         <Compile Include="Things\ThingCategoryDefOf.cs" />
-        <Compile Include="TortureUtility.cs" />
+        <Compile Include="Utility\ActionWithBar.cs" />
+        <Compile Include="Utility\TortureUtility.cs" />
     </ItemGroup>
     <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
     <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

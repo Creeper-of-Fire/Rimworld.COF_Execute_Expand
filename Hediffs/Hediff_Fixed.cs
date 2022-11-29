@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using COF_Torture.Data;
 using COF_Torture.Dialog;
+using COF_Torture.Dialog.Units;
 using COF_Torture.ModSetting;
 using COF_Torture.Patch;
 using RimWorld;
@@ -44,7 +46,8 @@ namespace COF_Torture.Hediffs
                 need = pawn.needs.AllNeeds.Find((Predicate<Need>)(x => x.def == SettingPatch.HygieneNeed));
                 if (need != null) Hygiene = need.CurLevel;
             }
-            //Log.Message(""+Food+Joy+Rest);
+
+            pawn.GetPawnData().IsFixed = true;
 
             base.PostAdd(dinfo);
         }
@@ -72,13 +75,15 @@ namespace COF_Torture.Hediffs
                 }
             }
 
+            pawn.GetPawnData().IsFixed = false;
+
             base.PostRemoved();
         }
 
         public override void ExposeData()
         {
             base.ExposeData();
-            Scribe_Values.Look<int>(ref this.tickNext, "tickNext", 1000, true);
+            Scribe_Values.Look(ref this.tickNext, "tickNext", 1000, true);
         }
 
         public override void Tick()
@@ -164,6 +169,7 @@ namespace COF_Torture.Hediffs
                 {
                     yield return gizmo;
                 }
+
             if (ModSettingMain.Instance.Setting.controlMenuOn) yield break;
             foreach (var command in this.Gizmo_ReleaseBondageBed())
             {

@@ -39,6 +39,7 @@ namespace COF_Torture.Hediffs
     public class MaltreatProperties
     {
         public List<BodyPartGroupDef> ableBodyPartGroupDefs = new List<BodyPartGroupDef>();
+        public List<BodyPartDef> ableBodyPartDefs = new List<BodyPartDef>();
         public ThingDef enableByBuilding = null;
     }
 }

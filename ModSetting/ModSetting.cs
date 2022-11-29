@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using Verse;
 
@@ -9,7 +10,7 @@ namespace COF_Torture.ModSetting
     {
         public ModSetting Setting;
         public static ModSettingMain Instance { get; private set; }
-
+        //private Vector2 scrollPosition = new Vector2();
         public ModSettingMain(ModContentPack content) : base(content)
         {
             Setting = GetSettings<ModSetting>(); //读取本地数据 设置setting中的mod关联
@@ -19,65 +20,67 @@ namespace COF_Torture.ModSetting
 
         public override string SettingsCategory()
         {
-            return "COF的更多酷刑模组";
+            return "COF_Torture_ModName".Translate();
         }
 
         public override void DoSettingsWindowContents(Rect inRect)
         {
-            Rect rect = new Rect(0, 0, 0.9f * inRect.width, 0.8f * inRect.height);
+            Rect rect = new Rect(0, 0, 0.9f*inRect.width, 0.8f * inRect.height);
             Listing_Standard ls = new Listing_Standard();
+            //GUI.BeginScrollView(rect, ref Setting.scrollPos, ref rect);
             ls.Begin(inRect);
-            if (ls.ButtonText("恢复默认".Translate()))
+            Text.Font = GameFont.Tiny;
+            if (ls.ButtonText("default".Translate()))
             {
                 Setting.InitData();
             } //按钮与监听
 
-            ls.GapLine(20f);
-            ls.Label("Safe Mode Is Default".Translate());
-            ls.CheckboxLabeled("建筑物默认启用安全模式", ref Setting.isSecurityMode);
+            ls.GapLine(5f);
+            //ls.Label("Safe Mode Is Default".Translate());
+            ls.CheckboxLabeled("CT_Setting_SecurityMode".Translate(), ref Setting.isSecurityMode);
             
-            ls.GapLine(20f);
-            ls.Label("Immortal In Execution".Translate());
-            ls.CheckboxLabeled("殖民者在处刑过程中不会死亡", ref Setting.isImmortal);
+            ls.GapLine(5f);
+            //ls.Label("Immortal In Execution".Translate());
+            ls.CheckboxLabeled("CT_Setting_ImmortalInExecution".Translate(), ref Setting.isImmortal);
            
-            ls.GapLine(20f);
-            ls.Label("Satisfy Hunger And Thirty".Translate());
-            ls.CheckboxLabeled("殖民者在刑具上会获得饮食和水的补充", ref Setting.isFeed); 
+            ls.GapLine(5f);
+            //ls.Label("Satisfy Hunger And Thirty".Translate());
+            ls.CheckboxLabeled("CT_Setting_SatisfyNeedsInExecution".Translate(), ref Setting.isFeed); 
             
-            ls.GapLine(20f);
-            ls.Label("Hold Head".Translate());
-            ls.CheckboxLabeled("殖民者不会被绞肉机破坏头颅", ref Setting.leftHead); 
+            ls.GapLine(5f);
+            //ls.Label("Hold Head".Translate());
+            ls.CheckboxLabeled("CT_Setting_HeadKeptWhenMincer".Translate(), ref Setting.leftHead); 
             
-            ls.GapLine(20f);
-            ls.Label("Remove Temp Injuries".Translate());
-            ls.CheckboxLabeled("中止处刑时同时移除临时伤口", ref Setting.isRemoveTempInjuries); 
+            ls.GapLine(5f);
+            //ls.Label("Remove Temp Injuries".Translate());
+            ls.CheckboxLabeled("CT_Setting_RemoveTempInjuries".Translate(), ref Setting.isRemoveTempInjuries); 
             
-            ls.GapLine(20f);
-            ls.Label("No Way Back".Translate());
-            ls.CheckboxLabeled("处刑一旦开始就无法释放殖民者", ref Setting.isNoWayBack); 
+            ls.GapLine(5f);
+            //ls.Label("No Way Back".Translate());
+            ls.CheckboxLabeled("CT_Setting_NoWayBack".Translate(), ref Setting.isNoWayBack); 
             
-            ls.GapLine(20f);
-            ls.Label("ControlMenu".Translate());
-            ls.CheckboxLabeled("使用菜单管理而非按钮管理殖民者身上的刑具", ref Setting.controlMenuOn); 
+            ls.GapLine(5f);
+            //ls.Label("ControlMenu".Translate());
+            ls.CheckboxLabeled("CT_Setting_ControlMenuOn".Translate(), ref Setting.controlMenuOn); 
             
-            ls.GapLine(20f);
-            ls.Label("刑具误启动概率（每小时）".Translate());
+            ls.GapLine(5f);
+            ls.Label("CT_Setting_MistakeStartUp".Translate());
             ls.Label(Setting.mistakeStartUp.ToStringPercent());
             Setting.mistakeStartUp = ls.Slider(Setting.mistakeStartUp, 0f, 1f);
 
-            ls.GapLine(20f);
-            ls.Label("盖子透明度（请重进存档以应用）".Translate());
+            ls.GapLine(5f);
+            ls.Label("CT_Setting_CoverTransparency".Translate());
             ls.Label(Setting.topTransparency.ToStringPercent());
             Setting.topTransparency = ls.Slider(Setting.topTransparency, 0f, 1f);
             
-            Text.Font = GameFont.Small;
-            ls.GapLine(20f);
-            Text.Font = GameFont.Medium;
-            ls.Label("处刑时间".Translate());
+            
+            ls.GapLine(5f);
+            ls.Label("CT_Setting_ExecutionTimeDesc".Translate());
             ls.Gap(10f);
-            Text.Font = GameFont.Small;
-            TextFieldNumericLabeled(ls, "自由调整处刑时间，单位为【游戏中的小时】，一小时为2500tick", ref Setting.executeHours, 0f, 2500f);
+            
+            TextFieldNumericLabeled(ls, "CT_Setting_ExecutionTime".Translate(), ref Setting.executeHours, 0f, 2500f);
             ls.End();
+            Text.Font = GameFont.Small;
         }
 
         private void TextFieldNumericLabeled<T>(Listing_Standard ls, string label, ref T val, float min, float max)

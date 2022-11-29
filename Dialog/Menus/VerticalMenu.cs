@@ -1,10 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using COF_Torture.Dialog.Units;
 using UnityEngine;
 using Verse;
 
-namespace COF_Torture.Dialog
+namespace COF_Torture.Dialog.Menus
 {
     public abstract class VerticalMenu : IDialogAssembly
     {
@@ -16,13 +17,14 @@ namespace COF_Torture.Dialog
         protected RectAggregator rectAggregator;
         public abstract void Draw(Rect outRect);
         public abstract void CalcSize();
-        public abstract void InitInfo(List<IDialogAssembly> units=null);
+        public abstract void Refresh();
     }
 
     public class SimpleVerticalMenu : VerticalMenu
     {
         private float MaxUnitWidth = 0f;
         private float MaxUnitHeight = 0f;
+        private List<DialogUnit> Units;
         private List<List<DialogUnit>> Unit_SubMenus;
         private const float marginCol = 8f;
         private const float marginRow = 4f;
@@ -83,7 +85,7 @@ namespace COF_Torture.Dialog
         {
             CalcUnitSize();
             rectAggregator = new RectAggregator(Rect.zero, this.GetHashCode(), margin);
-            rectAggregator.NewCol(marginCol);
+            //rectAggregator.NewCol(marginCol);
             for (var index = 0; index < Unit_SubMenus.Count; index++)
                 rectAggregator.NewCol(MaxUnitWidth);
             for (var index = 0; index < maxSubMenuRows; index++)
@@ -99,9 +101,11 @@ namespace COF_Torture.Dialog
         /// </summary>
         private void CalcUnitSize()
         {
-            Text.Font = GameFont.Small;
+            MaxUnitHeight = 0;
+            MaxUnitWidth = 0;
             foreach (var unit in Unit_SubMenus.SelectMany(Unit_SubMenu => Unit_SubMenu))
             {
+                unit.CalcSize();
                 MaxUnitWidth = Mathf.Max(MaxUnitWidth, unit.width);
                 MaxUnitHeight = Mathf.Max(MaxUnitHeight, unit.height);
             }
@@ -138,12 +142,13 @@ namespace COF_Torture.Dialog
             this.maxSubMenuRow = maxSubMenuRow;
             this.isScroll = isScroll;
             this.drawScroll = drawScroll;
-            InitInfo(units.ListReform<DialogUnit,IDialogAssembly>());
+            this.Units = units;
+            Refresh();
         }
-        
-        public sealed override void InitInfo(List<IDialogAssembly> units)
+
+        public sealed override void Refresh()
         {
-            MakeSubMenuMulti(units.ListReform<IDialogAssembly,DialogUnit>());
+            MakeSubMenuMulti(this.Units);
             CalcSize();
         }
     }

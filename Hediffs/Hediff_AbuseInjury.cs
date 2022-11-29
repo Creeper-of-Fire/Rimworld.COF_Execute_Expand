@@ -73,14 +73,14 @@ namespace COF_Torture.Hediffs
         {
             void HediffBase()
             {
-                if (!this.def.disablesNeeds.NullOrEmpty<NeedDef>())
+                if (!this.def.disablesNeeds.NullOrEmpty())
                     this.pawn.needs.AddOrRemoveNeedsAsAppropriate();
-                if (this.def.removeWithTags.NullOrEmpty<string>())
+                if (this.def.removeWithTags.NullOrEmpty())
                     return;
                 for (int index1 = this.pawn.health.hediffSet.hediffs.Count - 1; index1 >= 0; --index1)
                 {
                     Hediff hediff = this.pawn.health.hediffSet.hediffs[index1];
-                    if (hediff != this && !hediff.def.tags.NullOrEmpty<string>())
+                    if (hediff != this && !hediff.def.tags.NullOrEmpty())
                     {
                         foreach (var t in this.def.removeWithTags)
                         {
@@ -107,14 +107,7 @@ namespace COF_Torture.Hediffs
         {
             if (this.IsPermanent())
                 return;
-            this.Severity -= amount;
-            if (this.comps != null)
-            {
-                for (int index = 0; index < this.comps.Count; ++index)
-                    this.comps[index].CompPostInjuryHeal(amount);
-            }
-
-            this.pawn.health.Notify_HediffChanged((Hediff)this);
+            base.Heal(amount);
         }
     }
 }

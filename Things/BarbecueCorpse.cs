@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using COF_Torture.Utility;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -13,7 +14,7 @@ namespace COF_Torture.Things
         public override void ExposeData()
         {
             base.ExposeData();
-            Scribe_References.Look<Pawn>(ref this.LastPawn, "LastPawn");
+            Scribe_References.Look(ref this.LastPawn, "LastPawn");
         }
 
         public override void Tick()
@@ -73,14 +74,14 @@ namespace COF_Torture.Things
         }
         private BodyPartRecord GetBestBodyPartToEat(Pawn ingester, float nutritionWanted)
         {
-            IEnumerable<BodyPartRecord> source = this.InnerPawn.health.hediffSet.GetNotMissingParts().Where<BodyPartRecord>((Func<BodyPartRecord, bool>) (x => x.depth == BodyPartDepth.Outside && (double) FoodUtility.GetBodyPartNutrition(this, x) > 1.0 / 1000.0));
+            IEnumerable<BodyPartRecord> source = this.InnerPawn.health.hediffSet.GetNotMissingParts().Where((Func<BodyPartRecord, bool>) (x => x.depth == BodyPartDepth.Outside && (double) FoodUtility.GetBodyPartNutrition(this, x) > 1.0 / 1000.0));
             var bodyPartRecords = source as BodyPartRecord[];
             if (bodyPartRecords == null)
             {
                 bodyPartRecords = source.ToArray();
             }
 
-            if (!bodyPartRecords.Any<BodyPartRecord>())
+            if (!bodyPartRecords.Any())
                 return (BodyPartRecord)null;
             else
             {
@@ -88,7 +89,7 @@ namespace COF_Torture.Things
                 {
                     return Mathf.Abs(FoodUtility.GetBodyPartNutrition(this, x) - nutritionWanted);
                 }
-                return bodyPartRecords.MinBy<BodyPartRecord, float>((Func<BodyPartRecord, float>)(Func));
+                return bodyPartRecords.MinBy((Func<BodyPartRecord, float>)(Func));
             }
         }
     }

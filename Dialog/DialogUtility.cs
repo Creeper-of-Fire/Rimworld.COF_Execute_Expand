@@ -1,10 +1,22 @@
 using System.Collections.Generic;
 using System.Linq;
+using COF_Torture.Data;
+using COF_Torture.Dialog.Units;
+using COF_Torture.Utility;
 using UnityEngine;
 using Verse;
 
 namespace COF_Torture.Dialog
 {
+    public interface IDialogAssembly
+    {
+        /// <summary>
+        /// 绘制自己
+        /// </summary>
+        void Draw(Rect rect);
+        float width { get; }
+        float height { get; }
+    }
     public static class DialogUtility
     {
         public static IEnumerable<IWithGiver> AllTortureHediff(this Pawn pawn)
@@ -80,7 +92,7 @@ namespace COF_Torture.Dialog
         /// </summary>
         /// <param name="gizmos">含有Gizmo的可枚举对象</param>
         /// <returns>多个按钮</returns>
-        public static IEnumerable<ButtonUnit> getButtonInfo(IEnumerable<Command> gizmos)
+        public static IEnumerable<ButtonTextUnit> getButtonInfo(IEnumerable<Command> gizmos)
         {
             return gizmos.Select(getButtonInfo).Where(button => button != null);
         }
@@ -91,14 +103,19 @@ namespace COF_Torture.Dialog
         /// <param name="gizmo">Gizmo</param>
         /// <returns>按钮</returns>
         // ReSharper disable once MemberCanBePrivate.Global
-        public static ButtonUnit getButtonInfo(Command gizmo)
+        public static ButtonTextUnit getButtonInfo(Command gizmo)
         {
+            ButtonTextUnit button;
             switch (gizmo)
             {
                 case Command_Action ca:
-                    return new ButtonUnit(ca);
+                    button = new ButtonTextUnit();
+                    button.InitInfo(ca);
+                    return button;
                 case Command_Toggle ct:
-                    return new ButtonUnit(ct);
+                    button = new ButtonTextUnit();
+                    button.InitInfo(ct);
+                    return button;
             }
 
             return null;
@@ -108,14 +125,14 @@ namespace COF_Torture.Dialog
         {
             Text.Font = font;
             //maxHeight = Mathf.Max(maxHeight, Text.CalcHeight(GetLabel(menuColumn), width));
-            maxWidth = Mathf.Max(maxWidth, Text.CalcSize(GetLabel<T>(menuColumn)).x);
+            maxWidth = Mathf.Max(maxWidth, Text.CalcSize(GetLabel(menuColumn)).x);
             Text.Font = GameFont.Medium;
         }
 
         public static void CalcHeight<T>(T menuColumn, ref float maxHeight, GameFont font = GameFont.Medium)
         {
             Text.Font = font;
-            maxHeight = Mathf.Max(maxHeight, Text.CalcSize(GetLabel<T>(menuColumn)).y);
+            maxHeight = Mathf.Max(maxHeight, Text.CalcSize(GetLabel(menuColumn)).y);
             Text.Font = GameFont.Medium;
         }
 
@@ -136,7 +153,7 @@ namespace COF_Torture.Dialog
                 return GetLabel<T>(stringColumn);
             if (menuColumn is TaggedString tagStringColumn)
                 return GetLabel<T>(tagStringColumn);
-            Log.Error("[COF_Torture]" + menuColumn + "中没有发现对应的Label");
+            ModLog.Error(menuColumn + "中没有发现对应的Label");
             return "";
         }
 

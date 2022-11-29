@@ -1,8 +1,11 @@
 using System.Collections.Generic;
+using COF_Torture.Data;
 using COF_Torture.Dialog;
+using COF_Torture.Dialog.Units;
 using COF_Torture.Hediffs;
 using COF_Torture.ModSetting;
 using COF_Torture.Things;
+using COF_Torture.Utility;
 using UnityEngine;
 using Verse;
 
@@ -51,7 +54,7 @@ namespace COF_Torture.Component
             {
                 if (this.Parent.def.lethalSeverity <= 0f)
                 {
-                    Log.Error("[COF_TORTURE]错误：" + this.Parent + "是用于处理处刑效果的hediff，但是没有致死严重度数据");
+                    ModLog.Error("错误：" + this.Parent + "是用于处理处刑效果的hediff，但是没有致死严重度数据");
                     severityToDeath = 10f;
                 }
                 else
@@ -89,7 +92,7 @@ namespace COF_Torture.Component
                 }
         }
 
-        public override void CompPostTick(ref float severityAdjustment)
+        public sealed override void CompPostTick(ref float severityAdjustment)
         {
             base.CompPostTick(ref severityAdjustment);
             mistakeStartUp();

@@ -1,4 +1,5 @@
 using COF_Torture.ModSetting;
+using COF_Torture.Utility;
 using Verse;
 
 namespace COF_Torture.Hediffs
@@ -10,7 +11,7 @@ namespace COF_Torture.Hediffs
         public override void ExposeData()
         {
             base.ExposeData();
-            Scribe_References.Look<Thing>(ref this.giver, "giver");
+            Scribe_References.Look(ref this.giver, "giver");
         }
 
         public override bool TendableNow(bool ignoreTimer = false)

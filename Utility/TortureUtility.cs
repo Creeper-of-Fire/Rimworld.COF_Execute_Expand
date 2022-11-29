@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using COF_Torture.Data;
 using COF_Torture.Patch;
 using COF_Torture.Things;
 using HarmonyLib;
@@ -8,7 +9,7 @@ using RimWorld;
 using UnityEngine;
 using Verse;
 
-namespace COF_Torture
+namespace COF_Torture.Utility
 {
     [StaticConstructorOnStartup]
     public static class GizmoIcon
@@ -245,35 +246,143 @@ namespace COF_Torture
         }
 
         /// <summary>
-        /// 原本的BodyPartGroup是层层嵌套的，这个算法把嵌套解开，使得一个BodyPart只对应一个BodyPartGroup。/n这个算法同样适用于其他情况
+        /// 去除字典中的值
         /// </summary>
-        /// <param name="allParts">键：BodyPartGroup，值：其包含的BodyPart列表，彼此重复。</param>
-        /// <typeparam name="T">BodyPartGroup</typeparam>
-        /// <typeparam name="V">BodyPart</typeparam>
-        /// <returns>键：BodyPartGroup，值：其包含的BodyPart列表，互不重复。</returns>
-        public static Dictionary<T, List<V>> untieNestedDict<T, V>(Dictionary<T, List<V>> allParts)
+        /// <param name="dict">字典</param>
+        /// <param name="func">值满足的函数</param>
+        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="V"></typeparam>
+        public static void RemoveAt<T, V>(this Dictionary<T, V> dict, Func<V, bool> func)
+        {
+            var list = new List<T>();
+            foreach (var pair in dict)
+            {
+                if (func(pair.Value))
+                    list.Add(pair.Key);
+            }
+
+            foreach (var key in list)
+            {
+                dict.Remove(key);
+            }
+        }
+
+        /// <summary>
+        /// 对所有值为list的字典的每个Value执行某个动作
+        /// </summary>
+        /// <param name="dict">字典</param>
+        /// <param name="action">动作（无返回值）,参数为V</param>
+        /// <typeparam name="T">key类型</typeparam>
+        /// <typeparam name="V">list内容的类型</typeparam>
+        public static void ForeachDL<T, V>(this Dictionary<T, List<V>> dict, Action<V> action)
+        {
+            foreach (var list in dict.Values)
+            {
+                foreach (var value in list)
+                {
+                    action(value);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 对所有值为list的字典的每个Value执行某个动作
+        /// </summary>
+        /// <param name="dict">字典</param>
+        /// <param name="action">动作（无返回值），参数为T</param>
+        /// <typeparam name="T">key类型</typeparam>
+        /// <typeparam name="V">list内容的类型</typeparam>
+        public static void ForeachDL<T, V>(this Dictionary<T, List<V>> dict, Action<T> action)
+        {
+            foreach (var list in dict)
+            {
+                foreach (var value in list.Value)
+                {
+                    action(list.Key);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 对所有值为list的字典的每个Value执行某个动作
+        /// </summary>
+        /// <param name="dict">字典</param>
+        /// <param name="action">动作（无返回值），参数为T和V</param>
+        /// <typeparam name="T">key类型</typeparam>
+        /// <typeparam name="V">list内容的类型</typeparam>
+        public static void ForeachDL<T, V>(this Dictionary<T, List<V>> dict, Action<T, V> action)
+        {
+            foreach (var list in dict)
+            {
+                foreach (var value in list.Value)
+                {
+                    action(list.Key, value);
+                }
+            }
+        }
+
+        public static Dictionary<T, List<V>> untieNestedDict<T, V>(Dictionary<T, List<V>> allParts, T defaultT,
+            int minGroupLength = 0)
         {
             var fullGroups = new Dictionary<T, List<V>>();
             var regroupedGroups = new Dictionary<T, List<V>>();
             //var unfiledGroups = new List<T>();
             var unfiledParts = new List<V>(); //非引用而是复制
-            foreach (var bodyPartGroup in allParts)
+            var otherGroup = new List<V>();
+            GetFullGroups();
+            GetOtherGroup();
+            ReGroup(); //进入递归
+            if (unfiledParts.NullOrEmpty())
             {
-                foreach (var bodyPart in bodyPartGroup.Value)
+                foreach (var v in unfiledParts)
                 {
-                    fullGroups.DictListAdd(bodyPartGroup.Key, bodyPart);
-                    unfiledParts.Add(bodyPart);
+                    ModLog.Error("没有分类" + v);
+                    //regroupedGroups.DictListAdd(defaultT, v);
                 }
-                //unfiledGroups.Add(bodyPartGroup.Key);
             }
 
-            unfiledParts = unfiledParts.Distinct().ToList();
-            ReGroup();
+            regroupedGroups.Add(defaultT, otherGroup);
             return regroupedGroups;
+
+            void GetFullGroups()
+            {
+                foreach (var bodyPartGroup in allParts)
+                {
+                    foreach (var bodyPart in bodyPartGroup.Value)
+                    {
+                        fullGroups.DictListAdd(bodyPartGroup.Key, bodyPart);
+                        unfiledParts.Add(bodyPart);
+                    }
+                    //unfiledGroups.Add(bodyPartGroup.Key);
+                }
+
+                unfiledParts = unfiledParts.Distinct().ToList();
+            }
+
+
+            void GetOtherGroup()
+            {
+                if (minGroupLength <= 0)
+                    return;
+                foreach (var Group in fullGroups)
+                {
+                    if (Group.Value.Count < minGroupLength)
+                    {
+                        foreach (var bodyPart in Group.Value)
+                        {
+                            otherGroup.Add(bodyPart);
+                            unfiledParts.Remove(bodyPart);
+                        }
+                    }
+                }
+
+                otherGroup = otherGroup.Distinct().ToList();
+            }
 
             void ReGroup()
             {
-                var minGroup = GetMinBodyPartGroup(fullGroups);
+                var minGroup = GetMinBodyPartGroup(fullGroups); //找到要分类的
+                ModLog.Message("" + minGroup);
                 foreach (var bodyPart in minGroup.Value)
                 {
                     if (unfiledParts.Contains(bodyPart))
@@ -296,6 +405,8 @@ namespace COF_Torture
                 var minGroup = new KeyValuePair<T, List<V>>();
                 foreach (var Group in Groups)
                 {
+                    if (Group.Value.NullOrEmpty())
+                        continue;
                     if (minGroup.Value.NullOrEmpty())
                     {
                         minGroup = Group;
@@ -313,6 +424,176 @@ namespace COF_Torture
         }
 
         /// <summary>
+        /// 原本的BodyPartGroup是层层嵌套的，这个算法把嵌套解开，使得一个BodyPart只对应一个BodyPartGroup。/n这个算法同样适用于其他情况
+        /// </summary>
+        /// <param name="allParts">键：BodyPartGroup，值：其包含的BodyPart列表，彼此重复。</param>
+        /// <param name="defaultKey">默认键值</param>
+        /// <param name="minGroupLength"></param>
+        /// <returns>键：BodyPartGroup，值：其包含的BodyPart列表，互不重复。</returns>
+        public static Dictionary<string, List<BodyPartRecord>> untieNestedDict(
+            Dictionary<string, List<BodyPartRecord>> allParts, string defaultKey,
+            int minGroupLength = 3)
+        {
+            var fullGroups = new Dictionary<string, List<BodyPartRecord>>();
+            var regroupedGroups = new Dictionary<string, List<BodyPartRecord>>();
+            var directAddParts = new List<BodyPartRecord>();
+            //var regroupedGroups2 = new Dictionary<string, List<BodyPartRecord>>();
+            var unfiledParts = new List<BodyPartRecord>(); //非引用而是复制
+            var otherGroup = new List<BodyPartRecord>();
+            var rjwGroup = new List<BodyPartRecord>();
+            string rjwName = "";
+            var unfiledGroups = allParts.Keys.ToList();
+
+            GetFullParts();
+            //unfiledParts.Clear();
+            if (SettingPatch.RimJobWorldIsActive)
+                SetDirectGroupRJW();
+            SetDirectGroup();
+            //GetFullParts();
+            ReGroup();
+            GetOtherGroup();
+
+
+            if (SettingPatch.RimJobWorldIsActive && !rjwName.NullOrEmpty())
+                regroupedGroups.Add(rjwName, rjwGroup);
+            regroupedGroups.Add(defaultKey, otherGroup);
+
+            var outGroups = new Dictionary<string, List<BodyPartRecord>>();
+            regroupedGroups.ForeachDL((group, part) => { outGroups.DictListAdd(group, part); });
+            outGroups.RemoveAt((list) => list.NullOrEmpty());
+
+            return outGroups;
+
+            void SetDirectGroupRJW()
+            {
+                var parts = unfiledParts;
+                //var groups = unfiledGroups;
+                fullGroups.ForeachDL((group, part) =>
+                {
+                    if (!parts.Contains(part))
+                        return;
+                    var name = part.def.defName;
+                    if (name == "Genitals" || name == "Chest" || name == "Flank" || name == "Anus")
+                    {
+                        rjwGroup.Add(part);
+                        parts.Remove(part);
+                        if (rjwName.NullOrEmpty())
+                            rjwName = part.def.label;
+                    }
+                });
+                unfiledParts = parts.Distinct().ToList();
+            }
+
+            void SetDirectGroup()
+            {
+                var parts = unfiledParts;
+                //var groups = unfiledGroups;
+                fullGroups.ForeachDL((group, part) =>
+                {
+                    if (!parts.Contains(part))
+                        return;
+                    if (part.def.label.Contains(group) || group.Contains(part.def.label))
+                    {
+                        regroupedGroups.DictListAdd(group, part);
+                        parts.Remove(part);
+                    }
+                });
+                unfiledParts = parts.Distinct().ToList();
+            }
+
+            void GetOtherGroup()
+            {
+                var groups = regroupedGroups;
+                if (minGroupLength <= 0)
+                    return;
+                foreach (var Group in groups)
+                {
+                    if (Group.Value.Count >= minGroupLength) continue;
+                    foreach (var bodyPart in Group.Value)
+                    {
+                        otherGroup.Add(bodyPart);
+                        unfiledParts.Remove(bodyPart);
+                    }
+                }
+
+                otherGroup = otherGroup.Distinct().ToList();
+
+                foreach (var part in otherGroup)
+                {
+                    foreach (var list in regroupedGroups.Values)
+                    {
+                        list.Remove(part);
+                    }
+                }
+            }
+
+
+            void ReGroup()
+            {
+                var minKey = GetMinBodyPartGroup(unfiledGroups); //找到要分类的
+                //ModLog.Message("" + minKey);
+                if (!fullGroups.ContainsKey(minKey)) return;
+                var minGroup = fullGroups[minKey];
+                foreach (var bodyPart in minGroup)
+                {
+                    if (unfiledParts.Contains(bodyPart))
+                        //目的是分类bodyPart到Group里面，unfiledParts里面的就是没有分类的bodyPart
+                    {
+                        unfiledParts.Remove(bodyPart);
+                        regroupedGroups.DictListAdd(minKey, bodyPart);
+                    }
+                }
+
+                unfiledGroups.Remove(minKey);
+                if (unfiledGroups.NullOrEmpty())
+                    return;
+                ReGroup();
+            }
+
+            string GetMinBodyPartGroup(
+                List<string> Groups)
+            {
+                var minGroup = "";
+                foreach (var key in Groups)
+                {
+                    if (!fullGroups.ContainsKey(key))
+                        continue;
+                    var Group = fullGroups[key];
+                    if (Groups.NullOrEmpty())
+                        continue;
+                    if (minGroup == "")
+                    {
+                        minGroup = key;
+                        continue;
+                    }
+
+                    if (fullGroups.ContainsKey(minGroup) && Group.Count < fullGroups[minGroup].Count)
+                    {
+                        minGroup = key;
+                    }
+                }
+
+                return minGroup;
+            }
+
+            void GetFullParts()
+            {
+                //fullGroups.Clear();
+                var parts = unfiledParts;
+                var groups = unfiledGroups;
+                allParts.ForeachDL((group, part) =>
+                {
+                    fullGroups.DictListAdd(group, part);
+                    parts.Add(part);
+                    groups.Add(group);
+                });
+                unfiledParts = parts.Distinct().ToList();
+                unfiledGroups = groups.Distinct().ToList();
+                fullGroups.RemoveAt((list) => list.NullOrEmpty());
+            }
+        }
+
+        /// <summary>
         /// 转换列表内部数据的类型
         /// </summary>
         /// <param name="list1">原列表</param>
@@ -326,6 +607,8 @@ namespace COF_Torture
             {
                 if (value1 is T2 value2)
                     list2.Add(value2);
+                else
+                    ModLog.Error(value1 + "无法在" + typeof(T1) + "和" + typeof(T2) + "之间进行类型转换，错误地点位于" + list1);
             }
 
             return list2;
@@ -341,6 +624,8 @@ namespace COF_Torture
         /// 释放处刑对象
         /// </summary>
         void ReleaseVictim();
+
+        string Label { get; }
 
         /// <summary>
         /// 设置处刑对象

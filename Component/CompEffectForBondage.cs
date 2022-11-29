@@ -62,7 +62,7 @@ namespace COF_Torture.Component
             }
             else
             {
-                var bodyPart = t.hediffSet.GetNotMissingParts().FirstOrFallback<BodyPartRecord>(
+                var bodyPart = t.hediffSet.GetNotMissingParts().FirstOrFallback(
                     (Func<BodyPartRecord, bool>)(p => p.def == this.Props.part));
                 hediffAdd = (Hediff_WithGiver)HediffMaker.MakeHediff(hediffDef, this.Victim, bodyPart);
             }

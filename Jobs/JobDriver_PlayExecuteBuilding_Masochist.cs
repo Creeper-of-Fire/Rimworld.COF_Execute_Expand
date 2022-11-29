@@ -22,7 +22,7 @@ namespace COF_Torture.Jobs
         
         protected override IEnumerable<Toil> MakeNewToils()
         {
-            yield return new Toil().FailOnDestroyedNullOrForbidden<Toil>(TargetIndex.A);
+            yield return new Toil().FailOnDestroyedNullOrForbidden(TargetIndex.A);
             if (this.pawn.story.traits.HasTrait(TraitDefOf.Masochist) && this.pawn.health.capacities.CapableOf(PawnCapacityDefOf.Moving))
             {
                 if (this.pawn.Position != this.TargetA.Cell)
@@ -36,7 +36,7 @@ namespace COF_Torture.Jobs
             Toil beingFuck = ToilMaker.MakeToil(nameof(BeingFuck));
             beingFuck.defaultDuration = 3000;
             beingFuck.defaultCompleteMode = ToilCompleteMode.Delay;
-            beingFuck.FailOnDestroyedNullOrForbidden<Toil>(TargetIndex.A);
+            beingFuck.FailOnDestroyedNullOrForbidden(TargetIndex.A);
             beingFuck.initAction = (Action) (() =>
             {
                 //this.Map.mapDrawer.MapMeshDirty(this.sexBuilding.Position, MapMeshFlag.Buildings);

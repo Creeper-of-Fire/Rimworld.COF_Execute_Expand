@@ -1,8 +1,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using COF_Torture.Component;
+using COF_Torture.Data;
+using COF_Torture.Dialog.Units;
 using COF_Torture.Hediffs;
 using COF_Torture.Things;
+using COF_Torture.Utility;
 using UnityEngine;
 using Verse;
 using static COF_Torture.Dialog.DialogUtility;
@@ -35,11 +38,11 @@ namespace COF_Torture.Dialog
             //this.absorbInputAroundWindow = true;
         }
 
-        private static List<ButtonUnit> TryGetButtons(object ButtonOwner)
+        private static List<ButtonTextUnit> TryGetButtons(object ButtonOwner)
         {
             try
             {
-                List<ButtonUnit> buttons = new List<ButtonUnit>();
+                List<ButtonTextUnit> buttons = new List<ButtonTextUnit>();
                 if (ButtonOwner is Hediff h)
                     buttons = GetButtons(h);
                 else if (ButtonOwner is Thing t)
@@ -48,13 +51,13 @@ namespace COF_Torture.Dialog
             }
             catch
             {
-                Log.Error("[COF_Torture]" + ButtonOwner + "拥有错误的类型或其他错误" + ButtonOwner.GetType());
+                ModLog.Error( ButtonOwner + "拥有错误的类型或其他错误" + ButtonOwner.GetType());
             }
 
-            return new List<ButtonUnit>();
+            return new List<ButtonTextUnit>();
         }
 
-        private static List<ButtonUnit> GetButtons(Hediff ButtonOwner)
+        private static List<ButtonTextUnit> GetButtons(Hediff ButtonOwner)
         {
             if (ButtonOwner is Hediff_Fixed hf)
                 return getButtonInfo(hf.Gizmo_ReleaseBondageBed()).ToList();
@@ -64,14 +67,14 @@ namespace COF_Torture.Dialog
             var hcSas = ButtonOwner.TryGetComp<HediffComp_SwitchAbleSeverity>();
             if (hcSas != null)
                 return getButtonInfo(hcSas.Gizmo_StageUpAndDown()).ToList();
-            return new List<ButtonUnit>();
+            return new List<ButtonTextUnit>();
         }
 
-        private static List<ButtonUnit> GetButtons(Thing ButtonOwner)
+        private static List<ButtonTextUnit> GetButtons(Thing ButtonOwner)
         {
             if (ButtonOwner is Building_TortureBed btb)
                 return getButtonInfo(btb.Gizmo_SafeMode()).ToList();
-            return new List<ButtonUnit>();
+            return new List<ButtonTextUnit>();
         }
 
         private static void CalcButtonWidth(object menuColumn, ref float maxButtonWidth)
@@ -96,7 +99,7 @@ namespace COF_Torture.Dialog
                 if (key1 == null)
                 {
                     if (Prefs.DevMode)
-                        Log.Error("[COF_Torture]" + hediff + "是Hediff_WithGiver类型，但是Giver为空。本报错为开发者信息，这意味着游戏可能没有出错。");
+                        ModLog.Error(hediff + "是Hediff_WithGiver类型，但是Giver为空。本报错为开发者信息，这意味着游戏可能没有出错。");
                     continue;
                 }
 

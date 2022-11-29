@@ -1,8 +1,9 @@
 using System.Collections.Generic;
+using COF_Torture.Dialog.Units;
 using UnityEngine;
 using Verse;
 
-namespace COF_Torture.Dialog
+namespace COF_Torture.Dialog.Menus
 {
     public class VerticalTitleWithMenu : VerticalMenu
     {
@@ -48,7 +49,7 @@ namespace COF_Torture.Dialog
         {
             this.SubMenu = subMenu;
             this.Unit_Titles = titleUnits;
-            InitInfo();
+            Refresh();
         }
 
         /// <summary>
@@ -61,8 +62,9 @@ namespace COF_Torture.Dialog
         {
         }
         
-        public sealed override void InitInfo(List<IDialogAssembly>units = null)
+        public sealed override void Refresh()
         {
+            this.SubMenu.Refresh();
             CalcSize();
         }
 
@@ -71,9 +73,11 @@ namespace COF_Torture.Dialog
         /// </summary>
         private void CalcUnitSize()
         {
-            Text.Font = GameFont.Medium;
+            MaxUnitHeight = 0;
+            MaxUnitWidth = 0;
             foreach (var unit in Unit_Titles)
             {
+                unit.CalcSize();
                 MaxUnitWidth = Mathf.Max(MaxUnitWidth, unit.width);
                 MaxUnitHeight = Mathf.Max(MaxUnitHeight, unit.height);
             }

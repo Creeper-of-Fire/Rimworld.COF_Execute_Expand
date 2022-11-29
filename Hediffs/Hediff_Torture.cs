@@ -1,4 +1,5 @@
 using COF_Torture.Component;
+using COF_Torture.Data;
 using Verse;
 
 namespace COF_Torture.Hediffs
@@ -28,7 +29,7 @@ namespace COF_Torture.Hediffs
                 }
                 catch
                 {
-                    Log.Message("[COF_TORTURE]错误：" + this + "没有设置流血的数值");
+                    ModLog.Message("错误：" + this + "没有设置流血的数值");
                     return 0.0f;
                 }
             }

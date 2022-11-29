@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using COF_Torture.Dialog;
+using COF_Torture.Dialog.Units;
 using COF_Torture.ModSetting;
 using Verse;
 
@@ -25,7 +26,7 @@ namespace COF_Torture.Component
         public override void CompExposeData()
         {
             base.CompExposeData();
-            Scribe_Values.Look<int>(ref this.stageLimit, "stageLimit", defaultValue: 0);
+            Scribe_Values.Look(ref this.stageLimit, "stageLimit", defaultValue: 0);
             //Scribe_Values.Look<bool>(ref this.isUsing, "isUsing", defaultValue: false);
         }
 
@@ -52,6 +53,7 @@ namespace COF_Torture.Component
             if (this.stageLimit < this.stageMax)
                 this.stageLimit += 1;
             parent.Severity = this.severityLimit;
+            Notify_SexualHeatComp();
         }
 
         public void downStage()
@@ -59,6 +61,14 @@ namespace COF_Torture.Component
             if (this.stageLimit > 0)
                 this.stageLimit -= 1;
             parent.Severity = this.severityLimit;
+            Notify_SexualHeatComp();
+        }
+
+        public void Notify_SexualHeatComp()
+        {
+           var comp = this.parent.TryGetComp<HediffComp_GetSexualHeat>();
+           if (comp !=null)
+               comp.RefreshSexualHeatMaker();
         }
     }
 }

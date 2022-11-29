@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using COF_Torture.Data;
 using COF_Torture.Things;
 using RimWorld;
 using Verse;
@@ -66,8 +67,7 @@ namespace COF_Torture.Component
                                             (string)(usableBondageBed.FloatMenuOptionLabel(victim) + " (" +
                                                      "CT_Reserved".Translate((NamedArgument)victim.Label) + ")"),
                                             (Action)null, MenuOptionPriority.DisabledOption);
-                                    else if (victim.health.hediffSet.HasHediff(COF_Torture.Hediffs.HediffDefOf
-                                                 .COF_Torture_Fixed)) //已经被固定
+                                    else if (victim.GetPawnData().IsFixed) //已经被固定
                                     {
                                         //因为已经被固定所以需要先释放
                                         yield return new FloatMenuOption(

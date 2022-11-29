@@ -52,18 +52,7 @@ namespace COF_Torture.Genes
         {
             foreach (var h in hediffs)
             {
-                h.Severity -= 1;
-                if (h.Severity <= 0)
-                {
-                    if (h.def.lethalSeverity > 0)
-                    {
-                        h.Severity = 0.001f;
-                    }
-                    else
-                    {
-                        h.Severity = 0f;
-                    }
-                }
+                h.Heal(1);
             }
         }
 
@@ -73,7 +62,7 @@ namespace COF_Torture.Genes
         public override void ExposeData()
         {
             base.ExposeData();
-            Scribe_Values.Look<int>(ref this.ticksToHeal, "ticksToHeal");
+            Scribe_Values.Look(ref this.ticksToHeal, "ticksToHeal");
             //Scribe_References.Look<Hediff>(ref this.hediffToHeal, "hediffToHeal");
         }
     }

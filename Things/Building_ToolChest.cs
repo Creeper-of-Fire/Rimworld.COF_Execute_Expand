@@ -30,10 +30,6 @@ namespace COF_Torture.Things
             }
         }
 
-        public override Color DrawColor
-        {
-            get=>Color.white;
-            set { return; }
-        }
+        public override Color DrawColor => Color.white;
     }
 }

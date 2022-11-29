@@ -1,4 +1,5 @@
 using System;
+using COF_Torture.Utility;
 using Verse;
 
 namespace COF_Torture.Component
@@ -13,7 +14,7 @@ namespace COF_Torture.Component
             if (pawn.health.hediffSet.GetFirstHediffOfDef(this.Props.hediff) != null)
                 return;
             var part = pawn.health.hediffSet.GetNotMissingParts()
-                .FirstOrFallback<BodyPartRecord>((Func<BodyPartRecord, bool>)(p => p.def == this.Props.part));
+                .FirstOrFallback((Func<BodyPartRecord, bool>)(p => p.def == this.Props.part));
             var h = HediffMaker.MakeHediff(this.Props.hediff, pawn, part);
             if (h is IWithGiver hg)
             {

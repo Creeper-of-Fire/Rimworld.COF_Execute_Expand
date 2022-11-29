@@ -18,12 +18,12 @@ namespace COF_Torture.Jobs
         protected override IEnumerable<Toil> MakeNewToils()
         {
             JobDriver_ReleaseBondageBed f = this;
-            f.FailOnDestroyedOrNull<JobDriver_ReleaseBondageBed>(TargetIndex.A);
+            f.FailOnDestroyedOrNull(TargetIndex.A);
             //f.FailOnDestroyedOrNull<JobDriver_ReleaseBondageBed>(TargetIndex.B);
-            f.FailOnDespawnedNullOrForbidden<JobDriver_ReleaseBondageBed>(TargetIndex.A);
+            f.FailOnDespawnedNullOrForbidden(TargetIndex.A);
             //f.FailOnAggroMentalStateAndHostile<JobDriver_ReleaseBondageBed>(TargetIndex.B);
             yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.ClosestTouch)
-                .FailOnForbidden<Toil>(TargetIndex.A);
+                .FailOnForbidden(TargetIndex.A);
             //Pawn prisoner = (Pawn) f.Target;
             yield return Toils_General.WaitWith(TargetIndex.A, 60, true, true);
             //yield return Toils_Reserve.Release(TargetIndex.B);

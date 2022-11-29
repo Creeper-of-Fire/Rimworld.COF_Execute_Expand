@@ -43,7 +43,7 @@ namespace COF_Torture.Component
         {
             if (this.IsPermanent)
                 return;
-            if (!(this.parent.Severity <= 0.0f))
+            if (this.parent.Severity > 0.0f)
                 return;
             this.parent.Severity = this.parent.def.initialSeverity / 2;
             this.IsPermanent = true;

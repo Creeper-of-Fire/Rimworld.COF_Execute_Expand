@@ -1,4 +1,5 @@
 using System.Reflection;
+using COF_Torture.Data;
 using HarmonyLib;
 using RimWorld;
 using Verse;
@@ -28,7 +29,7 @@ namespace COF_Torture.Patch
             var harmony = new Harmony("com.github.Creeper-of-Fire.TortureExpand");
             //Harmony.DEBUG = true;
             harmony.PatchAll(Assembly.GetExecutingAssembly());
-            Log.Message("[COF_Torture]修改加载中!");
+            ModLog.Message("修改加载中!");
         }
 
         private static void ModSettingPatch()
@@ -42,7 +43,7 @@ namespace COF_Torture.Patch
             else
             {
                 SettingPatch.DubsBadHygieneIsActive = true;
-                Log.Message("[COF_TORTURE]Dubs Bad Hygiene is detected.");
+                ModLog.Message("Dubs Bad Hygiene is detected.");
             }
 
             SettingPatch.DBHThirstNeed = DefDatabase<NeedDef>.GetNamedSilentFail("DBHThirst"); //DUBS口渴
@@ -53,19 +54,19 @@ namespace COF_Torture.Patch
             else
             {
                 SettingPatch.DubsBadHygieneThirstIsActive = true;
-                Log.Message("[COF_TORTURE]Dubs Bad Hygiene Thirst is detected.");
+                ModLog.Message("Dubs Bad Hygiene Thirst is detected.");
             }
 
             SettingPatch.SexNeed = DefDatabase<NeedDef>.GetNamedSilentFail("Sex");
             if (SettingPatch.SexNeed == null)
             {
                 SettingPatch.RimJobWorldIsActive = false;
-                Log.Message("[COF_TORTURE]没有发现RJW，这会导致Orgasm和Licentious被禁用从而报错。并不影响游戏正常运行。");
+                ModLog.Message("CT_ErrorRjw".Translate());
             }
             else
             {
                 SettingPatch.RimJobWorldIsActive = true;
-                Log.Message("[COF_TORTURE]Rim Job World is detected.");
+                ModLog.Message("Rim Job World is detected.");
             }
 
             SettingPatch.SexSkill = DefDatabase<SkillDef>.GetNamedSilentFail("Sex");
@@ -76,7 +77,7 @@ namespace COF_Torture.Patch
             else
             {
                 SettingPatch.RJWSexperienceIsActive = true;
-                Log.Message("[COF_TORTURE]RJW-Sexperience is detected");
+                ModLog.Message("RJW-Sexperience is detected");
             }
         }
     }

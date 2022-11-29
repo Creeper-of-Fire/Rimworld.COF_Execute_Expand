@@ -1,8 +1,11 @@
 using System.Collections.Generic;
 using System.Linq;
+using COF_Torture.Data;
 using COF_Torture.Dialog;
+using COF_Torture.Dialog.Units;
 using COF_Torture.Jobs;
 using COF_Torture.ModSetting;
+using COF_Torture.Utility;
 using JetBrains.Annotations;
 using RimWorld;
 using UnityEngine;
@@ -16,14 +19,19 @@ namespace COF_Torture.Things
         //public Pawn GetVictim() => victimAlive;
 
         private bool _inExecuteProgress;
+        private Pawn _victim;
         public bool hasVictim => !victim.DestroyedOrNull();
-
         public bool inExecuteProgress => _inExecuteProgress;
 
         public void startExecuteProgress()
         {
             _inExecuteProgress = true;
         }
+        /*ublic override Color DrawColor
+        {
+            get=>Color.white;
+            set { return; }
+        }*/
 
         public List<IWithGiver> hasGiven { get; set; } = new List<IWithGiver>();
 
@@ -70,15 +78,15 @@ namespace COF_Torture.Things
         public Graphic graphic_blood;
         public Graphic graphic_blood_top;
         public Graphic graphic_blood_top_using;
-        private Pawn _victim;
+        
 
         public override void ExposeData()
         {
             base.ExposeData();
-            Scribe_References.Look<Pawn>(ref this._victim, "victim");
-            Scribe_Values.Look<bool>(ref this._inExecuteProgress, "_inExecuteProgress");
-            Scribe_Values.Look<bool>(ref this.isUsed, "isUsed");
-            Scribe_Values.Look<bool>(ref this.isSafe, "isSafe", defaultValue: ModSettingMain.Instance.Setting.isSecurityMode);
+            Scribe_References.Look(ref this._victim, "victim");
+            Scribe_Values.Look(ref this._inExecuteProgress, "_inExecuteProgress");
+            Scribe_Values.Look(ref this.isUsed, "isUsed");
+            Scribe_Values.Look(ref this.isSafe, "isSafe", defaultValue: ModSettingMain.Instance.Setting.isSecurityMode);
         }
 
         public override void SpawnSetup(Map map, bool respawningAfterLoad)
@@ -113,7 +121,7 @@ namespace COF_Torture.Things
                         //Job job = JobMaker.MakeJob(COF_Torture.Jobs.JobDefOf.UseBondageAlone,
                         //    (LocalTargetInfo)(Verse.Thing)this);
                         //job.count = 1;
-                        Log.Message("[COF_TORTURE]被束缚的殖民者突然倒地，试图进行修复（很可能是殖民者被传送了或者" + this + "的所有者发生变更）");
+                        ModLog.Warning("被束缚的殖民者突然倒地，试图进行修复（很可能是殖民者被传送了或者" + this + "的所有者发生变更）");
                         Pawn_HealthTracker victimHealth = victim.health;
                         victim.jobs.ClearQueuedJobs();
                         victim.jobs.StopAll();
@@ -139,6 +147,7 @@ namespace COF_Torture.Things
                     lastOwnerList = new List<Pawn>(OwnersForReading);
                     OwnersForReading.Clear();
                     this.CompAssignableToPawn.TryAssignPawn(victim);
+                    victim.GetPawnData().Fixer = this;
                 }
             }
 
@@ -147,7 +156,7 @@ namespace COF_Torture.Things
                 var crebb = this.GetComps<COF_Torture.Component.CompEffectForBondage>();
                 if (crebb == null)
                 {
-                    Log.Error("[COF_TORTURE]" + this + " Can not find compEffectForBondage");
+                    ModLog.Error(this + " Can not find compEffectForBondage");
                     return;
                 }
 
@@ -181,6 +190,7 @@ namespace COF_Torture.Things
 
         private void RemoveVictimPlace()
         {
+            victim.GetPawnData().Fixer = null;
             this.CompAssignableToPawn.TryUnassignPawn(victim);
             victim = null;
             OwnersForReading.Clear();
@@ -210,14 +220,14 @@ namespace COF_Torture.Things
             }
             else
             {
-                Log.Error("[COF_TORTURE]" + this + " Can not find its victim.");
+                ModLog.Error(this + " Can not find its victim.");
                 try
                 {
                     TryRemoveHediffFromAllPawns();
                 }
                 catch
                 {
-                    Log.Message("[COF_TORTURE]has no victim, and can't removeEffect.");
+                    ModLog.Message("has no victim, and can't removeEffect.");
                 }
             }
         }
@@ -225,7 +235,7 @@ namespace COF_Torture.Things
         private void TryRemoveHediffFromAllPawns()
         {
             List<Pawn> allPawnsSpawned = this.Map.mapPawns.AllPawnsSpawned;
-            Log.Message("[COF_TORTURE]Try Remove Hediff From All Pawns.");
+            ModLog.Message("Try Remove Hediff From All Pawns.");
             foreach (var aps in allPawnsSpawned)
             {
                 foreach (var hediffR in aps.health.hediffSet.hediffs)
@@ -379,7 +389,7 @@ namespace COF_Torture.Things
                 !this.CompAssignableToPawn.PlayerCanSeeAssignments)
                 return;
             Color defaultThingLabelColor = GenMapUI.DefaultThingLabelColor;
-            if (!this.OwnersForReading.Any<Pawn>())
+            if (!this.OwnersForReading.Any())
                 GenMapUI.DrawThingLabel((Thing)this, (string)"Unowned".Translate(), defaultThingLabelColor);
             else if (this.OwnersForReading.Count == 1 && !this.hasVictim)
             {
@@ -430,10 +440,10 @@ namespace COF_Torture.Things
 
                 if (victim != null)
                 {
-                    foreach (var com in this.Gizmo_StartAndStopExecute())
+                    /*foreach (var com in this.Gizmo_StartAndStopExecute())
                     {
                         yield return com;
-                    }
+                    }*/
 
                     foreach (var com in this.Gizmo_AbuseMenu())
                     {

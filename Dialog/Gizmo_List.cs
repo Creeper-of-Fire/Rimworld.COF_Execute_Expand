@@ -3,10 +3,10 @@ using COF_Torture.Component;
 using COF_Torture.Hediffs;
 using COF_Torture.ModSetting;
 using COF_Torture.Things;
+using COF_Torture.Utility;
 using RimWorld;
 using UnityEngine;
 using Verse;
-using HediffDefOf = COF_Torture.Hediffs.HediffDefOf;
 
 namespace COF_Torture.Dialog
 {
@@ -49,6 +49,8 @@ namespace COF_Torture.Dialog
 
         public static IEnumerable<Command> Gizmo_AbuseMenu(this ITortureThing thing)
         {
+            if (thing == null)
+                yield break;
             Command_Action command = new Command_Action();
             command.defaultLabel = "CT_AbuseMenu".Translate();
             command.icon = ContentFinder<Texture2D>.Get("UI/Commands/LaunchReport");
@@ -142,7 +144,7 @@ namespace COF_Torture.Dialog
             if (!hediffComp.isInProgress)
             {
                 com.defaultLabel = "CT_startExecute".Translate();
-                com.defaultDesc = "CT_startExecute".Translate();
+                com.defaultDesc = hediffComp.parent.LabelBase;
                 com.hotKey = KeyBindingDefOf.Misc5;
                 com.icon = GizmoIcon.texSkull;
                 com.action = hediffComp.StartProgress;
@@ -150,7 +152,7 @@ namespace COF_Torture.Dialog
             else
             {
                 com.defaultLabel = "CT_stopExecute".Translate();
-                com.defaultDesc = "CT_stopExecute".Translate();
+                com.defaultDesc = hediffComp.parent.LabelBase;
                 com.hotKey = KeyBindingDefOf.Misc5;
                 com.icon = GizmoIcon.texSkull;
                 com.action = hediffComp.StopProgress;
@@ -160,7 +162,7 @@ namespace COF_Torture.Dialog
         }
 
         /// <summary>
-        /// 开始或者结束处刑
+        /// 开始或者结束处刑，有bug所以禁用
         /// </summary>
         /// <param name="tortureThing">处刑建筑物</param>
         public static IEnumerable<Command> Gizmo_StartAndStopExecute(this ITortureThing tortureThing)
@@ -169,7 +171,7 @@ namespace COF_Torture.Dialog
             if (!tortureThing.inExecuteProgress)
             {
                 com.defaultLabel = "CT_startExecute".Translate();
-                com.defaultDesc = "CT_startExecute".Translate();
+                com.defaultDesc = tortureThing.Label;
                 com.hotKey = KeyBindingDefOf.Misc5;
                 com.icon = GizmoIcon.texSkull;
                 com.action = delegate
@@ -187,7 +189,7 @@ namespace COF_Torture.Dialog
             else
             {
                 com.defaultLabel = "CT_stopExecute".Translate();
-                com.defaultDesc = "CT_stopExecute".Translate();
+                com.defaultDesc = tortureThing.Label;
                 com.hotKey = KeyBindingDefOf.Misc5;
                 com.icon = GizmoIcon.texSkull;
                 com.action = delegate
@@ -214,20 +216,26 @@ namespace COF_Torture.Dialog
         {
             var stageUp = new Command_Action();
             stageUp.defaultLabel = "CT_stageUp".Translate();
-            //stageUp.defaultDesc = "CT_stageUp_desc".Translate();
+            if (!ModSettingMain.Instance.Setting.controlMenuOn)
+                stageUp.defaultLabel += "  "+hediffComp.parent.LabelBase;
+            stageUp.defaultDesc = hediffComp.parent.LabelBase;
             stageUp.icon = ContentFinder<Texture2D>.Get("COF_Torture/UI/SwitchStage");
             stageUp.action = hediffComp.upStage;
             if (hediffComp.stageLimit >= hediffComp.stageMax)
                 stageUp.Disable("CannotReach".Translate());
+            
+            
             var stageDown = new Command_Action();
             stageDown.defaultLabel = "CT_stageDown".Translate();
-            //stageDown.defaultDesc = "CT_stageDown_desc".Translate();
+            if (!ModSettingMain.Instance.Setting.controlMenuOn)
+                stageDown.defaultLabel += "  "+hediffComp.parent.LabelBase;
+            stageDown.defaultDesc = hediffComp.parent.LabelBase;
             stageDown.icon = ContentFinder<Texture2D>.Get("COF_Torture/UI/SwitchStage");
             stageDown.action = hediffComp.downStage;
             if (hediffComp.stageLimit <= 0)
                 stageDown.Disable("CannotReach".Translate());
-            yield return stageUp;
             yield return stageDown;
+            yield return stageUp;
         }
     }
 }
