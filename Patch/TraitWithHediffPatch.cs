@@ -1,6 +1,7 @@
 using HarmonyLib;
 using RimWorld;
 using Verse;
+using HediffDefOf = COF_Torture.Utility.DefOf.HediffDefOf;
 
 namespace COF_Torture.Patch
 {
@@ -28,10 +29,10 @@ namespace COF_Torture.Patch
             {
                 if (__instance.story.traits.HasTrait(TraitDefOf.Masochist))
                 {
-                    if (__instance.health.hediffSet.GetFirstHediffOfDef(COF_Torture.Hediffs.HediffDefOf
+                    if (__instance.health.hediffSet.GetFirstHediffOfDef(HediffDefOf
                             .COF_Torture_SexualHeatWithPain) == null)
                     {
-                        var hediff = HediffMaker.MakeHediff(COF_Torture.Hediffs.HediffDefOf
+                        var hediff = HediffMaker.MakeHediff(HediffDefOf
                             .COF_Torture_SexualHeatWithPain, __instance);
                         __instance.health.AddHediff(hediff);
                     }

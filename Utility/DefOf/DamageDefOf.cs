@@ -1,9 +1,8 @@
-using RimWorld;
 using Verse;
 
-namespace COF_Torture.Damages
+namespace COF_Torture.Utility.DefOf
 {
-    [DefOf]
+    [RimWorld.DefOf]
     public static class DamageDefOf
     {
         public static DamageDef Execute;

@@ -1,7 +1,8 @@
 ﻿using COF_Torture.Genes;
+using COF_Torture.Hediffs;
+using COF_Torture.Utility.DefOf;
 using HarmonyLib;
 using Verse;
-using COF_Torture.Hediffs;
 
 namespace COF_Torture.Patch
 {

@@ -1,4 +1,3 @@
-using System;
 using COF_Torture.Things;
 using RimWorld;
 using Verse;
@@ -10,8 +9,8 @@ namespace COF_Torture.Jobs
     {
         public static Toil BondageIntoBed(Building_Bed bed, Pawn takee, Pawn taker = null)
         {
-            var toil = ToilMaker.MakeToil(nameof(BondageIntoBed));
-            toil.initAction = (Action)(() =>
+            var toil = ToilMaker.MakeToil();
+            toil.initAction = () =>
             {
                 if (bed.Destroyed)
                 {
@@ -39,9 +38,9 @@ namespace COF_Torture.Jobs
 
                 if (!takee.IsPrisonerOfColony)
                     return;
-                LessonAutoActivator.TeachOpportunity(ConceptDefOf.PrisonerTab, (Thing)takee,
+                LessonAutoActivator.TeachOpportunity(ConceptDefOf.PrisonerTab, takee,
                     OpportunityType.GoodToKnow);
-            });
+            };
             toil.defaultCompleteMode = ToilCompleteMode.Instant;
             return toil;
         }
@@ -68,12 +67,12 @@ namespace COF_Torture.Jobs
                 takee.Position = RestUtility.GetBedSleepingSlotPosFor(takee, bed);
                 takee.Notify_Teleported(false);
                 takee.stances.CancelBusyStanceHard();
-                takee.jobs.StartJob(JobMaker.MakeJob(Jobs.JobDefOf.CT_LayDown, (LocalTargetInfo)(Thing)bed),
-                    JobCondition.InterruptForced, tag: new JobTag?(JobTag.TuckedIntoBed));
+                takee.jobs.StartJob(JobMaker.MakeJob(JobDefOf.CT_LayDown, (LocalTargetInfo)(Thing)bed),
+                    JobCondition.InterruptForced, tag: JobTag.TuckedIntoBed);
                 takee.mindState.Notify_TuckedIntoBed();
             }
 
-            LessonAutoActivator.TeachOpportunity(ConceptDefOf.PrisonerTab, (Thing)takee, OpportunityType.GoodToKnow);
+            LessonAutoActivator.TeachOpportunity(ConceptDefOf.PrisonerTab, takee, OpportunityType.GoodToKnow);
         }
 
         public static void CT_TuckedIntoBed(Building_Bed bed, Pawn takee)
@@ -82,7 +81,7 @@ namespace COF_Torture.Jobs
             takee.Notify_Teleported(false);
             takee.stances.CancelBusyStanceHard();
             takee.jobs.StartJob(JobMaker.MakeJob(JobDefOf.CT_LayDown, (LocalTargetInfo)(Thing)bed),
-                JobCondition.InterruptForced, tag: new JobTag?(JobTag.TuckedIntoBed));
+                JobCondition.InterruptForced, tag: JobTag.TuckedIntoBed);
         }
     }
 }

@@ -1,10 +1,9 @@
-using System;
 using System.Collections.Generic;
 using COF_Torture.Data;
 using COF_Torture.Dialog;
-using COF_Torture.Dialog.Units;
 using COF_Torture.ModSetting;
 using COF_Torture.Patch;
+using COF_Torture.Utility;
 using RimWorld;
 using Verse;
 
@@ -23,8 +22,8 @@ namespace COF_Torture.Hediffs
 
         public override void PostMake()
         {
-            this.Severity = 1f;
-            this.SetNextTick();
+            Severity = 1f;
+            SetNextTick();
         }
 
         public override void PostAdd(DamageInfo? dinfo)
@@ -35,15 +34,15 @@ namespace COF_Torture.Hediffs
             Need need;
             if (SettingPatch.DubsBadHygieneThirstIsActive)
             {
-                need = pawn.needs.AllNeeds.Find((Predicate<Need>)(x => x.def == SettingPatch.DBHThirstNeed));
+                need = pawn.needs.AllNeeds.Find(x => x.def == SettingPatch.DBHThirstNeed);
                 if (need != null) Thirst = need.CurLevel;
             }
 
             if (SettingPatch.DubsBadHygieneIsActive)
             {
-                need = pawn.needs.AllNeeds.Find((Predicate<Need>)(x => x.def == SettingPatch.BladderNeed));
+                need = pawn.needs.AllNeeds.Find(x => x.def == SettingPatch.BladderNeed);
                 if (need != null) Bladder = need.CurLevel;
-                need = pawn.needs.AllNeeds.Find((Predicate<Need>)(x => x.def == SettingPatch.HygieneNeed));
+                need = pawn.needs.AllNeeds.Find(x => x.def == SettingPatch.HygieneNeed);
                 if (need != null) Hygiene = need.CurLevel;
             }
 
@@ -62,15 +61,15 @@ namespace COF_Torture.Hediffs
                 Need need;
                 if (SettingPatch.DubsBadHygieneThirstIsActive)
                 {
-                    need = pawn.needs.AllNeeds.Find((Predicate<Need>)(x => x.def == SettingPatch.DBHThirstNeed));
+                    need = pawn.needs.AllNeeds.Find(x => x.def == SettingPatch.DBHThirstNeed);
                     if (need != null) need.CurLevel = Thirst;
                 }
 
                 if (SettingPatch.DubsBadHygieneIsActive)
                 {
-                    need = pawn.needs.AllNeeds.Find((Predicate<Need>)(x => x.def == SettingPatch.BladderNeed));
+                    need = pawn.needs.AllNeeds.Find(x => x.def == SettingPatch.BladderNeed);
                     if (need != null) need.CurLevel = Bladder;
-                    need = pawn.needs.AllNeeds.Find((Predicate<Need>)(x => x.def == SettingPatch.HygieneNeed));
+                    need = pawn.needs.AllNeeds.Find(x => x.def == SettingPatch.HygieneNeed);
                     if (need != null) need.CurLevel = Hygiene;
                 }
             }
@@ -83,22 +82,22 @@ namespace COF_Torture.Hediffs
         public override void ExposeData()
         {
             base.ExposeData();
-            Scribe_Values.Look(ref this.tickNext, "tickNext", 1000, true);
+            Scribe_Values.Look(ref tickNext, "tickNext", 1000, true);
         }
 
         public override void Tick()
         {
-            if (Find.TickManager.TicksGame < this.tickNext)
+            if (Find.TickManager.TicksGame < tickNext)
                 return;
             //this.HealWounds();
 
-            this.SatisfyFood();
-            this.SatisfyJoy();
-            this.SatisfyThirst();
-            this.SatisfyBladder();
-            this.SatisfyHygiene();
+            SatisfyFood();
+            SatisfyJoy();
+            SatisfyThirst();
+            SatisfyBladder();
+            SatisfyHygiene();
 
-            this.SetNextTick();
+            SetNextTick();
         }
 
         public override bool ShouldRemove
@@ -113,54 +112,54 @@ namespace COF_Torture.Hediffs
 
         public void SatisfyFood()
         {
-            Need_Food need = this.pawn.needs.TryGetNeed<Need_Food>();
+            Need_Food need = pawn.needs.TryGetNeed<Need_Food>();
             if (need == null || (double)need.CurLevel >= lowFloatOfNeeds)
                 return;
-            this.pawn.needs.food.CurLevel += need.MaxLevel / 5f;
+            pawn.needs.food.CurLevel += need.MaxLevel / 5f;
         }
 
         public void SatisfyJoy()
         {
-            Need_Food need = this.pawn.needs.TryGetNeed<Need_Food>();
+            Need_Food need = pawn.needs.TryGetNeed<Need_Food>();
             if (need == null || (double)need.CurLevel >= lowFloatOfNeeds)
                 return;
-            this.pawn.needs.food.CurLevel += need.MaxLevel / 5f;
+            pawn.needs.food.CurLevel += need.MaxLevel / 5f;
         }
 
         public void SatisfyThirst()
         {
             if (!SettingPatch.DubsBadHygieneThirstIsActive)
                 return;
-            Need need = this.pawn.needs.AllNeeds.Find((Predicate<Need>)(x => x.def == SettingPatch.DBHThirstNeed));
+            Need need = pawn.needs.AllNeeds.Find(x => x.def == SettingPatch.DBHThirstNeed);
             if (need == null || (double)need.CurLevel >= lowFloatOfNeeds)
                 return;
             float num = need.MaxLevel / 5f;
-            this.pawn.needs.TryGetNeed(need.def).CurLevel += num;
+            pawn.needs.TryGetNeed(need.def).CurLevel += num;
         }
 
         public void SatisfyBladder()
         {
             if (!SettingPatch.DubsBadHygieneIsActive)
                 return;
-            Need need = this.pawn.needs.AllNeeds.Find((Predicate<Need>)(x => x.def == SettingPatch.HygieneNeed));
+            Need need = pawn.needs.AllNeeds.Find(x => x.def == SettingPatch.HygieneNeed);
             if (need == null || (double)need.CurLevel >= lowFloatOfNeeds)
                 return;
             float num = need.MaxLevel / 5f;
-            this.pawn.needs.TryGetNeed(need.def).CurLevel += num;
+            pawn.needs.TryGetNeed(need.def).CurLevel += num;
         }
 
         public void SatisfyHygiene()
         {
             if (!SettingPatch.DubsBadHygieneIsActive)
                 return;
-            Need need = this.pawn.needs.AllNeeds.Find((Predicate<Need>)(x => x.def == SettingPatch.BladderNeed));
+            Need need = pawn.needs.AllNeeds.Find(x => x.def == SettingPatch.BladderNeed);
             if (need == null || (double)need.CurLevel >= lowFloatOfNeeds)
                 return;
             float num = need.MaxLevel / 5f;
-            this.pawn.needs.TryGetNeed(need.def).CurLevel += num;
+            pawn.needs.TryGetNeed(need.def).CurLevel += num;
         }
 
-        public void SetNextTick() => this.tickNext = Find.TickManager.TicksGame + 1000;
+        public void SetNextTick() => tickNext = Find.TickManager.TicksGame + 1000;
 
         public override IEnumerable<Gizmo> GetGizmos()
         {
@@ -176,5 +175,6 @@ namespace COF_Torture.Hediffs
                 yield return command;
             }
         }
+        
     }
 }

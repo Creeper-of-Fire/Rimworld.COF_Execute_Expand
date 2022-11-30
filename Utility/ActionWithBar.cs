@@ -17,9 +17,9 @@ namespace COF_Torture.Utility
 
         public ActionWithBar(Action endAction,Pawn pawn, float tick, string label = null)
         {
-            this.EndAction = endAction;
-            this.progressPerTick = 1 / tick;
-            this.progress = 0f;
+            EndAction = endAction;
+            progressPerTick = 1 / tick;
+            progress = 0f;
             this.label = label;
             this.pawn = pawn;
         }
@@ -28,7 +28,7 @@ namespace COF_Torture.Utility
         {
             if (effecter == null)
             {
-                this.effecter = EffecterDefOf.ProgressBar.Spawn();
+                effecter = EffecterDefOf.ProgressBar.Spawn();
             }
             effecter.EffectTick((TargetInfo) (Thing) pawn, TargetInfo.Invalid);
             progress += progressPerTick;
@@ -39,7 +39,7 @@ namespace COF_Torture.Utility
             mote.offsetZ = offsetZ;
             mote.alwaysShow = true;
             mote.Draw();
-            if (this.progress >= 1f)
+            if (progress >= 1f)
                 End();
         }
 
@@ -54,7 +54,7 @@ namespace COF_Torture.Utility
             if (effecter == null)
                 return;
             effecter.Cleanup();
-            effecter = (Effecter)null;
+            effecter = null;
         }
     }
 }

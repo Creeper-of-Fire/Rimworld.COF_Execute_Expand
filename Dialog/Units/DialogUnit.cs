@@ -1,3 +1,4 @@
+using COF_Torture.Utility;
 using UnityEngine;
 using Verse;
 
@@ -22,12 +23,12 @@ namespace COF_Torture.Dialog.Units
         /// <param name="_font">字体</param>
         protected void InitInfo(string _label, string _desc, GameFont _font)
         {
-            this.labelDefault = _label;
-            this.descDefault = _desc;
-            this.font = _font;
-            if (this.descDefault == "No description.")
+            labelDefault = _label;
+            descDefault = _desc;
+            font = _font;
+            if (descDefault == "No description.")
             {
-                this.descDefault = "";
+                descDefault = "";
             }
 
             CalcSize();

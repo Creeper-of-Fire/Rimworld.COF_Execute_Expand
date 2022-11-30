@@ -2,12 +2,9 @@ using System.Collections.Generic;
 using System.Linq;
 using COF_Torture.Data;
 using COF_Torture.Dialog;
-using COF_Torture.Dialog.Units;
-using COF_Torture.Hediffs;
 using COF_Torture.ModSetting;
 using COF_Torture.Utility;
 using HarmonyLib;
-using UnityEngine;
 using Verse;
 
 namespace COF_Torture.Patch

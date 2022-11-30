@@ -1,9 +1,10 @@
-using System;
 using COF_Torture.Utility;
 using HarmonyLib;
 using RimWorld;
 using UnityEngine;
 using Verse;
+using GeneDefOf = COF_Torture.Utility.DefOf.GeneDefOf;
+using HediffDefOf = COF_Torture.Utility.DefOf.HediffDefOf;
 
 namespace COF_Torture.Patch
 {
@@ -11,15 +12,14 @@ namespace COF_Torture.Patch
     public class MoreCorpseKindsPatch
     {
         [HarmonyPrefix]
-        [HarmonyPatch(typeof(Pawn), "MakeCorpse",
-            new Type[] { typeof(Building_Grave), typeof(Building_Bed) })]
+        [HarmonyPatch(typeof(Pawn), "MakeCorpse", typeof(Building_Grave), typeof(Building_Bed))]
         public static bool prefix(Pawn __instance, ref Corpse __result, Building_Grave assignedGrave,
             Building_Bed currentBed)
         {
-            if (!__instance.health.hediffSet.HasHediff(Hediffs.HediffDefOf.COF_Torture_Barbecued))
+            if (!__instance.health.hediffSet.HasHediff(HediffDefOf.COF_Torture_Barbecued))
             {
                 if (__instance.genes == null) return true;
-                if (__instance.genes != null && !__instance.genes.HasGene(Genes.GeneDefOf.COF_Torture_Barbecued)) return true;
+                if (__instance.genes != null && !__instance.genes.HasGene(GeneDefOf.COF_Torture_Barbecued)) return true;
             }
 
             if (__instance.story != null)

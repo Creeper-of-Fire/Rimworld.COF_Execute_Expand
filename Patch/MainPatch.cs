@@ -29,7 +29,7 @@ namespace COF_Torture.Patch
             var harmony = new Harmony("com.github.Creeper-of-Fire.TortureExpand");
             //Harmony.DEBUG = true;
             harmony.PatchAll(Assembly.GetExecutingAssembly());
-            ModLog.Message("修改加载中!");
+            ModLog.Message_Start("修改加载中!");
         }
 
         private static void ModSettingPatch()
@@ -43,7 +43,7 @@ namespace COF_Torture.Patch
             else
             {
                 SettingPatch.DubsBadHygieneIsActive = true;
-                ModLog.Message("Dubs Bad Hygiene is detected.");
+                ModLog.Message_Start("Dubs Bad Hygiene is detected.");
             }
 
             SettingPatch.DBHThirstNeed = DefDatabase<NeedDef>.GetNamedSilentFail("DBHThirst"); //DUBS口渴
@@ -54,19 +54,19 @@ namespace COF_Torture.Patch
             else
             {
                 SettingPatch.DubsBadHygieneThirstIsActive = true;
-                ModLog.Message("Dubs Bad Hygiene Thirst is detected.");
+                ModLog.Message_Start("Dubs Bad Hygiene Thirst is detected.");
             }
 
             SettingPatch.SexNeed = DefDatabase<NeedDef>.GetNamedSilentFail("Sex");
             if (SettingPatch.SexNeed == null)
             {
                 SettingPatch.RimJobWorldIsActive = false;
-                ModLog.Message("CT_ErrorRjw".Translate());
+                ModLog.Message_Start("CT_ErrorRjw".Translate());
             }
             else
             {
                 SettingPatch.RimJobWorldIsActive = true;
-                ModLog.Message("Rim Job World is detected.");
+                ModLog.Message_Start("Rim Job World is detected.");
             }
 
             SettingPatch.SexSkill = DefDatabase<SkillDef>.GetNamedSilentFail("Sex");
@@ -77,7 +77,7 @@ namespace COF_Torture.Patch
             else
             {
                 SettingPatch.RJWSexperienceIsActive = true;
-                ModLog.Message("RJW-Sexperience is detected");
+                ModLog.Message_Start("RJW-Sexperience is detected");
             }
         }
     }

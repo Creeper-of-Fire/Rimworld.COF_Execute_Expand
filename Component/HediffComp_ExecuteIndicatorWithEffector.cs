@@ -15,12 +15,12 @@ namespace COF_Torture.Component
             if (comp != null)
             {
                 comp.startExecuteProcess();
-                this.Parent.GiverAsInterface?.startExecuteProgress();
+                Parent.GiverAsInterface?.startExecuteProgress();
                 isInProgress = true;
             }
             else
             {
-                ModLog.Error("类型" + this.GetType() + "未找到对应的comp");
+                ModLog.Error("类型" + GetType() + "未找到对应的comp");
             }
         }
 
@@ -30,33 +30,33 @@ namespace COF_Torture.Component
             if (comp != null)
             {
                 comp.stopExecuteProcess();
-                this.Parent.GiverAsInterface?.stopExecuteProgress();
+                Parent.GiverAsInterface?.stopExecuteProgress();
                 isInProgress = false;
             }
             else
             {
-                ModLog.Error("类型" + this.GetType() + "未找到对应的comp");
+                ModLog.Error("类型" + GetType() + "未找到对应的comp");
             }
         }
     }
     public class HediffCompProperties_ExecuteIndicatorAddHediff : HediffCompProperties
     {
         public HediffCompProperties_ExecuteIndicatorAddHediff() =>
-            this.compClass = typeof(HediffComp_ExecuteIndicatorAddHediff);
+            compClass = typeof(HediffComp_ExecuteIndicatorAddHediff);
     }
 
     public class HediffComp_ExecuteIndicatorAddHediff : HediffComp_ExecuteIndicatorWithEffector
     {
         protected sealed override HediffComp GetChildComp()
         {
-            var comp = this.Parent.TryGetComp<HediffComp_ExecuteEffector_AddHediff>();
+            var comp = Parent.TryGetComp<HediffComp_ExecuteEffector_AddHediff>();
             return comp;
         }
     }
     
     public class HediffCompProperties_ExecuteIndicatorMincer : HediffCompProperties
     {
-        public HediffCompProperties_ExecuteIndicatorMincer() => this.compClass = typeof(HediffComp_ExecuteIndicatorMincer);
+        public HediffCompProperties_ExecuteIndicatorMincer() => compClass = typeof(HediffComp_ExecuteIndicatorMincer);
     }
 
     public class HediffComp_ExecuteIndicatorMincer : HediffComp_ExecuteIndicatorWithEffector
@@ -68,19 +68,19 @@ namespace COF_Torture.Component
         public override void CompExposeData()
         {
             base.CompExposeData();
-            Scribe_Values.Look(ref isButcherDone, "isButcherDone", false);
+            Scribe_Values.Look(ref isButcherDone, "isButcherDone");
         }
 
         protected override void SeverityProcess()
         {
-            if (!this.isButcherDone) return;
-            if (this.Parent.Giver is Building_TortureBed bT && !bT.isSafe)
-                TortureUtility.KillVictimDirect(this.Pawn);
+            if (!isButcherDone) return;
+            if (Parent.Giver is Building_TortureBed bT && !bT.isSafe)
+                TortureUtility.KillVictimDirect(Pawn);
         }
 
         protected sealed override HediffComp GetChildComp()
         {
-            var comp = this.Parent.TryGetComp<HediffComp_ExecuteEffector_Mincer>();
+            var comp = Parent.TryGetComp<HediffComp_ExecuteEffector_Mincer>();
             return comp;
         }
     }

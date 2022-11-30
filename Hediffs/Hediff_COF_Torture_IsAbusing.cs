@@ -2,9 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using COF_Torture.Body;
 using COF_Torture.Data;
-using COF_Torture.Dialog;
 using COF_Torture.Utility;
+using COF_Torture.Utility.DefOf;
 using Verse;
 
 namespace COF_Torture.Hediffs
@@ -51,13 +52,13 @@ namespace COF_Torture.Hediffs
                 return;
             }
 
-            if (this.pawn.pather.Moving)
+            if (pawn.pather.Moving)
             {
                 Break();
                 return;
             }
 
-            if (this.ShouldRemove)
+            if (ShouldRemove)
             {
                 return;
             }
@@ -122,28 +123,47 @@ namespace COF_Torture.Hediffs
                     nowAction.EndDirect();
                     nowAction = null;
                     nowActions.Value.RemoveAt(0);
-                    return;
                 }
             }
         }
 
-        public void AddAction(Hediff hediff, BodyPartRecord bodyPart)
+        public void AddAction(MaltreatDef hediffDef, BodyPartRecord bodyPart)
         {
-            var action = new Action(delegate
+            Action action;
+            Hediff hediff;
+            //String OldLabel = ;
+            if (bodyPart is VirtualPartRecord vBodyPart)
             {
-                if (pawn.health.hediffSet.GetNotMissingParts().Contains(bodyPart))
-                    pawn.health.AddHediff(hediff, bodyPart, dinfo: new DamageInfo());
-            });
+                var parentPart =  vBodyPart.PartTree.parentPart;
+                hediff = HediffMaker.MakeHediff(hediffDef, pawn, parentPart);
+                action = delegate
+                {
+                    if (!parentPart.IsMissingForPawn(pawn))
+                    {
+                        pawn.health.AddHediff(hediff, vBodyPart);
+                    }
+                };
+            }
+            else
+            {
+                hediff = HediffMaker.MakeHediff(hediffDef, pawn, bodyPart);
+                action = delegate
+                {
+                    if (!bodyPart.IsMissingForPawn(pawn))
+                        pawn.health.AddHediff(hediffDef, bodyPart, dinfo: new DamageInfo());
+                };
+            }
+
             var tick = hediff.Severity / SeverityPerHour * tickPerHour;
             ActionList.DictListAdd(hediff,
-                new ActionWithBar(action, this.pawn, tick, bodyPart.Label + "," + hediff.Label));
+                new ActionWithBar(action, pawn, tick, bodyPart.Label + "," + hediffDef.GetLabelAction()));
         }
 
         private void Break()
         {
             nowAction?.EndDirect();
             ActionList.Clear();
-            this.Severity = 0f;
+            Severity = 0f;
         }
 
         public static Hediff_COF_Torture_IsAbusing AddHediff_COF_Torture_IsAbusing(Pawn pawn)

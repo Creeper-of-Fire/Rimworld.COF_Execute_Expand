@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using COF_Torture.Dialog.Units;
+using COF_Torture.Utility;
 using UnityEngine;
 using Verse;
 
@@ -12,7 +13,7 @@ namespace COF_Torture.Dialog.Menus
         public float width { get; protected set; }
         public float height { get; protected set; }
         protected Vector2 scrollPosition;
-        public bool isScroll = false;
+        public bool isScroll;
         public bool drawScroll = true;
         protected RectAggregator rectAggregator;
         public abstract void Draw(Rect outRect);
@@ -22,8 +23,8 @@ namespace COF_Torture.Dialog.Menus
 
     public class SimpleVerticalMenu : VerticalMenu
     {
-        private float MaxUnitWidth = 0f;
-        private float MaxUnitHeight = 0f;
+        private float MaxUnitWidth;
+        private float MaxUnitHeight;
         private List<DialogUnit> Units;
         private List<List<DialogUnit>> Unit_SubMenus;
         private const float marginCol = 8f;
@@ -35,7 +36,7 @@ namespace COF_Torture.Dialog.Menus
         /// 获得行数最多的一列的列数
         /// </summary>
         private int maxSubMenuRows =>
-            Unit_SubMenus.Aggregate(0, (current, menu) => Mathf.Max((int)current, (int)menu.Count));
+            Unit_SubMenus.Aggregate(0, (current, menu) => Mathf.Max(current, menu.Count));
 
         /// <summary>
         /// 绘制自身
@@ -58,9 +59,9 @@ namespace COF_Torture.Dialog.Menus
                 return;
             }
 
-            var viewRect = new RectDivider(new Rect(0.0f, 0.0f, Width, height), this.GetHashCode(), margin);
+            var viewRect = new RectDivider(new Rect(0.0f, 0.0f, Width, height), GetHashCode(), margin);
 
-            Widgets.BeginScrollView(inRect, ref this.scrollPosition, viewRect, drawScroll);
+            Widgets.BeginScrollView(inRect, ref scrollPosition, viewRect, drawScroll);
             DrawCont(viewRect);
             Widgets.EndScrollView();
 
@@ -84,7 +85,7 @@ namespace COF_Torture.Dialog.Menus
         public override void CalcSize() //计算整个菜单需要的Rect大小，在此之前，需要获得单个单元的尺寸
         {
             CalcUnitSize();
-            rectAggregator = new RectAggregator(Rect.zero, this.GetHashCode(), margin);
+            rectAggregator = new RectAggregator(Rect.zero, GetHashCode(), margin);
             //rectAggregator.NewCol(marginCol);
             for (var index = 0; index < Unit_SubMenus.Count; index++)
                 rectAggregator.NewCol(MaxUnitWidth);
@@ -92,8 +93,8 @@ namespace COF_Torture.Dialog.Menus
                 rectAggregator.NewRow(MaxUnitHeight);
             if (drawScroll)
                 rectAggregator.NewCol(Window.StandardMargin);
-            this.width = rectAggregator.Rect.width;
-            this.height = rectAggregator.Rect.height;
+            width = rectAggregator.Rect.width;
+            height = rectAggregator.Rect.height;
         }
 
         /// <summary>
@@ -117,14 +118,14 @@ namespace COF_Torture.Dialog.Menus
         private void MakeSubMenuMulti(List<DialogUnit> Unit_SubMenuSingle)
         {
             Unit_SubMenus = new List<List<DialogUnit>>();
-            if (maxSubMenuRow <= 0)
+            if (maxSubMenuRow <= 0 || Unit_SubMenuSingle.Count <= maxSubMenuRow)
             {
                 Unit_SubMenus.Add(Unit_SubMenuSingle);
                 return;
             }
 
             var MenuCount = (int)Math.Ceiling((double)Unit_SubMenuSingle.Count / maxSubMenuRow);
-            var aCols = Unit_SubMenuSingle.Count / MenuCount; //一竖有多少个
+            var aCols = 1 + Unit_SubMenuSingle.Count / MenuCount; //一竖有多少个
             for (var i = 0; i < Unit_SubMenuSingle.Count; i += aCols)
                 Unit_SubMenus.Add(Unit_SubMenuSingle.Skip(i).Take(aCols).ToList());
         }
@@ -142,13 +143,13 @@ namespace COF_Torture.Dialog.Menus
             this.maxSubMenuRow = maxSubMenuRow;
             this.isScroll = isScroll;
             this.drawScroll = drawScroll;
-            this.Units = units;
+            Units = units;
             Refresh();
         }
 
         public sealed override void Refresh()
         {
-            MakeSubMenuMulti(this.Units);
+            MakeSubMenuMulti(Units);
             CalcSize();
         }
     }

@@ -9,10 +9,9 @@ namespace COF_Torture.Hediffs
         {
             get
             {
-                if (this.Severity < 1.5)
+                if (Severity < 1.5)
                     return base.LabelInBrackets;
-                else
-                    return Math.Ceiling((double)this.Severity) + "CT_OrgasmTimes".Translate();
+                return Math.Ceiling(Severity) + "CT_OrgasmTimes".Translate();
             }
         }
     }

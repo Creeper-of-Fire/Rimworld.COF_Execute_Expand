@@ -1,5 +1,5 @@
-using System;
 using System.Collections.Generic;
+using COF_Torture.Things;
 using RimWorld;
 using Verse;
 using Verse.AI;
@@ -8,7 +8,7 @@ namespace COF_Torture.Jobs
 {
     public class JobDriver_ReleaseBondageBed : JobDriver_UseItem
     {
-        protected Thing Thing => this.job.GetTarget(TargetIndex.A).Thing;
+        protected Thing Thing => job.GetTarget(TargetIndex.A).Thing;
 
         //protected Thing Target => this.job.GetTarget(TargetIndex.B).Thing;
 
@@ -27,7 +27,7 @@ namespace COF_Torture.Jobs
             //Pawn prisoner = (Pawn) f.Target;
             yield return Toils_General.WaitWith(TargetIndex.A, 60, true, true);
             //yield return Toils_Reserve.Release(TargetIndex.B);
-            yield return JobDriver_ReleaseBondageBed.ReleaseVictim((Building_Bed)this.Thing);
+            yield return ReleaseVictim((Building_Bed)Thing);
         }
 
         /// <summary>
@@ -35,14 +35,14 @@ namespace COF_Torture.Jobs
         /// </summary>
         public static Toil ReleaseVictim(Building_Bed Thing)
         {
-            var toil = ToilMaker.MakeToil(nameof(ReleaseVictim));
-            toil.initAction = (Action)(() =>
+            var toil = ToilMaker.MakeToil();
+            toil.initAction = () =>
             {
-                Things.Building_TortureBed thing = (Things.Building_TortureBed)Thing;
+                Building_TortureBed thing = (Building_TortureBed)Thing;
                 thing.ReleaseVictim();
-                MoteMaker.ThrowText(Thing.PositionHeld.ToVector3(), Thing.MapHeld, (string)"CT_Release".Translate(),
+                MoteMaker.ThrowText(Thing.PositionHeld.ToVector3(), Thing.MapHeld, "CT_Release".Translate(),
                     4f);
-            });
+            };
             toil.defaultCompleteMode = ToilCompleteMode.Instant;
             return toil;
         }

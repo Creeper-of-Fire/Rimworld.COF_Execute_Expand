@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using COF_Torture.Body;
 using COF_Torture.Data;
 using COF_Torture.Dialog.Menus;
 using COF_Torture.Dialog.Units;
@@ -58,7 +59,7 @@ namespace COF_Torture.Dialog
         /// <summary>
         /// 刷新屏幕，如果为true就执行刷新
         /// </summary>
-        private bool flagShouldRefresh = false;
+        private bool flagShouldRefresh;
 
         /// <summary>
         ///fixer是角色被捆绑到的建筑物，不应当为空
@@ -83,16 +84,22 @@ namespace COF_Torture.Dialog
         public Dialog_AbuseMenu(Pawn pawn, ITortureThing fixer)
         {
             this.pawn = pawn;
+            this.pawn.GetPawnData().VirtualParts.RefreshVirtualParts();
+            var a = this.pawn.GetPawnData().VirtualParts;
+            //ModLog.MessageEach(a.VirtualParts, (o) => o.Key.ToString());
+            ModLog.MessageEach(a.VirtualHediffByPart, (o) => o.Key + o.Value.hediffs.Count.ToString());
+            //ModLog.MessageEach(a.AllVirtualParts, (o) => o.Key.ToString());
+            //PawnExtendUtility.Notify_CheckGenderChange(pawn);
             this.fixer = fixer;
             //this.doCloseButton = true;
-            this.doCloseX = true;
+            doCloseX = true;
             //this.preventCameraMotion = false;
-            this.draggable = true;
-            this.resizeable = true;
+            draggable = true;
+            resizeable = true;
             //this.onlyOneOfTypeAllowed = false;
-            this.closeOnClickedOutside = true;
-            this.absorbInputAroundWindow = true;
-            this.forcePause = true;
+            closeOnClickedOutside = true;
+            absorbInputAroundWindow = true;
+            forcePause = true;
             SetAll();
 
             void SetAll()
@@ -104,12 +111,12 @@ namespace COF_Torture.Dialog
                     foreach (var thing in comp.LinkedFacilitiesListForReading)
                     {
                         //Log.Message("5" + thing);
-                        this.linker.Add(thing.def.defName);
+                        linker.Add(thing.def.defName);
                     }
                 }
                 else if (Prefs.DevMode)
                 {
-                    ModLog.Message("错误：Dialog_AbuseMenu不应当在不能连接的建筑物上绘制");
+                    ModLog.Warning("错误：Dialog_AbuseMenu不应当在不能连接的建筑物上绘制");
                 }
 
                 Set_AbleBodyPartGroups();
@@ -120,13 +127,13 @@ namespace COF_Torture.Dialog
 
         private void Set_AllAbuseHediff()
         {
-            if (!this.AllHediff.NullOrEmpty()) return;
+            if (!AllHediff.NullOrEmpty()) return;
             foreach (var maltreatDef in DefDatabase<MaltreatDef>.AllDefs)
             {
                 if (maltreatDef.maltreat.enableByBuilding == null ||
-                    this.linker.Contains(maltreatDef.maltreat.enableByBuilding.defName))
+                    linker.Contains(maltreatDef.maltreat.enableByBuilding.defName))
                 {
-                    this.AllHediff.Add(maltreatDef);
+                    AllHediff.Add(maltreatDef);
                     //Log.Message("2" + maltreatDef.maltreat.enableByBuilding);
                 }
 
@@ -141,7 +148,9 @@ namespace COF_Torture.Dialog
         private void Set_AbleBodyPartGroups()
         {
             var ablePartGroupsDict = new Dictionary<string, List<BodyPartRecord>>();
-            foreach (var bodyPart in pawn.health.hediffSet.GetNotMissingParts())
+            var bodyParts = pawn.health.hediffSet.GetNotMissingParts().ToList();
+            bodyParts.AddRange(BodyUtility.GetVirtualParts(pawn).ToList());
+            foreach (var bodyPart in bodyParts)
             {
                 foreach (var group in bodyPart.groups)
                 {
@@ -154,7 +163,7 @@ namespace COF_Torture.Dialog
                 }
             }
 
-            ableBodyPartGroupsDict = TortureUtility.untieNestedDict(ablePartGroupsDict, "CT_Others".Translate(), 3);
+            ableBodyPartGroupsDict = BodyUtility.untieNestedDict(ablePartGroupsDict, "CT_Others".Translate());
         }
 
         /// <summary>
@@ -187,22 +196,21 @@ namespace COF_Torture.Dialog
         /// <returns>动作列表（由focusHediff和BodyPart参与的动作）</returns>
         private List<ButtonTextUnit> Buttons_BodyParts()
         {
-            if (this.focusHediff == null || focusBodyPartGroup == null ||
+            if (focusHediff == null || focusBodyPartGroup == null ||
                 !ableBodyPartGroupsDict.ContainsKey(focusBodyPartGroup))
                 return new List<ButtonTextUnit>();
-            else
-                return ableBodyPartGroupsDict[focusBodyPartGroup].Select(Button_SetJob).ToList();
+            return ableBodyPartGroupsDict[focusBodyPartGroup].Select(Button_SetJob).ToList();
         }
 
         private ButtonTextUnit Button_SetHediff(MaltreatDef hediff)
         {
-            var inactive = this.focusHediff != hediff;
+            var inactive = focusHediff != hediff;
             var action = new Action(delegate
             {
-                if (this.focusHediff != hediff)
-                    this.focusHediff = hediff;
+                if (focusHediff != hediff)
+                    focusHediff = hediff;
                 else
-                    this.focusHediff = null;
+                    focusHediff = null;
                 flagShouldRefresh = true;
             });
             var button = new ButtonTextUnit();
@@ -215,13 +223,13 @@ namespace COF_Torture.Dialog
 
         private ButtonTextUnit Button_SetBodyPartGroup(string bodyPartGroupDef)
         {
-            var inactive = this.focusBodyPartGroup != bodyPartGroupDef;
+            var inactive = focusBodyPartGroup != bodyPartGroupDef;
             var action = new Action(delegate
             {
-                if (this.focusBodyPartGroup == bodyPartGroupDef || this.focusHediff == null)
-                    this.focusBodyPartGroup = null;
+                if (focusBodyPartGroup == bodyPartGroupDef || focusHediff == null)
+                    focusBodyPartGroup = null;
                 else
-                    this.focusBodyPartGroup = bodyPartGroupDef;
+                    focusBodyPartGroup = bodyPartGroupDef;
                 flagShouldRefresh = true;
                 //Log.Message("" + focusBodyPartGroup);
             });
@@ -278,7 +286,7 @@ namespace COF_Torture.Dialog
                     PartDisabled = true;
                     foreach (var def in listPart)
                     {
-                         if (bodyPart.def.defName == def.defName)
+                        if (bodyPart.def.defName == def.defName)
                             PartDisabled = false;
                     }
                 }
@@ -289,17 +297,18 @@ namespace COF_Torture.Dialog
 
         private ButtonTextUnit Button_SetJob(BodyPartRecord bodyPart)
         {
-            var h = HediffMaker.MakeHediff(this.focusHediff, this.pawn, bodyPart);
-            var actionToDo = new Action(delegate { DoAddHediffJob(h, bodyPart); });
+            //var h = HediffMaker.MakeHediff(focusHediff, pawn, bodyPart);
+            var focus = focusHediff;
+            var actionToDo = new Action(delegate { DoAddHediffJob(focus, bodyPart); });
             var buttonToDo = new ButtonTextUnit();
             buttonToDo.InitInfo(actionToDo,
-                bodyPart.Label + "," + this.focusHediff.GetLabelAction().Colorize(this.focusHediff.defaultLabelColor),
-                this.focusHediff.GetDescriptionAction());
+                bodyPart.Label + "," + focusHediff.GetLabelAction().Colorize(focusHediff.defaultLabelColor),
+                focusHediff.GetDescriptionAction());
             var actionButton = new Action(delegate
             {
                 for (var i = 0; i < GenUI.CurrentAdjustmentMultiplier(); i++)
                 {
-                    if (this.focusHediff != null && this.focusBodyPartGroup != null)
+                    if (focusHediff != null && focusBodyPartGroup != null)
                         todoList.Add(buttonToDo);
                 }
 
@@ -314,7 +323,7 @@ namespace COF_Torture.Dialog
         {
             var action = new Action(delegate
             {
-                this.todoList.Clear();
+                todoList.Clear();
                 flagShouldRefresh = true;
             });
             var button = new ButtonTextUnit();
@@ -327,12 +336,12 @@ namespace COF_Torture.Dialog
         {
             var action = new Action(delegate
             {
-                foreach (var b in this.todoList)
+                foreach (var b in todoList)
                 {
                     b.DoAction();
                 }
 
-                this.Close();
+                Close();
             });
             var button = new ButtonTextUnit();
             button.InitInfo(action,
@@ -354,9 +363,9 @@ namespace COF_Torture.Dialog
                 {
                     for (var i = 0; i < GenUI.CurrentAdjustmentMultiplier(); i++)
                     {
-                        var buttonInfo = this.todoList.Find(info => info.label == stack.labelDefault);
+                        var buttonInfo = todoList.Find(info => info.label == stack.labelDefault);
                         if (buttonInfo != null)
-                            this.todoList.Remove(buttonInfo);
+                            todoList.Remove(buttonInfo);
                     }
 
                     flagShouldRefresh = true;
@@ -370,9 +379,9 @@ namespace COF_Torture.Dialog
             return labels;
         }
 
-        private void DoAddHediffJob(Hediff hediff, BodyPartRecord bodyPart)
+        private void DoAddHediffJob(MaltreatDef def, BodyPartRecord bodyPart)
         {
-            Hediff_COF_Torture_IsAbusing.AddHediff_COF_Torture_IsAbusing(pawn).AddAction(hediff, bodyPart);
+            Hediff_COF_Torture_IsAbusing.AddHediff_COF_Torture_IsAbusing(pawn).AddAction(def, bodyPart);
             //TODO 加入另一个人
         }
 
@@ -397,19 +406,18 @@ namespace COF_Torture.Dialog
 
             public List<VerticalTitleWithMenu> ToMenuList()
             {
-                return new List<VerticalTitleWithMenu>()
+                return new List<VerticalTitleWithMenu>
                     { menu_Hediffs, menu_BodyPartGroups, menu_BodyParts, menu_TodoList };
             }
 
             public List<List<DialogUnit>> ToTitleList()
             {
-                return new List<List<DialogUnit>>()
-                    { titleHediffs, titleBodyGroup, titleBody, titleTodoList };
+                return new List<List<DialogUnit>> { titleHediffs, titleBodyGroup, titleBody, titleTodoList };
             }
 
             public List<List<DialogUnit>> ToUnitList()
             {
-                return new List<List<DialogUnit>>()
+                return new List<List<DialogUnit>>
                     { buttons_Hediffs, buttons_BodyPartGroups, buttons_BodyParts, label_TodoList };
             }
         }
@@ -497,7 +505,7 @@ namespace COF_Torture.Dialog
             Rect outRect = new Rect(inRect);
             outRect.yMin += StandardMargin;
             outRect.yMax -= StandardMargin * 2;
-            RectDivider viewRect = new RectDivider(outRect, this.GetHashCode());
+            RectDivider viewRect = new RectDivider(outRect, GetHashCode());
             var menuRects = new List<RectDivider>();
             foreach (var menu in DialogMenus.ToMenuList())
             {

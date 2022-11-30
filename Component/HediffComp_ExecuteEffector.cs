@@ -8,12 +8,12 @@ namespace COF_Torture.Component
 
         public virtual void startExecuteProcess()
         {
-            this.isInProgress = true;
+            isInProgress = true;
         }
 
         public virtual void stopExecuteProcess()
         {
-            this.isInProgress = false;
+            isInProgress = false;
         }
 
         public override void CompPostTick(ref float severityAdjustment)
@@ -26,7 +26,7 @@ namespace COF_Torture.Component
         public override void CompExposeData()
         {
             base.CompExposeData();
-            Scribe_Values.Look(ref isInProgress, "isInProgress", false);
+            Scribe_Values.Look(ref isInProgress, "isInProgress");
         }
 
         protected abstract void ProcessTick();

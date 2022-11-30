@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using COF_Torture.Dialog;
 using COF_Torture.Hediffs;
 using COF_Torture.ModSetting;
 using COF_Torture.Patch;
@@ -7,6 +8,7 @@ using COF_Torture.Things;
 using RimWorld;
 using UnityEngine;
 using Verse;
+using DamageDefOf = COF_Torture.Utility.DefOf.DamageDefOf;
 
 namespace COF_Torture.Component
 {
@@ -20,15 +22,15 @@ namespace COF_Torture.Component
         public List<BodyPartDef> addBodyParts;
 
         public HediffCompProperties_ExecuteEffector_AddHediff() =>
-            this.compClass = typeof(HediffComp_ExecuteEffector_AddHediff);
+            compClass = typeof(HediffComp_ExecuteEffector_AddHediff);
     }
 
     public class HediffComp_ExecuteEffector_AddHediff : HediffComp_ExecuteEffector
     {
         public HediffCompProperties_ExecuteEffector_AddHediff Props =>
-            (HediffCompProperties_ExecuteEffector_AddHediff)this.props;
+            (HediffCompProperties_ExecuteEffector_AddHediff)props;
 
-        public Hediff_WithGiver Parent => (Hediff_WithGiver)this.parent;
+        public Hediff_WithGiver Parent => (Hediff_WithGiver)parent;
         public int ticksToAdd;
         public Thing giver;
 
@@ -36,12 +38,12 @@ namespace COF_Torture.Component
         {
             if (SettingPatch.RimJobWorldIsActive)
             {
-                var execute = Damages.DamageDefOf.Execute_Licentious;
+                var execute = DamageDefOf.Execute_Licentious;
                 return new DamageInfo(execute, 1);
             }
             else
             {
-                var execute = Damages.DamageDefOf.Execute;
+                var execute = DamageDefOf.Execute;
                 return new DamageInfo(execute, 1);
             }
         }
@@ -54,7 +56,7 @@ namespace COF_Torture.Component
                 yield break;
             }
 
-            var partsAdd = this.Props.addBodyParts;
+            var partsAdd = Props.addBodyParts;
             //var h = (Hediff_Injury)HediffMaker.MakeHediff(Props.addHediff, Pawn);
             if (partsAdd == null)
             {
@@ -84,11 +86,11 @@ namespace COF_Torture.Component
                 return;
             if (giver == null)
             {
-                giver = this.Parent.Giver;
+                giver = Parent.Giver;
             }
 
             if (AddHediff())
-                this.TryAddHediff(depth);
+                TryAddHediff(depth);
         }
 
         /// <summary>
@@ -100,11 +102,11 @@ namespace COF_Torture.Component
             BodyPartRecord part = ListOfPart().RandomElement();
             if (part == null)
                 return false;
-            HediffDef hDef = this.Props.addHediff;
+            HediffDef hDef = Props.addHediff;
             //Log.Message(part + "");
             Hediff_ExecuteInjury h = (Hediff_ExecuteInjury)HediffMaker.MakeHediff(hDef, Pawn, part);
-            h.Severity = this.Props.severityToAdd.RandomInRange;
-            if (Pawn.health.hediffSet.GetHediffCount(hDef) < this.Props.addHediffNumMax)
+            h.Severity = Props.severityToAdd.RandomInRange;
+            if (Pawn.health.hediffSet.GetHediffCount(hDef) < Props.addHediffNumMax)
             {
                 if (isAddAble(part, h))
                 {
@@ -122,12 +124,12 @@ namespace COF_Torture.Component
         {
             if (part == null)
                 return false;
-            if (!((double)part.coverageAbs > 0.0))
+            if (!(part.coverageAbs > 0.0))
             {
                 return false;
             }
 
-            if (this.Parent.Giver is Building_TortureBed bT && bT.isSafe)
+            if (Parent.Giver is Building_TortureBed bT && bT.isSafe)
             {
                 if (Pawn.health.hediffSet.GetPartHealth(part) < (double)h.Severity)
                 {
@@ -142,7 +144,7 @@ namespace COF_Torture.Component
         {
             if (!isInProgress) return;
             ticksToAdd++;
-            if (ticksToAdd >= this.Props.ticksToAdd)
+            if (ticksToAdd >= Props.ticksToAdd)
             {
                 ticksToAdd = 0;
                 TryAddHediff();
@@ -152,12 +154,12 @@ namespace COF_Torture.Component
         public override void startExecuteProcess()
         {
             postExecuteStart();
-            this.isInProgress = true;
+            isInProgress = true;
         }
 
         public virtual void postExecuteStart()
         {
-            for (int i = 0; i < this.Props.addHediffNumInt; i++)
+            for (int i = 0; i < Props.addHediffNumInt; i++)
             {
                 TryAddHediff();
             }
@@ -172,13 +174,13 @@ namespace COF_Torture.Component
         public float meatPerSeverity;
 
         public HediffCompProperties_ExecuteEffector_Mincer() =>
-            this.compClass = typeof(HediffComp_ExecuteEffector_Mincer);
+            compClass = typeof(HediffComp_ExecuteEffector_Mincer);
     }
 
     public class HediffComp_ExecuteEffector_Mincer : HediffComp_ExecuteEffector_AddHediff
     {
         public new HediffCompProperties_ExecuteEffector_Mincer Props =>
-            (HediffCompProperties_ExecuteEffector_Mincer)this.props;
+            (HediffCompProperties_ExecuteEffector_Mincer)props;
 
         public BodyPartHeight height;
         public Thing giverOfHediff;
@@ -198,7 +200,7 @@ namespace COF_Torture.Component
                 if (part.def != BodyPartDefOf.Torso)
                     if ((!part.IsInGroup(BodyPartGroupDefOf.FullHead) && part.def != BodyPartDefOf.Neck) ||
                         !ModSettingMain.Instance.Setting.leftHead)
-                        if ((double)part.coverageAbs > 0.0)
+                        if (part.coverageAbs > 0.0)
                             return true;
             return false;
         }
@@ -267,10 +269,10 @@ namespace COF_Torture.Component
             }
 
             var part = parts.RandomElement();
-            var hDef = this.Props.addHediff;
+            var hDef = Props.addHediff;
             Hediff_ExecuteInjury h = (Hediff_ExecuteInjury)HediffMaker.MakeHediff(hDef, Pawn, part);
-            h.Severity = this.Props.severityToAdd.RandomInRange;
-            if (part == null || !((double)part.coverageAbs > 0.0)) return true;
+            h.Severity = Props.severityToAdd.RandomInRange;
+            if (part == null || !(part.coverageAbs > 0.0)) return true;
             h.Giver = giverOfHediff;
             Pawn.health.AddHediff(h, part, dInfo());
             productBar += h.Severity * Props.meatPerSeverity;
@@ -281,16 +283,16 @@ namespace COF_Torture.Component
         protected override void ProcessTick()
         {
             ticksToAdd++;
-            if (ticksToAdd < this.Props.ticksToAdd) return;
+            if (ticksToAdd < Props.ticksToAdd) return;
             ticksToAdd = 0;
             if (initialParts > 0)
             {
                 var severity = (1 - (float)AllPartsNotBone().Count() / initialParts) *
-                               this.Parent.def.lethalSeverity;
+                               Parent.def.lethalSeverity;
                 //Log.Message(severity.ToString());
-                severity = Mathf.Min(severity, this.Parent.def.lethalSeverity);
+                severity = Mathf.Min(severity, Parent.def.lethalSeverity);
                 severity = Mathf.Max(severity, 0.01f);
-                this.Parent.Severity = severity;
+                Parent.Severity = severity;
             }
 
             TryAddHediff();
@@ -325,8 +327,8 @@ namespace COF_Torture.Component
                 Thing thing = ThingMaker.MakeThing(Pawn.RaceProps.meatDef);
                 thing.stackCount = (int)productBar;
                 productBar -= (int)productBar;
-                GenPlace.TryPlaceThing(thing, this.Parent.Giver.Position + (new IntVec3(0, 0, -2)),
-                    this.Parent.Giver.Map, ThingPlaceMode.Near,
+                GenPlace.TryPlaceThing(thing, Parent.Giver.Position + (new IntVec3(0, 0, -2)),
+                    Parent.Giver.Map, ThingPlaceMode.Near,
                     out Thing _);
             }
         }

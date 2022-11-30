@@ -10,25 +10,24 @@ namespace COF_Torture.Hediffs
         public override void ExposeData()
         {
             base.ExposeData();
-            Scribe_References.Look(ref this.giver, "giver");
+            Scribe_References.Look(ref giver, "giver");
         }
 
         public override bool TendableNow(bool ignoreTimer = false)
         {
             if (giver == null)
                 return base.TendableNow(ignoreTimer);
-            else
-                return false;
+            return false;
         }
 
         public Thing Giver
         {
-            get => this.giver;
+            get => giver;
             set
             {
                 if (value is ITortureThing iValue)
                     iValue.hasGiven.Add(this);
-                this.giver = value;
+                giver = value;
             }
         }
 

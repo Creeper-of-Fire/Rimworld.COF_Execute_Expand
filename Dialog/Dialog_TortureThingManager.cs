@@ -28,11 +28,11 @@ namespace COF_Torture.Dialog
         public Dialog_TortureThingManager(Pawn pawn)
         {
             this.pawn = pawn;
-            this.doCloseButton = true;
-            this.doCloseX = true;
-            this.preventCameraMotion = false;
-            this.draggable = true;
-            this.resizeable = true;
+            doCloseButton = true;
+            doCloseX = true;
+            preventCameraMotion = false;
+            draggable = true;
+            resizeable = true;
             //this.onlyOneOfTypeAllowed = false;
             //this.closeOnClickedOutside = true;
             //this.absorbInputAroundWindow = true;
@@ -150,7 +150,7 @@ namespace COF_Torture.Dialog
             RectAggregator rectAggregator = new RectAggregator(Rect.zero, contextHash);
 
             CalcHeight(pawn, ref maxHeightHediff);
-            foreach (var menuColumns in this.menuColumnDict)
+            foreach (var menuColumns in menuColumnDict)
             {
                 CalcWidth(menuColumns.Key, ref maxTextWidth);
                 CalcHeight(menuColumns.Key, ref maxHeightGiver);
@@ -171,7 +171,7 @@ namespace COF_Torture.Dialog
 
             rectAggregator.NewRow(maxHeightHediff);
             rectAggregator.NewRow(SeparatorHeight);
-            foreach (var menuColumns in this.menuColumnDict)
+            foreach (var menuColumns in menuColumnDict)
             {
                 rectAggregator.NewRow(maxHeightGiver);
                 for (var index = menuColumns.Value.Count - 1; index >= 0; index--)
@@ -188,7 +188,7 @@ namespace COF_Torture.Dialog
             RectDivider viewRect =
                 new RectDivider(new Rect(0.0f, 0.0f, width, height), contextHash);
 
-            Widgets.BeginScrollView(outRect, ref this.scrollPosition, viewRect);
+            Widgets.BeginScrollView(outRect, ref scrollPosition, viewRect);
 
             Text.Anchor = TextAnchor.MiddleLeft;
             DrawColumn(pawn, maxHeightHediff, isDrawButton: false, font: GameFont.Medium);
@@ -197,7 +197,7 @@ namespace COF_Torture.Dialog
             Rect rect1 = viewRect.NewRow(SeparatorHeight * 0.5f).Rect;
             Widgets.DrawLineHorizontal(rect1.x, rect1.y + rect1.height / 2f, rect1.width);
 
-            foreach (var menuColumns in this.menuColumnDict)
+            foreach (var menuColumns in menuColumnDict)
             {
                 Text.Anchor = TextAnchor.MiddleLeft;
                 DrawColumn(menuColumns.Key, maxHeightGiver, menuColumns.Key.DescriptionDetailed,

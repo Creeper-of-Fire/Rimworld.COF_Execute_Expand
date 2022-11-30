@@ -1,8 +1,3 @@
-using System.Linq;
-using COF_Torture.Things;
-using RimWorld;
-using Verse;
-
 namespace COF_Torture.Component
 {
     /*public class CompProperties_AffectedByToolChests : CompProperties_AffectedByFacilities

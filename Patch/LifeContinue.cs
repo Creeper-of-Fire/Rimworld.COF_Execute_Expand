@@ -1,5 +1,5 @@
 using COF_Torture.Data;
-using COF_Torture.Hediffs;
+using COF_Torture.Utility;
 using HarmonyLib;
 using Verse;
 

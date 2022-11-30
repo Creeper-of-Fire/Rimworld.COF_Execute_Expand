@@ -19,20 +19,20 @@ namespace COF_Torture.Jobs
                 }
             }*/
             if (!pawn.story.traits.HasTrait(TraitDefOf.Masochist))
-                return (Job)null;
-            if (pawn.CanReach((LocalTargetInfo)(Thing)t, PathEndMode.ClosestTouch,
+                return null;
+            if (pawn.CanReach((LocalTargetInfo)t, PathEndMode.ClosestTouch,
                     Danger.Some))
                 //&&pawn.health.capacities.CapableOf(PawnCapacityDefOf.Moving)
             {
-                if (pawn.CanReserve((LocalTargetInfo)(Thing)t))
-                    return JobMaker.MakeJob(this.def.jobDef, (LocalTargetInfo)t);
+                if (pawn.CanReserve((LocalTargetInfo)t))
+                    return JobMaker.MakeJob(def.jobDef, (LocalTargetInfo)t);
             }
             else
             {  
                 //Log.Message(pawn.ToString()+" try to use"+t.ToString());
-                return (Job)null;
+                return null;
             }
-            return (Job)null;
+            return null;
         }
     }
 }

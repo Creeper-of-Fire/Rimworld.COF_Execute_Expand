@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using COF_Torture.Utility;
@@ -14,7 +13,7 @@ namespace COF_Torture.Things
         public override void ExposeData()
         {
             base.ExposeData();
-            Scribe_References.Look(ref this.LastPawn, "LastPawn");
+            Scribe_References.Look(ref LastPawn, "LastPawn");
         }
 
         public override void Tick()
@@ -41,32 +40,32 @@ namespace COF_Torture.Things
             out int numTaken,
             out float nutritionIngested)
         {
-            BodyPartRecord bodyPartRecord = this.GetBestBodyPartToEat(ingester, nutritionWanted/TortureUtility.BBQNutritionFactor);
+            BodyPartRecord bodyPartRecord = GetBestBodyPartToEat(ingester, nutritionWanted/TortureUtility.BBQNutritionFactor);
             if (bodyPartRecord == null)
             {
-                Log.Error(ingester.ToString() + " ate " + (object)this +
+                Log.Error(ingester + " ate " + this +
                           " but no body part was found. Replacing with core part.");
-                bodyPartRecord = this.InnerPawn.RaceProps.body.corePart;
+                bodyPartRecord = InnerPawn.RaceProps.body.corePart;
             }
 
             float bodyPartNutrition = FoodUtility.GetBodyPartNutrition(this, bodyPartRecord);
-            if (bodyPartRecord == this.InnerPawn.RaceProps.body.corePart)
+            if (bodyPartRecord == InnerPawn.RaceProps.body.corePart)
             {
-                if (PawnUtility.ShouldSendNotificationAbout(this.InnerPawn) && this.InnerPawn.RaceProps.Humanlike)
+                if (PawnUtility.ShouldSendNotificationAbout(InnerPawn) && InnerPawn.RaceProps.Humanlike)
                     Messages.Message(
-                        (string)"MessageEatenByPredator".Translate((NamedArgument)this.InnerPawn.LabelShort,
-                            ingester.Named("PREDATOR"), this.InnerPawn.Named("EATEN")).CapitalizeFirst(),
-                        (LookTargets)(Thing)ingester, MessageTypeDefOf.NegativeEvent);
+                        "MessageEatenByPredator".Translate((NamedArgument)InnerPawn.LabelShort,
+                            ingester.Named("PREDATOR"), InnerPawn.Named("EATEN")).CapitalizeFirst(),
+                        (Thing)ingester, MessageTypeDefOf.NegativeEvent);
                 numTaken = 1;
             }
             else
             {
                 Hediff_MissingPart hediffMissingPart =
-                    (Hediff_MissingPart)HediffMaker.MakeHediff(HediffDefOf.MissingBodyPart, this.InnerPawn,
+                    (Hediff_MissingPart)HediffMaker.MakeHediff(HediffDefOf.MissingBodyPart, InnerPawn,
                         bodyPartRecord);
                 hediffMissingPart.lastInjury = HediffDefOf.Bite;
                 hediffMissingPart.IsFresh = true;
-                this.InnerPawn.health.AddHediff((Hediff)hediffMissingPart);
+                InnerPawn.health.AddHediff(hediffMissingPart);
                 numTaken = 0;
             }
 
@@ -74,7 +73,7 @@ namespace COF_Torture.Things
         }
         private BodyPartRecord GetBestBodyPartToEat(Pawn ingester, float nutritionWanted)
         {
-            IEnumerable<BodyPartRecord> source = this.InnerPawn.health.hediffSet.GetNotMissingParts().Where((Func<BodyPartRecord, bool>) (x => x.depth == BodyPartDepth.Outside && (double) FoodUtility.GetBodyPartNutrition(this, x) > 1.0 / 1000.0));
+            IEnumerable<BodyPartRecord> source = InnerPawn.health.hediffSet.GetNotMissingParts().Where(x => x.depth == BodyPartDepth.Outside && FoodUtility.GetBodyPartNutrition(this, x) > 1.0 / 1000.0);
             var bodyPartRecords = source as BodyPartRecord[];
             if (bodyPartRecords == null)
             {
@@ -82,15 +81,13 @@ namespace COF_Torture.Things
             }
 
             if (!bodyPartRecords.Any())
-                return (BodyPartRecord)null;
-            else
+                return null;
+
+            float Func(BodyPartRecord x)
             {
-                float Func(BodyPartRecord x)
-                {
-                    return Mathf.Abs(FoodUtility.GetBodyPartNutrition(this, x) - nutritionWanted);
-                }
-                return bodyPartRecords.MinBy((Func<BodyPartRecord, float>)(Func));
+                return Mathf.Abs(FoodUtility.GetBodyPartNutrition(this, x) - nutritionWanted);
             }
+            return bodyPartRecords.MinBy(Func);
         }
     }
 }

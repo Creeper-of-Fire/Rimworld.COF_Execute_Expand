@@ -1,9 +1,8 @@
-using RimWorld;
 using Verse;
 
-namespace COF_Torture.Hediffs
+namespace COF_Torture.Utility.DefOf
 {
-    [DefOf]
+    [RimWorld.DefOf]
     public static class HediffDefOf
     {
         /*private static HediffDef Torture_NeverPainDowned;
@@ -31,6 +30,7 @@ namespace COF_Torture.Hediffs
         public static HediffDef COF_Torture_Licentious;
         public static HediffDef COF_Torture_IsAbusing;
         public static HediffDef COF_Torture_Barbecued;
+        public static HediffDef NonExist;
     }
 
 }

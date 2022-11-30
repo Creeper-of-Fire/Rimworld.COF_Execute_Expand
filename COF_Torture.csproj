@@ -66,6 +66,12 @@
         </Reference>
     </ItemGroup>
     <ItemGroup>
+        <Compile Include="Body\BodyUtility.cs" />
+        <Compile Include="Body\VirtualHediffSet.cs" />
+        <Compile Include="Body\VirtualPartData.cs" />
+        <Compile Include="Body\VirtualPartTree.cs" />
+        <Compile Include="Body\VirtualPartTreeDef.cs" />
+        <Compile Include="Body\VirtualPartRecord.cs" />
         <Compile Include="Component\CompCauseHediff_Apparel.cs" />
         <Compile Include="Component\CompEffectForBondage.cs" />
         <Compile Include="Component\CompBuildingSitHediffGiver.cs" />
@@ -79,21 +85,21 @@
         <Compile Include="Component\HediffComp_ExecuteIndicator.cs" />
         <Compile Include="Component\HediffComp_OrgasmIndicator.cs" />
         <Compile Include="Component\HediffComp_GetSexualHeat.cs" />
-        <Compile Include="Damages\DamageDefOf.cs" />
+        <Compile Include="Data\PawnExtendUtility.cs" />
+        <Compile Include="Dialog\DialogUtility.cs" />
+        <Compile Include="Dialog\Dialog_ChooseAPawn.cs" />
         <Compile Include="Dialog\Gizmo_List.cs" />
         <Compile Include="Dialog\Menus\VerticalMenu.cs" />
         <Compile Include="Dialog\Menus\VerticalTitleWithMenu.cs" />
         <Compile Include="Dialog\Units\ButtonUnit.cs" />
         <Compile Include="Dialog\Units\DialogUnit.cs" />
         <Compile Include="Dialog\Units\LabelUnit.cs" />
-        <Compile Include="Dialog\DialogUtility.cs" />
         <Compile Include="Dialog\Dialog_AbuseMenu.cs" />
         <Compile Include="Dialog\Dialog_TortureThingManager.cs" />
         <Compile Include="Dialog\Units\LabelWithUnits.cs" />
-        <Compile Include="Genes\GeneDefOf.cs" />
         <Compile Include="Genes\Gene_SpeedingRegeneration.cs" />
-        <Compile Include="Hediffs\HediffDefOf.cs" />
         <Compile Include="Hediffs\Hediff_COF_Torture_IsAbusing.cs" />
+        <Compile Include="Hediffs\Hediff_NonExistPart.cs" />
         <Compile Include="Hediffs\Hediff_Orgasm.cs" />
         <Compile Include="Hediffs\MaltreatDef.cs" />
         <Compile Include="Hediffs\Hediff_AbuseInjury.cs" />
@@ -109,9 +115,11 @@
         <Compile Include="Jobs\JobDriver_ReleaseBondageBed.cs" />
         <Compile Include="Jobs\JobDriver_UseBondageBed.cs" />
         <Compile Include="Jobs\JobDriver_UseBondageAlone.cs" />
+        <Compile Include="Jobs\JobDriver_WaitTillAbuseFinish.cs" />
         <Compile Include="Jobs\JoyGiver_PlayExecuteBuilding_Masochist.cs" />
         <Compile Include="Jobs\JoyGiver_PlayExecuteBuilding_Sadism.cs" />
         <Compile Include="ModSetting\ModSetting.cs" />
+        <Compile Include="Patch\BodyPartWithGenderPatch.cs" />
         <Compile Include="Patch\BondageBedPatch.cs" />
         <Compile Include="Patch\LifeContinue.cs" />
         <Compile Include="Patch\MainPatch.cs" />
@@ -123,18 +131,25 @@
         <Compile Include="Data\DesignatorsData.cs" />
         <Compile Include="Data\ModLog.cs" />
         <Compile Include="Data\PawnData.cs" />
-        <Compile Include="Data\PawnExtend.cs" />
         <Compile Include="Data\SaveStorage.cs" />
         <Compile Include="Properties\AssemblyInfo.cs" />
         <Compile Include="Things\Apparel_Torture.cs" />
         <Compile Include="Things\BarbecueCorpse.cs" />
         <Compile Include="Things\BuildingDef.cs" />
-        <Compile Include="Things\BuildingDefOf.cs" />
         <Compile Include="Things\Building_ToolChest.cs" />
         <Compile Include="Things\Building_TortureBed.cs" />
-        <Compile Include="Things\ThingCategoryDefOf.cs" />
         <Compile Include="Utility\ActionWithBar.cs" />
+        <Compile Include="Utility\DefOf\BodyPartTagDefOf.cs" />
+        <Compile Include="Utility\DefOf\BuildingDefOf.cs" />
+        <Compile Include="Utility\DefOf\DamageDefOf.cs" />
+        <Compile Include="Utility\DefOf\GeneDefOf.cs" />
+        <Compile Include="Utility\DefOf\HediffDefOf.cs" />
+        <Compile Include="Utility\DefOf\ThingCategoryDefOf.cs" />
+        <Compile Include="Utility\RJWUtility.cs" />
         <Compile Include="Utility\TortureUtility.cs" />
+    </ItemGroup>
+    <ItemGroup>
+      <Folder Include="Damages" />
     </ItemGroup>
     <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
     <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

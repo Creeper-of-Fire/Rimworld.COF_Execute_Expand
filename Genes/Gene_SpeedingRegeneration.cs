@@ -13,24 +13,24 @@ namespace COF_Torture.Genes
         public override void PostAdd()
         {
             base.PostAdd();
-            this.ResetInterval();
+            ResetInterval();
         }
 
         public override void Tick()
         {
             base.Tick();
             //Log.Message("1");
-            --this.ticksToHeal;
-            if (this.ticksToHeal > 0)
+            --ticksToHeal;
+            if (ticksToHeal > 0)
                 return;
-            this.ResetInterval();
+            ResetInterval();
             //Log.Message("2");
             if (hediffsToHeal == null)
             {
-                this.hediffsToHeal = SetHealAbleHediffs(pawn.health);
+                hediffsToHeal = SetHealAbleHediffs(pawn.health);
             }
-            if (this.hediffsToHeal != null)
-                HealHediffs(pawn.health, this.hediffsToHeal);
+            if (hediffsToHeal != null)
+                HealHediffs(pawn.health, hediffsToHeal);
         }
 
         public static IEnumerable<Hediff> SetHealAbleHediffs(Pawn_HealthTracker health)
@@ -57,12 +57,12 @@ namespace COF_Torture.Genes
         }
 
         private void ResetInterval() =>
-            this.ticksToHeal = Gene_SpeedingRegeneration.HealingIntervalTicksRange;
+            ticksToHeal = HealingIntervalTicksRange;
 
         public override void ExposeData()
         {
             base.ExposeData();
-            Scribe_Values.Look(ref this.ticksToHeal, "ticksToHeal");
+            Scribe_Values.Look(ref ticksToHeal, "ticksToHeal");
             //Scribe_References.Look<Hediff>(ref this.hediffToHeal, "hediffToHeal");
         }
     }

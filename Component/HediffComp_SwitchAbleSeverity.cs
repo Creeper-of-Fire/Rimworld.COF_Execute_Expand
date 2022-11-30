@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using COF_Torture.Dialog;
-using COF_Torture.Dialog.Units;
 using COF_Torture.ModSetting;
 using Verse;
 
@@ -8,7 +7,7 @@ namespace COF_Torture.Component
 {
     public class HediffCompProperties_SwitchAbleSeverity : HediffCompProperties
     {
-        public HediffCompProperties_SwitchAbleSeverity() => this.compClass = typeof(HediffComp_SwitchAbleSeverity);
+        public HediffCompProperties_SwitchAbleSeverity() => compClass = typeof(HediffComp_SwitchAbleSeverity);
     }
 
     /// <summary>
@@ -16,7 +15,7 @@ namespace COF_Torture.Component
     /// </summary>
     public class HediffComp_SwitchAbleSeverity : HediffComp
     {
-        public HediffCompProperties_SwitchAbleSeverity Props => (HediffCompProperties_SwitchAbleSeverity)this.props;
+        public HediffCompProperties_SwitchAbleSeverity Props => (HediffCompProperties_SwitchAbleSeverity)props;
         public int stageLimit;
         public int stageMax => parent.def.stages.Count - 1;
 
@@ -26,7 +25,7 @@ namespace COF_Torture.Component
         public override void CompExposeData()
         {
             base.CompExposeData();
-            Scribe_Values.Look(ref this.stageLimit, "stageLimit", defaultValue: 0);
+            Scribe_Values.Look(ref stageLimit, "stageLimit", defaultValue: 0);
             //Scribe_Values.Look<bool>(ref this.isUsing, "isUsing", defaultValue: false);
         }
 
@@ -34,10 +33,9 @@ namespace COF_Torture.Component
         {
             get
             {
-                if (this.stageLimit < this.stageMax)
+                if (stageLimit < stageMax)
                     return parent.def.stages[stageLimit].minSeverity;
-                else
-                    return parent.def.maxSeverity;
+                return parent.def.maxSeverity;
             }
         }
         public override IEnumerable<Gizmo> CompGetGizmos()
@@ -50,23 +48,23 @@ namespace COF_Torture.Component
         }
         public void upStage()
         {
-            if (this.stageLimit < this.stageMax)
-                this.stageLimit += 1;
-            parent.Severity = this.severityLimit;
+            if (stageLimit < stageMax)
+                stageLimit += 1;
+            parent.Severity = severityLimit;
             Notify_SexualHeatComp();
         }
 
         public void downStage()
         {
-            if (this.stageLimit > 0)
-                this.stageLimit -= 1;
-            parent.Severity = this.severityLimit;
+            if (stageLimit > 0)
+                stageLimit -= 1;
+            parent.Severity = severityLimit;
             Notify_SexualHeatComp();
         }
 
         public void Notify_SexualHeatComp()
         {
-           var comp = this.parent.TryGetComp<HediffComp_GetSexualHeat>();
+           var comp = parent.TryGetComp<HediffComp_GetSexualHeat>();
            if (comp !=null)
                comp.RefreshSexualHeatMaker();
         }

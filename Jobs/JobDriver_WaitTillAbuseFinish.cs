@@ -6,7 +6,7 @@ using Verse.AI;
 
 namespace COF_Torture.Jobs
 {
-    public class JobDriver_UseBondageAlone : JobDriver_UseItem
+    public class JobDriver_WaitTillAbuseFinish : JobDriver_UseItem
     {
         private Building_TortureBed Thing => (Building_TortureBed)job.GetTarget(TargetIndex.A).Thing; //building
 
@@ -32,7 +32,7 @@ namespace COF_Torture.Jobs
             if (Thing.victim != pawn)
             {
                 yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch).FailOnForbidden(TargetIndex.A);
-                yield return Toils_General.WaitWith(TargetIndex.A, 60, true, true);
+                yield return Toils_General.Wait(60);
                 yield return Toils_Reserve.Release(TargetIndex.A);
                 yield return CT_Toils_GoToBed.BondageIntoBed(Thing, target_pawn);
             }

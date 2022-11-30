@@ -10,26 +10,26 @@ namespace COF_Torture.Hediffs
         {
             get
             {
-                if (this.Part == null)
+                if (Part == null)
                 {
                     return 0.0f;
                 }
 
-                if (this.def.injuryProps == null)
+                if (def.injuryProps == null)
                     return 0.0f;
-                if (this.pawn.Dead ||
-                    this.Part.def.IsSolid(this.Part,
-                        this.pawn.health.hediffSet
+                if (pawn.Dead ||
+                    Part.def.IsSolid(Part,
+                        pawn.health.hediffSet
                             .hediffs)) //|| this.pawn.health.hediffSet.PartOrAnyAncestorHasDirectlyAddedParts(this.Part))
                     return 0.0f;
                 try
                 {
-                    float bR = this.def.injuryProps.bleedRate;
+                    float bR = def.injuryProps.bleedRate;
                     return bR;
                 }
                 catch
                 {
-                    ModLog.Message("错误：" + this + "没有设置流血的数值");
+                    ModLog.Message_Start("错误：" + this + "没有设置流血的数值");
                     return 0.0f;
                 }
             }
@@ -68,13 +68,12 @@ namespace COF_Torture.Hediffs
             get
             {
                 string labelInBrackets = base.LabelInBrackets;
-                string stringPercent = (this.Severity/this.def.lethalSeverity).ToStringPercent("F0");
+                string stringPercent = (Severity/def.lethalSeverity).ToStringPercent("F0");
                 if (this.TryGetComp<HediffComp_ExecuteIndicator>() == null)
                     return labelInBrackets;
                 if (labelInBrackets.NullOrEmpty())
                     return stringPercent;
-                else
-                    return labelInBrackets + " " + stringPercent;
+                return labelInBrackets + " " + stringPercent;
             }
         }
     }

@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using COF_Torture.Things;
 using Verse;
 
 namespace COF_Torture.Hediffs
@@ -9,9 +8,9 @@ namespace COF_Torture.Hediffs
         public override void PostLoad()
         {
             base.PostLoad();
-            if (this.descriptionHyperlinks != null && !this.descriptionHyperlinks.Contains(maltreat.enableByBuilding))
+            if (descriptionHyperlinks != null && !descriptionHyperlinks.Contains(maltreat.enableByBuilding))
             {
-                this.descriptionHyperlinks.Add(maltreat.enableByBuilding);
+                descriptionHyperlinks.Add(maltreat.enableByBuilding);
             }
         }
         [MustTranslate]
@@ -23,15 +22,13 @@ namespace COF_Torture.Hediffs
         {
             if (labelAction.NullOrEmpty())
                 return label;
-            else
-                return labelAction;
+            return labelAction;
         }
         public string GetDescriptionAction()
         {
             if (descriptionAction.NullOrEmpty())
                 return description;
-            else
-                return descriptionAction;
+            return descriptionAction;
         }
         public MaltreatProperties maltreat;
     }

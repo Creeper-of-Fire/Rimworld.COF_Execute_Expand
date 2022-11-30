@@ -1,9 +1,8 @@
-using RimWorld;
 using Verse;
 
-namespace COF_Torture.Genes
+namespace COF_Torture.Utility.DefOf
 {
-    [DefOf]
+    [RimWorld.DefOf]
     public static class GeneDefOf
     {
         public static GeneDef COF_Torture_NeverPainDowned;

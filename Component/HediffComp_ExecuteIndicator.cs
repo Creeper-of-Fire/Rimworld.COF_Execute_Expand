@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using COF_Torture.Data;
 using COF_Torture.Dialog;
-using COF_Torture.Dialog.Units;
 using COF_Torture.Hediffs;
 using COF_Torture.ModSetting;
 using COF_Torture.Things;
@@ -17,7 +16,7 @@ namespace COF_Torture.Component
 
         //public int ticksToExecute = 9000;
         //public float severityToDeath = 10.0f;
-        public HediffCompProperties_ExecuteIndicator() => this.compClass = typeof(HediffComp_ExecuteIndicator);
+        public HediffCompProperties_ExecuteIndicator() => compClass = typeof(HediffComp_ExecuteIndicator);
     }
 
     /// <summary>
@@ -25,8 +24,8 @@ namespace COF_Torture.Component
     /// </summary>
     public class HediffComp_ExecuteIndicator : HediffComp
     {
-        public HediffCompProperties_ExecuteIndicator Props => (HediffCompProperties_ExecuteIndicator)this.props;
-        public Hediff_WithGiver Parent => (Hediff_WithGiver)this.parent;
+        public HediffCompProperties_ExecuteIndicator Props => (HediffCompProperties_ExecuteIndicator)props;
+        public Hediff_WithGiver Parent => (Hediff_WithGiver)parent;
 
         private int ticksLeftToCount;
 
@@ -45,36 +44,36 @@ namespace COF_Torture.Component
         public override void CompExposeData()
         {
             base.CompExposeData();
-            Scribe_Values.Look(ref isInProgress, "isInProgress", false);
+            Scribe_Values.Look(ref isInProgress, "isInProgress");
         }
         
         protected virtual void SeverityProcess()
         {
             if (severityToDeath <= 0f)
             {
-                if (this.Parent.def.lethalSeverity <= 0f)
+                if (Parent.def.lethalSeverity <= 0f)
                 {
-                    ModLog.Error("错误：" + this.Parent + "是用于处理处刑效果的hediff，但是没有致死严重度数据");
+                    ModLog.Error("错误：" + Parent + "是用于处理处刑效果的hediff，但是没有致死严重度数据");
                     severityToDeath = 10f;
                 }
                 else
-                    severityToDeath = this.Parent.def.lethalSeverity;
+                    severityToDeath = Parent.def.lethalSeverity;
             }
 
             if (severityAdd == 0f)
                 severityAdd = severityToDeath /
                               ((float)ModSettingMain.Instance.Setting.executeHours * 2500 / ticksToCount);
             //上面为初始化严重度相关设置
-            if ((double)this.parent.Severity >= (double)severityToDeath)
+            if (parent.Severity >= (double)severityToDeath)
             {
-                var a = (Building_TortureBed)this.Parent.Giver;
+                var a = (Building_TortureBed)Parent.Giver;
                 a.isUsed = true;
-                if (this.Parent.Giver is Building_TortureBed bT && !bT.isSafe)
-                    TortureUtility.KillVictimDirect(this.Pawn);
+                if (Parent.Giver is Building_TortureBed bT && !bT.isSafe)
+                    TortureUtility.KillVictimDirect(Pawn);
             }
             else
             {
-                this.parent.Severity += severityAdd;
+                parent.Severity += severityAdd;
             }
         }
 
@@ -85,7 +84,7 @@ namespace COF_Torture.Component
         protected void mistakeStartUp()
         {
             if (ModSettingMain.Instance.Setting.mistakeStartUp != 0.0f)
-                if (this.Pawn.IsHashIntervalTick(2500))
+                if (Pawn.IsHashIntervalTick(2500))
                 {
                     if (ModSettingMain.Instance.Setting.mistakeStartUp >= Random.value)
                         StartProgress();
@@ -97,16 +96,16 @@ namespace COF_Torture.Component
             base.CompPostTick(ref severityAdjustment);
             mistakeStartUp();
             if (!isInProgress) return;
-            this.ticksLeftToCount--;
-            if (this.ticksLeftToCount > 0) //多次CompPostTick执行一次
+            ticksLeftToCount--;
+            if (ticksLeftToCount > 0) //多次CompPostTick执行一次
                 return;
-            this.ticksLeftToCount = ticksToCount; //重置计时器
+            ticksLeftToCount = ticksToCount; //重置计时器
             SeverityProcess();
             if (!ModSettingMain.Instance.Setting.isImmortal) //如果会死，就改变死因为本comp造成
             {
-                TortureUtility.ShouldNotDie(this.Pawn);
-                if (TortureUtility.ShouldBeDead(this.Pawn))
-                    TortureUtility.KillVictimDirect(this.Pawn);
+                TortureUtility.ShouldNotDie(Pawn);
+                if (TortureUtility.ShouldBeDead(Pawn))
+                    TortureUtility.KillVictimDirect(Pawn);
             }
         }
 
@@ -124,7 +123,7 @@ namespace COF_Torture.Component
         /// </summary>
         public virtual void StartProgress()
         {
-            this.Parent.GiverAsInterface.startExecuteProgress();
+            Parent.GiverAsInterface.startExecuteProgress();
             isInProgress = true;
         }
 
@@ -133,7 +132,7 @@ namespace COF_Torture.Component
         /// </summary>
         public virtual void StopProgress()
         {
-            this.Parent.GiverAsInterface.stopExecuteProgress();
+            Parent.GiverAsInterface.stopExecuteProgress();
             isInProgress = false;
         }
     }

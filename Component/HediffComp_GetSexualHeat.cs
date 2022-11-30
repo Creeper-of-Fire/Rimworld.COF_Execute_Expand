@@ -1,4 +1,5 @@
 using COF_Torture.Hediffs;
+using COF_Torture.Utility.DefOf;
 using Verse;
 
 namespace COF_Torture.Component
@@ -74,11 +75,11 @@ namespace COF_Torture.Component
 
         private Hediff GetHediffOrgasmIndicator()
         {
-            var h = this.Pawn.health.hediffSet.GetFirstHediffOfDef(HediffDefOf.COF_Torture_OrgasmIndicator);
+            var h = Pawn.health.hediffSet.GetFirstHediffOfDef(HediffDefOf.COF_Torture_OrgasmIndicator);
             if (h == null)
             {
                 h = HediffMaker.MakeHediff(HediffDefOf.COF_Torture_OrgasmIndicator, Pawn);
-                this.Pawn.health.AddHediff(h);
+                Pawn.health.AddHediff(h);
             }
             return h;
         }
@@ -87,11 +88,11 @@ namespace COF_Torture.Component
     public class HediffComp_GetSexualHeatNormal : HediffComp_GetSexualHeat //正常获得性兴奋
     {
         private HediffCompProperties_GetSexualHeatNormal Props =>
-            (HediffCompProperties_GetSexualHeatNormal)this.props;
+            (HediffCompProperties_GetSexualHeatNormal)props;
 
         protected override float GetSexualHeatPerHour()
         {
-            var props1 = this.Props;
+            var props1 = Props;
             return props1.SexualHeatGetPerHour;
         }
     }
@@ -100,18 +101,18 @@ namespace COF_Torture.Component
     {
         public float SexualHeatGetPerHour = 0f;
         public HediffCompProperties_GetSexualHeatNormal() =>
-            this.compClass = typeof(HediffComp_GetSexualHeatNormal);
+            compClass = typeof(HediffComp_GetSexualHeatNormal);
     }
     
     public class HediffComp_GetSexualHeatBySeverity : HediffComp_GetSexualHeat //正常获得性兴奋
     {
         private HediffCompProperties_GetSexualHeatBySeverity Props =>
-            (HediffCompProperties_GetSexualHeatBySeverity)this.props;
+            (HediffCompProperties_GetSexualHeatBySeverity)props;
 
         protected override float GetSexualHeatPerHour()
         {
-            var props1 = this.Props;
-            return this.parent.Severity * props1.SexualHeatConversionRatePerHour;
+            var props1 = Props;
+            return parent.Severity * props1.SexualHeatConversionRatePerHour;
         }
     }
 
@@ -119,18 +120,18 @@ namespace COF_Torture.Component
     {
         public float SexualHeatConversionRatePerHour = 0f;
         public HediffCompProperties_GetSexualHeatBySeverity() =>
-            this.compClass = typeof(HediffComp_GetSexualHeatBySeverity);
+            compClass = typeof(HediffComp_GetSexualHeatBySeverity);
     }
 
     public class HediffComp_GetSexualHeatWithPain : HediffComp_GetSexualHeatNormal //通过疼痛获得性兴奋
     {
         private HediffCompProperties_GetSexualHeatWithPain Props =>
-            (HediffCompProperties_GetSexualHeatWithPain)this.props;
+            (HediffCompProperties_GetSexualHeatWithPain)props;
         
         protected override float GetSexualHeatPerHour()
         {
-            var props1 = this.Props;
-            var pain = this.Pawn.health.hediffSet.PainTotal;
+            var props1 = Props;
+            var pain = Pawn.health.hediffSet.PainTotal;
             return pain * props1.SexualHeatConversionRatePerHour;
         }
     }
@@ -139,6 +140,6 @@ namespace COF_Torture.Component
     {
         public float SexualHeatConversionRatePerHour = 0f;
         public HediffCompProperties_GetSexualHeatWithPain() =>
-            this.compClass = typeof(HediffComp_GetSexualHeatWithPain);
+            compClass = typeof(HediffComp_GetSexualHeatWithPain);
     }
 }

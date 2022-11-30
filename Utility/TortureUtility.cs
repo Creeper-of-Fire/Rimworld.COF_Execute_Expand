@@ -2,12 +2,16 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using COF_Torture.Data;
+using COF_Torture.Hediffs;
 using COF_Torture.Patch;
 using COF_Torture.Things;
 using HarmonyLib;
 using RimWorld;
 using UnityEngine;
 using Verse;
+using BodyPartTagDefOf = COF_Torture.Utility.DefOf.BodyPartTagDefOf;
+using DamageDefOf = COF_Torture.Utility.DefOf.DamageDefOf;
+using HediffDefOf = COF_Torture.Utility.DefOf.HediffDefOf;
 
 namespace COF_Torture.Utility
 {
@@ -35,15 +39,15 @@ namespace COF_Torture.Utility
             Hediff HediffOrgasm;
             bool hasOrgasmBefore;
             HediffComp_Disappears comps1 = null;
-            if (pawn.health.hediffSet.HasHediff(COF_Torture.Hediffs.HediffDefOf.COF_Torture_Orgasm))
+            if (pawn.health.hediffSet.HasHediff(HediffDefOf.COF_Torture_Orgasm))
             {
                 HediffOrgasm =
-                    pawn.health.hediffSet.GetFirstHediffOfDef(COF_Torture.Hediffs.HediffDefOf.COF_Torture_Orgasm);
+                    pawn.health.hediffSet.GetFirstHediffOfDef(HediffDefOf.COF_Torture_Orgasm);
                 hasOrgasmBefore = true;
             }
             else
             {
-                HediffOrgasm = HediffMaker.MakeHediff(COF_Torture.Hediffs.HediffDefOf.COF_Torture_Orgasm, pawn);
+                HediffOrgasm = HediffMaker.MakeHediff(HediffDefOf.COF_Torture_Orgasm, pawn);
                 hasOrgasmBefore = false;
             }
 
@@ -51,8 +55,8 @@ namespace COF_Torture.Utility
             {
                 if (SettingPatch.RimJobWorldIsActive)
                 {
-                    Need need = pawn.needs.AllNeeds.Find((Predicate<Need>)(x => x.def == SettingPatch.SexNeed));
-                    need.CurLevel += TortureUtility.satisfySexNeedWhenOrgasm; //因为高潮获得了性满足
+                    Need need = pawn.needs.AllNeeds.Find(x => x.def == SettingPatch.SexNeed);
+                    need.CurLevel += satisfySexNeedWhenOrgasm; //因为高潮获得了性满足
                 }
 
                 if (hasOrgasmBefore)
@@ -65,7 +69,7 @@ namespace COF_Torture.Utility
                 //补充高潮状态，重置消失时间
                 else
                 {
-                    pawn.health.AddHediff(COF_Torture.Hediffs.HediffDefOf.COF_Torture_Orgasm);
+                    pawn.health.AddHediff(HediffDefOf.COF_Torture_Orgasm);
                     hasOrgasmBefore = true;
                 }
             }
@@ -78,8 +82,8 @@ namespace COF_Torture.Utility
             {
                 Log.Warning(
                     "We can't make corpse because the pawn is in a ThingOwner. Remove him from the container first. This should have been already handled before calling this method. holder=" +
-                    (object)pawn.ParentHolder);
-                return (Corpse)null;
+                    pawn.ParentHolder);
+                return null;
             }
 
             var cD = pawn.RaceProps.corpseDef;
@@ -106,12 +110,12 @@ namespace COF_Torture.Utility
             corpseDef.SetStatBaseValue(StatDefOf.FoodPoisonChanceFixedHuman, 0.0f);
             corpseDef.SetStatBaseValue(StatDefOf.Nutrition, 5.2f * BBQNutritionFactor);
             corpseDef.defName = "CT_BarbecueCorpse_" + pawnDef.defName;
-            corpseDef.label = (string)"BarbecueCorpseLabel".Translate((NamedArgument)pawnDef.label);
-            corpseDef.description = (string)"BarbecueCorpseDesc".Translate((NamedArgument)pawnDef.label);
+            corpseDef.label = "BarbecueCorpseLabel".Translate((NamedArgument)pawnDef.label);
+            corpseDef.description = "BarbecueCorpseDesc".Translate((NamedArgument)pawnDef.label);
             //corpseDef.thingCategories.Remove(ThingCategoryDefOf.CorpsesHumanlike);
             //corpseDef.thingCategories.Add(Things.ThingCategoryDefOf.BarbecueCorpsesHumanlike);
             corpseDef.comps.Clear();
-            corpseDef.comps.Add((CompProperties)new CompProperties_Forbiddable());
+            corpseDef.comps.Add(new CompProperties_Forbiddable());
             corpseDef.ingestible = new IngestibleProperties();
             corpseDef.tickerType = TickerType.Rare;
             corpseDef.ingestible.parent = pawnDef;
@@ -173,13 +177,13 @@ namespace COF_Torture.Utility
             Hediff dHediff;
             if (SettingPatch.RimJobWorldIsActive && pawn.story.traits.HasTrait(TraitDefOf.Masochist))
             {
-                execute = Damages.DamageDefOf.Execute_Licentious;
-                dHediff = HediffMaker.MakeHediff(Hediffs.HediffDefOf.COF_Torture_Licentious, pawn);
+                execute = DamageDefOf.Execute_Licentious;
+                dHediff = HediffMaker.MakeHediff(HediffDefOf.COF_Torture_Licentious, pawn);
             }
             else
             {
-                execute = Damages.DamageDefOf.Execute;
-                dHediff = HediffMaker.MakeHediff(Hediffs.HediffDefOf.COF_Torture_Fixed, pawn);
+                execute = DamageDefOf.Execute;
+                dHediff = HediffMaker.MakeHediff(HediffDefOf.COF_Torture_Fixed, pawn);
             }
 
             var dInfo = new DamageInfo(execute, 1);
@@ -190,13 +194,13 @@ namespace COF_Torture.Utility
                     return false;
                 BodyPartRecord brain = p.health.hediffSet.GetBrain();
                 return brain != null && !p.health.hediffSet.PartIsMissing(brain) &&
-                       (double)p.health.hediffSet.GetPartHealth(brain) > 0.0;
+                       p.health.hediffSet.GetPartHealth(brain) > 0.0;
             } //这里实际上是SanguophageUtility.ShouldBeDeathrestingOrInComaInsteadOfDead，但是因为ShouldBeDead被改过所以只能重写
 
             if (ShouldBeDeathrestingOrInComaInsteadOfDead(pawn))
             {
                 var ForceDeathrestOrComa = AccessTools.Method(typeof(Pawn_HealthTracker), "ForceDeathrestOrComa");
-                ForceDeathrestOrComa.Invoke(pawn.health, new object[] { (object)dInfo, (object)dHediff });
+                ForceDeathrestOrComa.Invoke(pawn.health, new[] { dInfo, (object)dHediff });
             }
             else
             {
@@ -222,11 +226,11 @@ namespace COF_Torture.Utility
 
             if (health.ShouldBeDeadFromRequiredCapacity() != null)
                 return true;
-            if ((double)PawnCapacityUtility.CalculatePartEfficiency(health.hediffSet, pawn.RaceProps.body.corePart) <=
+            if (PawnCapacityUtility.CalculatePartEfficiency(health.hediffSet, pawn.RaceProps.body.corePart) <=
                 0.0)
             {
                 if (DebugViewSettings.logCauseOfDeath)
-                    Log.Message("CauseOfDeath: zero efficiency of " + pawn.RaceProps.body.corePart.Label);
+                    ModLog.Message_Start("CauseOfDeath: zero efficiency of " + pawn.RaceProps.body.corePart.Label);
                 return true;
             }
 
@@ -382,7 +386,7 @@ namespace COF_Torture.Utility
             void ReGroup()
             {
                 var minGroup = GetMinBodyPartGroup(fullGroups); //找到要分类的
-                ModLog.Message("" + minGroup);
+                //ModLog.Message("" + minGroup);
                 foreach (var bodyPart in minGroup.Value)
                 {
                     if (unfiledParts.Contains(bodyPart))
@@ -423,175 +427,6 @@ namespace COF_Torture.Utility
             }
         }
 
-        /// <summary>
-        /// 原本的BodyPartGroup是层层嵌套的，这个算法把嵌套解开，使得一个BodyPart只对应一个BodyPartGroup。/n这个算法同样适用于其他情况
-        /// </summary>
-        /// <param name="allParts">键：BodyPartGroup，值：其包含的BodyPart列表，彼此重复。</param>
-        /// <param name="defaultKey">默认键值</param>
-        /// <param name="minGroupLength"></param>
-        /// <returns>键：BodyPartGroup，值：其包含的BodyPart列表，互不重复。</returns>
-        public static Dictionary<string, List<BodyPartRecord>> untieNestedDict(
-            Dictionary<string, List<BodyPartRecord>> allParts, string defaultKey,
-            int minGroupLength = 3)
-        {
-            var fullGroups = new Dictionary<string, List<BodyPartRecord>>();
-            var regroupedGroups = new Dictionary<string, List<BodyPartRecord>>();
-            var directAddParts = new List<BodyPartRecord>();
-            //var regroupedGroups2 = new Dictionary<string, List<BodyPartRecord>>();
-            var unfiledParts = new List<BodyPartRecord>(); //非引用而是复制
-            var otherGroup = new List<BodyPartRecord>();
-            var rjwGroup = new List<BodyPartRecord>();
-            string rjwName = "";
-            var unfiledGroups = allParts.Keys.ToList();
-
-            GetFullParts();
-            //unfiledParts.Clear();
-            if (SettingPatch.RimJobWorldIsActive)
-                SetDirectGroupRJW();
-            SetDirectGroup();
-            //GetFullParts();
-            ReGroup();
-            GetOtherGroup();
-
-
-            if (SettingPatch.RimJobWorldIsActive && !rjwName.NullOrEmpty())
-                regroupedGroups.Add(rjwName, rjwGroup);
-            regroupedGroups.Add(defaultKey, otherGroup);
-
-            var outGroups = new Dictionary<string, List<BodyPartRecord>>();
-            regroupedGroups.ForeachDL((group, part) => { outGroups.DictListAdd(group, part); });
-            outGroups.RemoveAt((list) => list.NullOrEmpty());
-
-            return outGroups;
-
-            void SetDirectGroupRJW()
-            {
-                var parts = unfiledParts;
-                //var groups = unfiledGroups;
-                fullGroups.ForeachDL((group, part) =>
-                {
-                    if (!parts.Contains(part))
-                        return;
-                    var name = part.def.defName;
-                    if (name == "Genitals" || name == "Chest" || name == "Flank" || name == "Anus")
-                    {
-                        rjwGroup.Add(part);
-                        parts.Remove(part);
-                        if (rjwName.NullOrEmpty())
-                            rjwName = part.def.label;
-                    }
-                });
-                unfiledParts = parts.Distinct().ToList();
-            }
-
-            void SetDirectGroup()
-            {
-                var parts = unfiledParts;
-                //var groups = unfiledGroups;
-                fullGroups.ForeachDL((group, part) =>
-                {
-                    if (!parts.Contains(part))
-                        return;
-                    if (part.def.label.Contains(group) || group.Contains(part.def.label))
-                    {
-                        regroupedGroups.DictListAdd(group, part);
-                        parts.Remove(part);
-                    }
-                });
-                unfiledParts = parts.Distinct().ToList();
-            }
-
-            void GetOtherGroup()
-            {
-                var groups = regroupedGroups;
-                if (minGroupLength <= 0)
-                    return;
-                foreach (var Group in groups)
-                {
-                    if (Group.Value.Count >= minGroupLength) continue;
-                    foreach (var bodyPart in Group.Value)
-                    {
-                        otherGroup.Add(bodyPart);
-                        unfiledParts.Remove(bodyPart);
-                    }
-                }
-
-                otherGroup = otherGroup.Distinct().ToList();
-
-                foreach (var part in otherGroup)
-                {
-                    foreach (var list in regroupedGroups.Values)
-                    {
-                        list.Remove(part);
-                    }
-                }
-            }
-
-
-            void ReGroup()
-            {
-                var minKey = GetMinBodyPartGroup(unfiledGroups); //找到要分类的
-                //ModLog.Message("" + minKey);
-                if (!fullGroups.ContainsKey(minKey)) return;
-                var minGroup = fullGroups[minKey];
-                foreach (var bodyPart in minGroup)
-                {
-                    if (unfiledParts.Contains(bodyPart))
-                        //目的是分类bodyPart到Group里面，unfiledParts里面的就是没有分类的bodyPart
-                    {
-                        unfiledParts.Remove(bodyPart);
-                        regroupedGroups.DictListAdd(minKey, bodyPart);
-                    }
-                }
-
-                unfiledGroups.Remove(minKey);
-                if (unfiledGroups.NullOrEmpty())
-                    return;
-                ReGroup();
-            }
-
-            string GetMinBodyPartGroup(
-                List<string> Groups)
-            {
-                var minGroup = "";
-                foreach (var key in Groups)
-                {
-                    if (!fullGroups.ContainsKey(key))
-                        continue;
-                    var Group = fullGroups[key];
-                    if (Groups.NullOrEmpty())
-                        continue;
-                    if (minGroup == "")
-                    {
-                        minGroup = key;
-                        continue;
-                    }
-
-                    if (fullGroups.ContainsKey(minGroup) && Group.Count < fullGroups[minGroup].Count)
-                    {
-                        minGroup = key;
-                    }
-                }
-
-                return minGroup;
-            }
-
-            void GetFullParts()
-            {
-                //fullGroups.Clear();
-                var parts = unfiledParts;
-                var groups = unfiledGroups;
-                allParts.ForeachDL((group, part) =>
-                {
-                    fullGroups.DictListAdd(group, part);
-                    parts.Add(part);
-                    groups.Add(group);
-                });
-                unfiledParts = parts.Distinct().ToList();
-                unfiledGroups = groups.Distinct().ToList();
-                fullGroups.RemoveAt((list) => list.NullOrEmpty());
-            }
-        }
 
         /// <summary>
         /// 转换列表内部数据的类型
@@ -612,6 +447,28 @@ namespace COF_Torture.Utility
             }
 
             return list2;
+        }
+
+        public static bool IsOneOfThem(this string This, params string[] strS)
+        {
+            foreach (var str in strS)
+            {
+                if (str == This)
+                    return true;
+            }
+
+            return false;
+        }
+
+        public static bool ContainOneOfThem(this string This, params string[] strS)
+        {
+            foreach (var str in strS)
+            {
+                if (This.Contains(str))
+                    return true;
+            }
+
+            return false;
         }
     }
 

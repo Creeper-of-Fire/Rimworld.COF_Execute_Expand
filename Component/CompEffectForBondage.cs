@@ -1,5 +1,6 @@
-using System;
 using COF_Torture.Hediffs;
+using COF_Torture.Things;
+using COF_Torture.Utility.DefOf;
 using Verse;
 
 namespace COF_Torture.Component
@@ -9,14 +10,14 @@ namespace COF_Torture.Component
         public HediffDef hediff;
         public BodyPartDef part;
 
-        public CompProperties_EffectForBondage() => this.compClass = typeof(CompEffectForBondage);
+        public CompProperties_EffectForBondage() => compClass = typeof(CompEffectForBondage);
     }
 
     public class CompEffectForBondage : ThingComp
     {
-        public CompProperties_EffectForBondage Props => (CompProperties_EffectForBondage)this.props;
-        public COF_Torture.Things.Building_TortureBed Parent => (COF_Torture.Things.Building_TortureBed)this.parent;
-        public Pawn Victim => this.Parent.victim;
+        public CompProperties_EffectForBondage Props => (CompProperties_EffectForBondage)props;
+        public Building_TortureBed Parent => (Building_TortureBed)parent;
+        public Pawn Victim => Parent.victim;
 
         /*public void RemoveEffect()
         {
@@ -38,36 +39,36 @@ namespace COF_Torture.Component
 
         public void AddEffect()
         {
-            var t = this.Victim.health;
+            var t = Victim.health;
 
 
             //给予固定状态
             Hediff_Fixed hediffTF =
-                (Hediff_Fixed)HediffMaker.MakeHediff(COF_Torture.Hediffs.HediffDefOf.COF_Torture_Fixed, this.Victim);
-            hediffTF.Giver = this.Parent;
+                (Hediff_Fixed)HediffMaker.MakeHediff(HediffDefOf.COF_Torture_Fixed, Victim);
+            hediffTF.Giver = Parent;
             t.AddHediff(hediffTF);
 
 
             //给予附加hediff
-            if (this.Props.hediff == null)
+            if (Props.hediff == null)
                 return;
-            HediffDef hediffDef = this.Props.hediff;
+            HediffDef hediffDef = Props.hediff;
             Hediff hediff = t.hediffSet.GetFirstHediffOfDef(hediffDef);
             if (hediff != null)
                 return;
             Hediff_WithGiver hediffAdd;
-            if (this.Props.part == null)
+            if (Props.part == null)
             {
-                hediffAdd = (Hediff_WithGiver)HediffMaker.MakeHediff(hediffDef, this.Victim);
+                hediffAdd = (Hediff_WithGiver)HediffMaker.MakeHediff(hediffDef, Victim);
             }
             else
             {
                 var bodyPart = t.hediffSet.GetNotMissingParts().FirstOrFallback(
-                    (Func<BodyPartRecord, bool>)(p => p.def == this.Props.part));
-                hediffAdd = (Hediff_WithGiver)HediffMaker.MakeHediff(hediffDef, this.Victim, bodyPart);
+                    p => p.def == Props.part);
+                hediffAdd = (Hediff_WithGiver)HediffMaker.MakeHediff(hediffDef, Victim, bodyPart);
             }
 
-            hediffAdd.Giver = this.Parent;
+            hediffAdd.Giver = Parent;
             t.AddHediff(hediffAdd);
         }
     }

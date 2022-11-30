@@ -15,7 +15,7 @@ namespace COF_Torture.Dialog.Menus
         public override void Draw(Rect inRect)
         {
             var outRect = new Rect(inRect);
-            var rect = new RectDivider(outRect, this.GetHashCode());
+            var rect = new RectDivider(outRect, GetHashCode());
             Widgets.DrawLineVertical(outRect.xMin - Window.StandardMargin / 2f,
                 outRect.y, outRect.height);
             foreach (var unit in Unit_Titles)
@@ -32,12 +32,12 @@ namespace COF_Torture.Dialog.Menus
         {
             CalcUnitSize();
             var Width = Mathf.Max(MaxUnitWidth, SubMenu.width);
-            rectAggregator = new RectAggregator(Rect.zero, this.GetHashCode());
+            rectAggregator = new RectAggregator(Rect.zero, GetHashCode());
             rectAggregator.NewCol(Width);
             for (var index = 0; index < Unit_Titles.Count; index++)
                 rectAggregator.NewRow(MaxUnitHeight);
-            this.width = rectAggregator.Rect.width;
-            this.height = rectAggregator.Rect.height;
+            width = rectAggregator.Rect.width;
+            height = rectAggregator.Rect.height;
         }
 
         /// <summary>
@@ -47,8 +47,8 @@ namespace COF_Torture.Dialog.Menus
         /// <param name="subMenu">下属菜单</param>
         public VerticalTitleWithMenu(List<DialogUnit> titleUnits, SimpleVerticalMenu subMenu)
         {
-            this.SubMenu = subMenu;
-            this.Unit_Titles = titleUnits;
+            SubMenu = subMenu;
+            Unit_Titles = titleUnits;
             Refresh();
         }
 
@@ -58,13 +58,13 @@ namespace COF_Torture.Dialog.Menus
         /// <param name="titleUnit">标题</param>
         /// <param name="subMenu">下属菜单</param>
         public VerticalTitleWithMenu(DialogUnit titleUnit, SimpleVerticalMenu subMenu) :
-            this(new List<DialogUnit>() { titleUnit }, subMenu)
+            this(new List<DialogUnit> { titleUnit }, subMenu)
         {
         }
         
         public sealed override void Refresh()
         {
-            this.SubMenu.Refresh();
+            SubMenu.Refresh();
             CalcSize();
         }
 

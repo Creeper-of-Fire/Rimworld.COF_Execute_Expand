@@ -1,9 +1,8 @@
-using RimWorld;
 using Verse;
 
-namespace COF_Torture.Things
+namespace COF_Torture.Utility.DefOf
 {
-    [DefOf]
+    [RimWorld.DefOf]
     public class ThingCategoryDefOf
     {
         public static ThingCategoryDef BarbecueCorpsesHumanlike;

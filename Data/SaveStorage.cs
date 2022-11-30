@@ -1,4 +1,6 @@
+using COF_Torture.Utility;
 using HugsLib;
+using RimWorld;
 using Verse;
 
 namespace COF_Torture.Data
@@ -8,18 +10,25 @@ namespace COF_Torture.Data
         public static DataStore DataStore;
         public static DesignatorsData DesignatorsData;
 
-        public override string ModIdentifier => SaveStorage.ModId;
+        public override string ModIdentifier => ModId;
 
         public static string ModId => "COF_Torture";
 
-        public override void SettingsChanged() => this.ToggleTabIfNeeded();
+        public override void SettingsChanged() => ToggleTabIfNeeded();
 
         public override void WorldLoaded()
         {
-            SaveStorage.DataStore = Find.World.GetComponent<DataStore>();
-            SaveStorage.DesignatorsData = Find.World.GetComponent<DesignatorsData>();
-            SaveStorage.DesignatorsData.Update();
-            this.ToggleTabIfNeeded();
+            DataStore = Find.World.GetComponent<DataStore>();
+            DesignatorsData = Find.World.GetComponent<DesignatorsData>();
+            DesignatorsData.Update();
+            ToggleTabIfNeeded();
+            BodyPartFix();
+        }
+
+        private void BodyPartFix()
+        {
+            //foreach (var pawn in PawnsFinder.All_AliveOrDead) 
+                //PawnExtendUtility.Notify_CheckGenderChange(pawn);
         }
 
         protected override bool HarmonyAutoPatch => false;
@@ -30,7 +39,6 @@ namespace COF_Torture.Data
 
         private SaveStorage()
         {
-            
         }
     }
 }

@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 using Verse;
 
@@ -9,7 +8,9 @@ namespace COF_Torture.ModSetting
     public class ModSettingMain : Mod
     {
         public ModSetting Setting;
+
         public static ModSettingMain Instance { get; private set; }
+
         //private Vector2 scrollPosition = new Vector2();
         public ModSettingMain(ModContentPack content) : base(content)
         {
@@ -25,9 +26,9 @@ namespace COF_Torture.ModSetting
 
         public override void DoSettingsWindowContents(Rect inRect)
         {
-            Rect rect = new Rect(0, 0, 0.9f*inRect.width, 0.8f * inRect.height);
+            Rect rect = new Rect(0, 0, 0.9f * inRect.width, 0.8f * inRect.height);
             Listing_Standard ls = new Listing_Standard();
-            //GUI.BeginScrollView(rect, ref Setting.scrollPos, ref rect);
+
             ls.Begin(inRect);
             Text.Font = GameFont.Tiny;
             if (ls.ButtonText("default".Translate()))
@@ -36,33 +37,26 @@ namespace COF_Torture.ModSetting
             } //按钮与监听
 
             ls.GapLine(5f);
-            //ls.Label("Safe Mode Is Default".Translate());
             ls.CheckboxLabeled("CT_Setting_SecurityMode".Translate(), ref Setting.isSecurityMode);
-            
+
             ls.GapLine(5f);
-            //ls.Label("Immortal In Execution".Translate());
             ls.CheckboxLabeled("CT_Setting_ImmortalInExecution".Translate(), ref Setting.isImmortal);
-           
+
             ls.GapLine(5f);
-            //ls.Label("Satisfy Hunger And Thirty".Translate());
-            ls.CheckboxLabeled("CT_Setting_SatisfyNeedsInExecution".Translate(), ref Setting.isFeed); 
-            
+            ls.CheckboxLabeled("CT_Setting_SatisfyNeedsInExecution".Translate(), ref Setting.isFeed);
+
             ls.GapLine(5f);
-            //ls.Label("Hold Head".Translate());
-            ls.CheckboxLabeled("CT_Setting_HeadKeptWhenMincer".Translate(), ref Setting.leftHead); 
-            
+            ls.CheckboxLabeled("CT_Setting_HeadKeptWhenMincer".Translate(), ref Setting.leftHead);
+
             ls.GapLine(5f);
-            //ls.Label("Remove Temp Injuries".Translate());
-            ls.CheckboxLabeled("CT_Setting_RemoveTempInjuries".Translate(), ref Setting.isRemoveTempInjuries); 
-            
+            ls.CheckboxLabeled("CT_Setting_RemoveTempInjuries".Translate(), ref Setting.isRemoveTempInjuries);
+
             ls.GapLine(5f);
-            //ls.Label("No Way Back".Translate());
-            ls.CheckboxLabeled("CT_Setting_NoWayBack".Translate(), ref Setting.isNoWayBack); 
-            
+            ls.CheckboxLabeled("CT_Setting_NoWayBack".Translate(), ref Setting.isNoWayBack);
+
             ls.GapLine(5f);
-            //ls.Label("ControlMenu".Translate());
-            ls.CheckboxLabeled("CT_Setting_ControlMenuOn".Translate(), ref Setting.controlMenuOn); 
-            
+            ls.CheckboxLabeled("CT_Setting_ControlMenuOn".Translate(), ref Setting.controlMenuOn);
+
             ls.GapLine(5f);
             ls.Label("CT_Setting_MistakeStartUp".Translate());
             ls.Label(Setting.mistakeStartUp.ToStringPercent());
@@ -72,12 +66,19 @@ namespace COF_Torture.ModSetting
             ls.Label("CT_Setting_CoverTransparency".Translate());
             ls.Label(Setting.topTransparency.ToStringPercent());
             Setting.topTransparency = ls.Slider(Setting.topTransparency, 0f, 1f);
-            
-            
+
+            ls.GapLine(5f);
+            ls.CheckboxLabeled("CT_SpecificOrgans".Translate(), ref Setting.specificOrgans);
+
+            ls.GapLine(5f);
+            ls.CheckboxLabeled("CT_SpecificOrgansForAllHediffAdded".Translate(),
+                ref Setting.specificOrgansForAllHediffAdded);
+
+
             ls.GapLine(5f);
             ls.Label("CT_Setting_ExecutionTimeDesc".Translate());
             ls.Gap(10f);
-            
+
             TextFieldNumericLabeled(ls, "CT_Setting_ExecutionTime".Translate(), ref Setting.executeHours, 0f, 2500f);
             ls.End();
             Text.Font = GameFont.Small;
@@ -99,12 +100,12 @@ namespace COF_Torture.ModSetting
         public bool isImmortal = true;
         public bool isRemoveTempInjuries = true;
         public bool isNoWayBack = false;
-        //public float testFloat = 1f;
         public int executeHours = 2500;
-        public UnityEngine.Vector2 scrollPos = UnityEngine.Vector2.zero;//这玩意哪来的？我怎么一觉醒来多了这行代码？
         public float topTransparency = 1.0f;
-        public float mistakeStartUp = 0.0f;
+        public float mistakeStartUp = 0f;
         public bool controlMenuOn = false;
+        public bool specificOrgans = true;
+        public bool specificOrgansForAllHediffAdded = false;
 
         public override void ExposeData()
         {
@@ -115,10 +116,12 @@ namespace COF_Torture.ModSetting
             Scribe_Values.Look(ref isImmortal, "isImmortal", true);
             Scribe_Values.Look(ref isRemoveTempInjuries, "isRemoveTempInjuries", true);
             Scribe_Values.Look(ref isNoWayBack, "isNoWayBack", false);
-            Scribe_Values.Look(ref controlMenuOn,"controlMenuOn",false);
+            Scribe_Values.Look(ref controlMenuOn, "controlMenuOn", false);
             Scribe_Values.Look(ref topTransparency, "topTransparency", 1f);
             Scribe_Values.Look(ref mistakeStartUp, "mistakeStartUp", 0f);
             Scribe_Values.Look(ref executeHours, "executeHours", 4);
+            Scribe_Values.Look(ref specificOrgans, "specificOrgans", true);
+            Scribe_Values.Look(ref specificOrgansForAllHediffAdded, "specificOrgansForAllHediffAdded", false);
         }
 
         public void InitData()
@@ -132,6 +135,8 @@ namespace COF_Torture.ModSetting
             topTransparency = 1f;
             mistakeStartUp = 0f;
             controlMenuOn = false;
+            specificOrgans = true;
+            specificOrgansForAllHediffAdded = false;
             //testInt = 2500;
         }
     }

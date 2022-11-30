@@ -1,12 +1,11 @@
 using System.Collections.Generic;
 using System.Linq;
+using COF_Torture.Component;
 using COF_Torture.Data;
 using COF_Torture.Dialog;
-using COF_Torture.Dialog.Units;
 using COF_Torture.Jobs;
 using COF_Torture.ModSetting;
 using COF_Torture.Utility;
-using JetBrains.Annotations;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -62,8 +61,7 @@ namespace COF_Torture.Things
             {
                 if (def is Building_TortureBedDef Def)
                     return new Vector3(0, 0, Def.shiftPawnDrawPosZ);
-                else
-                    return Vector3.zero;
+                return Vector3.zero;
             }
         }
 
@@ -83,17 +81,17 @@ namespace COF_Torture.Things
         public override void ExposeData()
         {
             base.ExposeData();
-            Scribe_References.Look(ref this._victim, "victim");
-            Scribe_Values.Look(ref this._inExecuteProgress, "_inExecuteProgress");
-            Scribe_Values.Look(ref this.isUsed, "isUsed");
-            Scribe_Values.Look(ref this.isSafe, "isSafe", defaultValue: ModSettingMain.Instance.Setting.isSecurityMode);
+            Scribe_References.Look(ref _victim, "victim");
+            Scribe_Values.Look(ref _inExecuteProgress, "_inExecuteProgress");
+            Scribe_Values.Look(ref isUsed, "isUsed");
+            Scribe_Values.Look(ref isSafe, "isSafe", defaultValue: ModSettingMain.Instance.Setting.isSecurityMode);
         }
 
         public override void SpawnSetup(Map map, bool respawningAfterLoad)
         {
             base.SpawnSetup(map, respawningAfterLoad);
             isSafe = ModSettingMain.Instance.Setting.isSecurityMode;
-            this.Medical = false;
+            Medical = false;
         }
 
         public override void DeSpawn(DestroyMode mode = DestroyMode.Vanish)
@@ -101,7 +99,7 @@ namespace COF_Torture.Things
             //如果床上面有囚犯
             if (hasVictim)
             {
-                this.ReleaseVictim();
+                ReleaseVictim();
             }
 
             base.DeSpawn(mode);
@@ -143,17 +141,17 @@ namespace COF_Torture.Things
             {
                 if (victim == null)
                 {
-                    this.victim = p;
+                    victim = p;
                     lastOwnerList = new List<Pawn>(OwnersForReading);
                     OwnersForReading.Clear();
-                    this.CompAssignableToPawn.TryAssignPawn(victim);
+                    CompAssignableToPawn.TryAssignPawn(victim);
                     victim.GetPawnData().Fixer = this;
                 }
             }
 
             void SetVictimHediff()
             {
-                var crebb = this.GetComps<COF_Torture.Component.CompEffectForBondage>();
+                var crebb = GetComps<CompEffectForBondage>();
                 if (crebb == null)
                 {
                     ModLog.Error(this + " Can not find compEffectForBondage");
@@ -169,35 +167,35 @@ namespace COF_Torture.Things
 
         public void ReleaseVictim()
         {
-            this._inExecuteProgress = false;
-            this.showVictimBody = true;
+            _inExecuteProgress = false;
+            showVictimBody = true;
             if (victim == null) return;
             TortureUtility.ShouldNotDie(victim);
-            this.RemoveVictimHediff();
+            RemoveVictimHediff();
             if (TortureUtility.ShouldBeDead(victim)) //放下来时如果会立刻死，就改变死因为本comp造成
             {
                 TortureUtility.KillVictimDirect(victim);
             }
 
-            this.RemoveVictimPlace();
+            RemoveVictimPlace();
         }
 
         private void RemoveVictim()
         {
-            this.RemoveVictimHediff();
-            this.RemoveVictimPlace();
+            RemoveVictimHediff();
+            RemoveVictimPlace();
         }
 
         private void RemoveVictimPlace()
         {
             victim.GetPawnData().Fixer = null;
-            this.CompAssignableToPawn.TryUnassignPawn(victim);
+            CompAssignableToPawn.TryUnassignPawn(victim);
             victim = null;
             OwnersForReading.Clear();
             if (lastOwnerList != null)
                 foreach (Pawn p in lastOwnerList)
                 {
-                    this.CompAssignableToPawn.TryAssignPawn(p);
+                    CompAssignableToPawn.TryAssignPawn(p);
                 }
         }
 
@@ -227,15 +225,15 @@ namespace COF_Torture.Things
                 }
                 catch
                 {
-                    ModLog.Message("has no victim, and can't removeEffect.");
+                    ModLog.Message_Start("has no victim, and can't removeEffect.");
                 }
             }
         }
 
         private void TryRemoveHediffFromAllPawns()
         {
-            List<Pawn> allPawnsSpawned = this.Map.mapPawns.AllPawnsSpawned;
-            ModLog.Message("Try Remove Hediff From All Pawns.");
+            List<Pawn> allPawnsSpawned = Map.mapPawns.AllPawnsSpawned;
+            ModLog.Message_Start("Try Remove Hediff From All Pawns.");
             foreach (var aps in allPawnsSpawned)
             {
                 foreach (var hediffR in aps.health.hediffSet.hediffs)
@@ -252,13 +250,13 @@ namespace COF_Torture.Things
         public override void Draw()
         {
             //base.Draw();
-            IntVec3 position = this.Position;
+            IntVec3 position = Position;
             Rot4 north = Rot4.North;
             Vector3 shiftedWithAltitude;
             shiftedWithAltitude = position.ToVector3ShiftedWithAltitude(AltitudeLayer.LayingPawn);
             //if (victim != null)
             //    victim.DrawAt(shiftedWithAltitude+this.shiftPawnDrawPos);
-            if (this.graphic == null)
+            if (graphic == null)
             {
                 trySetGraphic();
                 return;
@@ -270,31 +268,31 @@ namespace COF_Torture.Things
             {
                 //关上的盖子
                 shiftedWithAltitude = position.ToVector3ShiftedWithAltitude(AltitudeLayer.PawnRope);
-                graphic_top_using?.Draw(shiftedWithAltitude, north, (Thing)this);
+                graphic_top_using?.Draw(shiftedWithAltitude, north, this);
             }
             else
             {
                 //打开的盖子
                 shiftedWithAltitude = position.ToVector3ShiftedWithAltitude(AltitudeLayer.Building);
-                graphic_top?.Draw(shiftedWithAltitude, north, (Thing)this);
+                graphic_top?.Draw(shiftedWithAltitude, north, this);
             }
 
             if (isUsed)
             {
                 //底部的血液
                 shiftedWithAltitude = position.ToVector3ShiftedWithAltitude(AltitudeLayer.BuildingOnTop);
-                graphic_blood?.Draw(shiftedWithAltitude, north, (Thing)this);
+                graphic_blood?.Draw(shiftedWithAltitude, north, this);
                 if (inExecuteProgress)
                 {
                     //关上的盖子上的血液
                     shiftedWithAltitude = position.ToVector3ShiftedWithAltitude(AltitudeLayer.Projectile);
-                    graphic_blood_top_using?.Draw(shiftedWithAltitude, north, (Thing)this);
+                    graphic_blood_top_using?.Draw(shiftedWithAltitude, north, this);
                 }
                 else
                 {
                     //打开的盖子上的血液
                     //shiftedWithAltitude = position.ToVector3ShiftedWithAltitude(AltitudeLayer.BuildingOnTop);
-                    graphic_blood_top?.Draw(shiftedWithAltitude, north, (Thing)this);
+                    graphic_blood_top?.Draw(shiftedWithAltitude, north, this);
                 }
             }
         }
@@ -328,12 +326,12 @@ namespace COF_Torture.Things
 
         private void trySetGraphic()
         {
-            string texPath = this.Graphic.path;
-            var dS = this.Graphic.drawSize;
-            var gph = this.Graphic.GetCopy(dS, null);
+            string texPath = Graphic.path;
+            var dS = Graphic.drawSize;
+            var gph = Graphic.GetCopy(dS, null);
             trySetGraphicFor6(gph, texPath, dS);
             //Log.Message("0");
-            if (this.def.rotatable)
+            if (def.rotatable)
             {
                 //Log.Message("1");
                 trySetGraphicFor6(gph, texPath, dS, isRotatable: true);
@@ -343,18 +341,18 @@ namespace COF_Torture.Things
         private void trySetGraphicFor6(Graphic gph, string texPath, Vector2 dS, bool isRotatable = true)
         {
             if (isRotatable)
-                this.graphic = this.Graphic;
+                graphic = Graphic;
             else
-                trySetGraphicSingle(gph, texPath + "_south", dS, ref this.graphic);
-            trySetGraphicSingle(gph, texPath + "_top", dS, ref this.graphic_top,
+                trySetGraphicSingle(gph, texPath + "_south", dS, ref graphic);
+            trySetGraphicSingle(gph, texPath + "_top", dS, ref graphic_top,
                 isMulti: isRotatable);
-            trySetGraphicSingle(gph, texPath + "_top_using", dS, ref this.graphic_top_using,
+            trySetGraphicSingle(gph, texPath + "_top_using", dS, ref graphic_top_using,
                 isTrans: true, isMulti: isRotatable);
-            trySetGraphicSingle(gph, texPath + "_blood", dS, ref this.graphic_blood,
+            trySetGraphicSingle(gph, texPath + "_blood", dS, ref graphic_blood,
                 isBlood: true, isMulti: isRotatable);
-            trySetGraphicSingle(gph, texPath + "_blood_top", dS, ref this.graphic_blood_top,
+            trySetGraphicSingle(gph, texPath + "_blood_top", dS, ref graphic_blood_top,
                 isBlood: true, isMulti: isRotatable);
-            trySetGraphicSingle(gph, texPath + "_blood_top_using", dS, ref this.graphic_blood_top_using,
+            trySetGraphicSingle(gph, texPath + "_blood_top_using", dS, ref graphic_blood_top_using,
                 isTrans: true, isBlood: true, isMulti: isRotatable);
         }
 
@@ -386,16 +384,16 @@ namespace COF_Torture.Things
         public override void DrawGUIOverlay()
         {
             if (Medical || Find.CameraDriver.CurrentZoom != CameraZoomRange.Closest ||
-                !this.CompAssignableToPawn.PlayerCanSeeAssignments)
+                !CompAssignableToPawn.PlayerCanSeeAssignments)
                 return;
             Color defaultThingLabelColor = GenMapUI.DefaultThingLabelColor;
-            if (!this.OwnersForReading.Any())
-                GenMapUI.DrawThingLabel((Thing)this, (string)"Unowned".Translate(), defaultThingLabelColor);
-            else if (this.OwnersForReading.Count == 1 && !this.hasVictim)
+            if (!OwnersForReading.Any())
+                GenMapUI.DrawThingLabel(this, "Unowned".Translate(), defaultThingLabelColor);
+            else if (OwnersForReading.Count == 1 && !hasVictim)
             {
-                if (this.OwnersForReading[0].InBed() && this.OwnersForReading[0].CurrentBed() == this)
+                if (OwnersForReading[0].InBed() && OwnersForReading[0].CurrentBed() == this)
                     return;
-                GenMapUI.DrawThingLabel((Thing)this, this.OwnersForReading[0].LabelShort, defaultThingLabelColor);
+                GenMapUI.DrawThingLabel(this, OwnersForReading[0].LabelShort, defaultThingLabelColor);
             }
         }
 

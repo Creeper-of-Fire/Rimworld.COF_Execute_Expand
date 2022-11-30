@@ -35,7 +35,7 @@ namespace COF_Torture.Dialog.Units
         public override void CalcSize()
         {
             Text.Font = font;
-            var size = Text.CalcSize(this.label);
+            var size = Text.CalcSize(label);
             height = size.y + LittleBlankSize;
             width = size.x + LittleBlankSize;
         }
@@ -57,7 +57,7 @@ namespace COF_Torture.Dialog.Units
 
         // ReSharper disable once MemberCanBePrivate.Global
         public int GetStack() => count;
-        public override string label => this.labelDefault + " x" + GetStack();
+        public override string label => labelDefault + " x" + GetStack();
 
         public static List<UnitStack> stackList(List<DialogUnit> UnStackList)
         {

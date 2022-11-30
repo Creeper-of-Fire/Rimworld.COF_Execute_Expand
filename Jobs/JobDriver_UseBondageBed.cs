@@ -4,18 +4,19 @@ using COF_Torture.Hediffs;
 using RimWorld;
 using Verse;
 using Verse.AI;
+using HediffDefOf = COF_Torture.Utility.DefOf.HediffDefOf;
 
 namespace COF_Torture.Jobs
 {
     public class JobDriver_UseBondageBed: JobDriver_UseItem
     {
-        private Thing Thing => this.job.GetTarget(TargetIndex.A).Thing; //building
-        private Thing Target => this.job.GetTarget(TargetIndex.B).Thing; //target
+        private Thing Thing => job.GetTarget(TargetIndex.A).Thing; //building
+        private Thing Target => job.GetTarget(TargetIndex.B).Thing; //target
         
         public override bool TryMakePreToilReservations(bool errorOnFailed)
         {
-            return this.pawn.Reserve(Thing, job, 1, -1, null, errorOnFailed) &&
-                   this.pawn.Reserve(Target, job, 1, -1, null, errorOnFailed);
+            return pawn.Reserve(Thing, job, 1, -1, null, errorOnFailed) &&
+                   pawn.Reserve(Target, job, 1, -1, null, errorOnFailed);
         }
 
         protected override IEnumerable<Toil> MakeNewToils()
@@ -29,7 +30,7 @@ namespace COF_Torture.Jobs
                 yield break;
             }
             yield return Toils_Goto.GotoThing(TargetIndex.B, PathEndMode.ClosestTouch);
-            Hediff_Fixed hediffFixed = (Hediff_Fixed)target_pawn.health.hediffSet.GetFirstHediffOfDef(COF_Torture.Hediffs.HediffDefOf.COF_Torture_Fixed);
+            Hediff_Fixed hediffFixed = (Hediff_Fixed)target_pawn.health.hediffSet.GetFirstHediffOfDef(HediffDefOf.COF_Torture_Fixed);
             if (hediffFixed != null)
             {
                 Building_Bed That_bed = (Building_Bed) hediffFixed.Giver;
@@ -49,7 +50,7 @@ namespace COF_Torture.Jobs
             }
             yield return Toils_General.WaitWith(TargetIndex.A, 60, true, true);
             yield return Toils_Reserve.Release(TargetIndex.A);
-            yield return CT_Toils_GoToBed.BondageIntoBed((Building_Bed) this.Thing, target_pawn,this.pawn);
+            yield return CT_Toils_GoToBed.BondageIntoBed((Building_Bed) Thing, target_pawn,pawn);
         }
     }
 }

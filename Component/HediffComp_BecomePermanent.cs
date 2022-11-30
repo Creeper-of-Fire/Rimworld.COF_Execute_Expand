@@ -9,45 +9,45 @@ namespace COF_Torture.Component
         [MustTranslate] public string permanentLabel = "";
         [MustTranslate] public string permanentLabelExtraDescription="";
 
-        public HediffCompProperties_BecomePermanent() => this.compClass = typeof(HediffComp_BecomePermanent);
+        public HediffCompProperties_BecomePermanent() => compClass = typeof(HediffComp_BecomePermanent);
     }
     public class HediffComp_BecomePermanent : HediffComp_GetsPermanent
     {
-        public new HediffCompProperties_BecomePermanent Props => (HediffCompProperties_BecomePermanent)this.props;
+        public new HediffCompProperties_BecomePermanent Props => (HediffCompProperties_BecomePermanent)props;
 
         public override string CompDescriptionExtra
         {
             get
             {
-                if (this.IsPermanent)
-                    return this.Props.permanentLabelExtraDescription;
-                return (string)null;
+                if (IsPermanent)
+                    return Props.permanentLabelExtraDescription;
+                return null;
             }
         }
 
         public override void CompPostTick(ref float severityAdjustment)
         {
             base.CompPostTick(ref severityAdjustment);
-            if (this.Props.WoundCrackingProbabilityPerHour > (double)0f)
-                if (this.Pawn.IsHashIntervalTick(2500))
+            if (Props.WoundCrackingProbabilityPerHour > (double)0f)
+                if (Pawn.IsHashIntervalTick(2500))
                 {
-                    if (this.Props.WoundCrackingProbabilityPerHour >= (double)Random.value)
+                    if (Props.WoundCrackingProbabilityPerHour >= (double)Random.value)
                     {
-                        this.IsPermanent = true;
-                        this.parent.Severity = this.parent.def.initialSeverity;
+                        IsPermanent = true;
+                        parent.Severity = parent.def.initialSeverity;
                     }
                 }
         }
 
         public override void CompPostInjuryHeal(float amount)
         {
-            if (this.IsPermanent)
+            if (IsPermanent)
                 return;
-            if (this.parent.Severity > 0.0f)
+            if (parent.Severity > 0.0f)
                 return;
-            this.parent.Severity = this.parent.def.initialSeverity / 2;
-            this.IsPermanent = true;
-            this.Pawn.health.Notify_HediffChanged((Hediff)this.parent);
+            parent.Severity = parent.def.initialSeverity / 2;
+            IsPermanent = true;
+            Pawn.health.Notify_HediffChanged(parent);
         }
     }
 }

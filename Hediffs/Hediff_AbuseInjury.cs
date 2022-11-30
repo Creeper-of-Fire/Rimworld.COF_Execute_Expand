@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Text;
+using COF_Torture.Body;
 using COF_Torture.Component;
-using RimWorld;
 using UnityEngine;
 using Verse;
 
@@ -13,9 +13,22 @@ namespace COF_Torture.Hediffs
         {
             get
             {
-                if (this.def is MaltreatDef hediffWithBodyPartGroups)
+                if (def is MaltreatDef hediffWithBodyPartGroups)
                     return hediffWithBodyPartGroups.maltreat.ableBodyPartGroupDefs;
                 return new List<BodyPartGroupDef>();
+            }
+        }
+
+        public override string Description
+        {
+            get
+            {
+                var desc = new StringBuilder();
+                desc.Append(base.Description);
+                var part = this.TryGetVirtualPart();
+                if (part != null)
+                    desc.Append("\n\n"+"CT_AtVirtualPart".Translate()+part.Label);
+                return desc.ToString();
             }
         }
 
@@ -30,7 +43,7 @@ namespace COF_Torture.Hediffs
                         return comp.Props.permanentLabel;
                 }
 
-                return this.def.label;
+                return def.label;
             }
         }
 
@@ -45,21 +58,21 @@ namespace COF_Torture.Hediffs
                 }
                 StringBuilder stringBuilder = new StringBuilder();
                 stringBuilder.Append(base.LabelInBrackets);
-                if (this.sourceHediffDef != null)
+                if (sourceHediffDef != null)
                 {
                     if (stringBuilder.Length != 0)
                         stringBuilder.Append(", ");
-                    stringBuilder.Append(this.sourceHediffDef.label);
+                    stringBuilder.Append(sourceHediffDef.label);
                 }
-                else if (this.source != null)
+                else if (source != null)
                 {
                     if (stringBuilder.Length != 0)
                         stringBuilder.Append(", ");
-                    stringBuilder.Append(this.source.label);
-                    if (this.sourceBodyPartGroup != null)
+                    stringBuilder.Append(source.label);
+                    if (sourceBodyPartGroup != null)
                     {
                         stringBuilder.Append(" ");
-                        stringBuilder.Append(this.sourceBodyPartGroup.LabelShort);
+                        stringBuilder.Append(sourceBodyPartGroup.LabelShort);
                     }
                 }
 
@@ -67,26 +80,26 @@ namespace COF_Torture.Hediffs
             }
         }
 
-        public override Color LabelColor => this.def.defaultLabelColor;
+        public override Color LabelColor => def.defaultLabelColor;
 
         public override void PostAdd(DamageInfo? dinfo)
         {
             void HediffBase()
             {
-                if (!this.def.disablesNeeds.NullOrEmpty())
-                    this.pawn.needs.AddOrRemoveNeedsAsAppropriate();
-                if (this.def.removeWithTags.NullOrEmpty())
+                if (!def.disablesNeeds.NullOrEmpty())
+                    pawn.needs.AddOrRemoveNeedsAsAppropriate();
+                if (def.removeWithTags.NullOrEmpty())
                     return;
-                for (int index1 = this.pawn.health.hediffSet.hediffs.Count - 1; index1 >= 0; --index1)
+                for (int index1 = pawn.health.hediffSet.hediffs.Count - 1; index1 >= 0; --index1)
                 {
-                    Hediff hediff = this.pawn.health.hediffSet.hediffs[index1];
+                    Hediff hediff = pawn.health.hediffSet.hediffs[index1];
                     if (hediff != this && !hediff.def.tags.NullOrEmpty())
                     {
-                        foreach (var t in this.def.removeWithTags)
+                        foreach (var t in def.removeWithTags)
                         {
                             if (hediff.def.tags.Contains(t))
                             {
-                                this.pawn.health.RemoveHediff(hediff);
+                                pawn.health.RemoveHediff(hediff);
                                 break;
                             }
                         }
@@ -95,10 +108,10 @@ namespace COF_Torture.Hediffs
             }
 
             HediffBase();
-            if (this.comps == null)
+            if (comps == null)
                 return;
-            for (int index = 0; index < this.comps.Count; ++index)
-                this.comps[index].CompPostPostAdd(dinfo);
+            for (int index = 0; index < comps.Count; ++index)
+                comps[index].CompPostPostAdd(dinfo);
         }
 
         //public override bool ShouldRemove => this.IsPermanent() && (double)this.Severity <= 0.0;

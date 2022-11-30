@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using RimWorld;
 using Verse;
@@ -10,22 +9,22 @@ namespace COF_Torture.Jobs
     {
         //private const TargetIndex BuildingToPlay = TargetIndex.A;
         
-        private Building BuildingToPlay => (Building) this.TargetA;
+        private Building BuildingToPlay => (Building) TargetA;
 
         //private Toil beingFuck;
         
         public override bool TryMakePreToilReservations(bool errorOnFailed) =>
-            this.pawn.Reserve(this.job.targetA,
-                this.job,
-                this.job.def.joyMaxParticipants,
+            pawn.Reserve(job.targetA,
+                job,
+                job.def.joyMaxParticipants,
                 0);
         
         protected override IEnumerable<Toil> MakeNewToils()
         {
             yield return new Toil().FailOnDestroyedNullOrForbidden(TargetIndex.A);
-            if (this.pawn.story.traits.HasTrait(TraitDefOf.Masochist) && this.pawn.health.capacities.CapableOf(PawnCapacityDefOf.Moving))
+            if (pawn.story.traits.HasTrait(TraitDefOf.Masochist) && pawn.health.capacities.CapableOf(PawnCapacityDefOf.Moving))
             {
-                if (this.pawn.Position != this.TargetA.Cell)
+                if (pawn.Position != TargetA.Cell)
                     yield return Toils_Goto.GotoCell(TargetIndex.A, PathEndMode.OnCell);
                 yield return BeingFuck();
             }
@@ -33,18 +32,18 @@ namespace COF_Torture.Jobs
 
         private Toil BeingFuck()
         {
-            Toil beingFuck = ToilMaker.MakeToil(nameof(BeingFuck));
+            Toil beingFuck = ToilMaker.MakeToil();
             beingFuck.defaultDuration = 3000;
             beingFuck.defaultCompleteMode = ToilCompleteMode.Delay;
             beingFuck.FailOnDestroyedNullOrForbidden(TargetIndex.A);
-            beingFuck.initAction = (Action) (() =>
+            beingFuck.initAction = () =>
             {
                 //this.Map.mapDrawer.MapMeshDirty(this.sexBuilding.Position, MapMeshFlag.Buildings);
                 //beingFuck.actor.pather.StopDead();
-                this.pawn.jobs.posture = PawnPosture.LayingOnGroundFaceUp;
-            });
+                pawn.jobs.posture = PawnPosture.LayingOnGroundFaceUp;
+            };
             //int tickCounter = 0;
-            beingFuck.tickAction = (Action) (() =>
+            beingFuck.tickAction = () =>
             { 
                 Pawn actor = beingFuck.actor;
                 Job curJob = actor.CurJob;
@@ -52,8 +51,8 @@ namespace COF_Torture.Jobs
                 //actor.Drawer.renderer.graphics.ClearCache();
                 //actor.Drawer.renderer.graphics.apparelGraphics.Clear();
                 actor.GainComfortFromCellIfPossible();
-                JoyUtility.JoyTickCheckEnd(this.pawn, joySource: ((Building) this.TargetA));
-            });
+                JoyUtility.JoyTickCheckEnd(pawn, joySource: ((Building) TargetA));
+            };
             return beingFuck;
         }
     }
