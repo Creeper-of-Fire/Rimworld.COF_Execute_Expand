@@ -32,7 +32,7 @@ namespace COF_Torture.Things
             set { return; }
         }*/
 
-        public List<IWithGiver> hasGiven { get; set; } = new List<IWithGiver>();
+        public List<IWithThingGiver> hasGiven { get; set; } = new List<IWithThingGiver>();
 
         public Pawn victim
         {
@@ -206,7 +206,7 @@ namespace COF_Torture.Things
                 foreach (var hediffR in victim.health.hediffSet.hediffs)
                 {
                     if (hediffR == null) continue;
-                    if (!(hediffR is IWithGiver hg) || hg.Giver == null) continue;
+                    if (!(hediffR is IWithThingGiver hg) || hg.Giver == null) continue;
                     if (hg.Giver == this)
                     {
                         hg.Giver = null;
@@ -238,7 +238,7 @@ namespace COF_Torture.Things
             {
                 foreach (var hediffR in aps.health.hediffSet.hediffs)
                 {
-                    if (!(hediffR is IWithGiver hg) || hg.Giver == null) continue;
+                    if (!(hediffR is IWithThingGiver hg) || hg.Giver == null) continue;
                     if (hg.Giver == this)
                     {
                         hg.Giver = null;

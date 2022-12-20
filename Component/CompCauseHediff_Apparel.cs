@@ -15,7 +15,7 @@ namespace COF_Torture.Component
             var part = pawn.health.hediffSet.GetNotMissingParts()
                 .FirstOrFallback(p => p.def == Props.part);
             var h = HediffMaker.MakeHediff(Props.hediff, pawn, part);
-            if (h is IWithGiver hg)
+            if (h is IWithThingGiver hg)
             {
                 hg.Giver = parent;
             }

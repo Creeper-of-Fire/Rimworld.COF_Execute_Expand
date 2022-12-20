@@ -36,7 +36,7 @@ namespace COF_Torture.Dialog
             yield return SafeMode;
         }
 
-        public static IEnumerable<Command> Gizmo_AbuseMenu(this Pawn pawn, IWithGiver hediff)
+        public static IEnumerable<Command> Gizmo_AbuseMenu(this Pawn pawn, IWithThingGiver hediff)
         {
             if (hediff != null)
             {
@@ -71,9 +71,10 @@ namespace COF_Torture.Dialog
             commandAction.defaultDesc = "CT_TortureThingManagerDesc".Translate();
             commandAction.action = delegate
             {
-                bool flag = false;
-                Dialog_TortureThingManager Dialog = new Dialog_TortureThingManager(pawn);
-                foreach (var window in Find.WindowStack.Windows)
+                //bool flag = false;
+                var Dialog = new Dialog_TortureThingManager(pawn);
+                Find.WindowStack.Add(Dialog);
+                /*foreach (var window in Find.WindowStack.Windows)
                 {
                     if (window is Dialog_TortureThingManager dialogTortureThingManager)
                     {
@@ -81,16 +82,16 @@ namespace COF_Torture.Dialog
                         Dialog = dialogTortureThingManager;
                         flag = true;
                     }
-                }
+                }*/
 
-                if (flag)
+                /*if (flag)
                 {
                     Find.WindowStack.TryRemove(Dialog);
                 }
                 else
                 {
                     Find.WindowStack.Add(Dialog);
-                }
+                }*/
             };
             yield return commandAction;
         }

@@ -19,15 +19,21 @@ namespace COF_Torture.Body
             {
                 if (Data == null)
                 {
-                    Data = PartTree.pawn.GetPawnData().VirtualParts;
+                    Data = PartTree.pawn.GetPawnData()?.VirtualParts;
                 }
 
-                if (!Data.VirtualHediffByPart.ContainsKey(this.UniLabel))
+                if (Data != null)
                 {
-                    this.Data.VirtualHediffByPart.Add(this.UniLabel,new VirtualHediffSet());
+                    if (!Data.VirtualHediffByPart.ContainsKey(this.UniLabel))
+                    {
+                        Data.VirtualHediffByPart.Add(this.UniLabel, new VirtualHediffSet());
+                    }
+                    var Set = Data.VirtualHediffByPart[this.UniLabel];
+                    return Set;
                 }
-                var Set = Data.VirtualHediffByPart[this.UniLabel];
-                return Set;
+
+                ModLog.Error("错误，没有找到VirtualPartData");
+                return new VirtualHediffSet();
             }
         }
 

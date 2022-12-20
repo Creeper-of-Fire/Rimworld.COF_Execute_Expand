@@ -19,11 +19,11 @@ namespace COF_Torture.Dialog
     }
     public static class DialogUtility
     {
-        public static IEnumerable<IWithGiver> AllTortureHediff(this Pawn pawn)
+        public static IEnumerable<IWithThingGiver> AllTortureHediff(this Pawn pawn)
         {
             foreach (var h in pawn.health.hediffSet.hediffs)
             {
-                if (h is IWithGiver hg && hg.Giver != null)
+                if (h is IWithThingGiver hg && hg.Giver != null)
                 {
                     yield return hg;
                 }

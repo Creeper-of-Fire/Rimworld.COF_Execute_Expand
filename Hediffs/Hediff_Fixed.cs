@@ -87,6 +87,7 @@ namespace COF_Torture.Hediffs
 
         public override void Tick()
         {
+            //base.Tick();
             if (Find.TickManager.TicksGame < tickNext)
                 return;
             //this.HealWounds();

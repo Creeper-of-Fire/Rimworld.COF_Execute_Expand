@@ -75,6 +75,24 @@ namespace COF_Torture.Utility
             }
         }
 
+        public static List<Pawn> ListAllPlayerPawns(Map map)
+        {
+            var list = new List<Pawn>();
+            foreach (var pawn in map.mapPawns.AllPawns)
+            {
+                if (!pawn.IsColonist)
+                    continue;
+
+                if (pawn.IsColonyMech)
+                    list.Add(pawn);
+
+                if (pawn.IsColonyMechPlayerControlled)
+                    list.Add(pawn);
+            }
+
+            return list;
+        }
+
         public static Corpse MakeCorpse_DifferentKind(this Pawn pawn, Building_Grave assignedGrave, bool inBed,
             float bedRotation)
         {
@@ -505,7 +523,7 @@ namespace COF_Torture.Utility
         /// </summary>
         void stopExecuteProgress();
 
-        List<IWithGiver> hasGiven { get; set; }
+        List<IWithThingGiver> hasGiven { get; set; }
 
         /// <summary>
         /// 处刑对象
@@ -513,7 +531,7 @@ namespace COF_Torture.Utility
         Pawn victim { get; }
     }
 
-    public interface IWithGiver
+    public interface IWithThingGiver
     {
         /// <summary>
         /// 本对象的提供者或者维护者

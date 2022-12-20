@@ -6,7 +6,7 @@ using Verse;
 namespace COF_Torture.Patch
 {
     [HarmonyPatch]
-    public static class LifeContinue
+    public static class LifeContinuePatch
     {
         [HarmonyPrefix]
         [HarmonyPatch(typeof(Pawn_HealthTracker), "ShouldBeDead")]

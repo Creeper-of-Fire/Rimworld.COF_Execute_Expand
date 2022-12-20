@@ -13,7 +13,17 @@ using Verse;
 
 namespace COF_Torture.Dialog
 {
-    public class Dialog_ChooseAPawn
+    public class Dialog_ChoosePawn
     {
+        public Action<Pawn> action;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="action">需要对Pawn执行的动作</param>
+        public Dialog_ChoosePawn(Action<Pawn> action)
+        {
+            this.action = action;
+        }
     }
 }

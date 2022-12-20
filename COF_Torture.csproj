@@ -72,6 +72,13 @@
         <Compile Include="Body\VirtualPartTree.cs" />
         <Compile Include="Body\VirtualPartTreeDef.cs" />
         <Compile Include="Body\VirtualPartRecord.cs" />
+        <Compile Include="Cell\CellEffector.cs" />
+        <Compile Include="Cell\CellEffectorData.cs" />
+        <Compile Include="Cell\CellEffectorSet.cs" />
+        <Compile Include="Cell\CellEffector_AddHediff.cs" />
+        <Compile Include="Component\CompBuildingPassHediffGiver.cs" />
+        <Compile Include="Component\CompBuildingRangeHediffGiver.cs" />
+        <Compile Include="Component\CompBuilding_AutoAbuse.cs" />
         <Compile Include="Component\CompCauseHediff_Apparel.cs" />
         <Compile Include="Component\CompEffectForBondage.cs" />
         <Compile Include="Component\CompBuildingSitHediffGiver.cs" />
@@ -85,9 +92,9 @@
         <Compile Include="Component\HediffComp_ExecuteIndicator.cs" />
         <Compile Include="Component\HediffComp_OrgasmIndicator.cs" />
         <Compile Include="Component\HediffComp_GetSexualHeat.cs" />
-        <Compile Include="Data\PawnExtendUtility.cs" />
+        <Compile Include="Data\DataUtility.cs" />
         <Compile Include="Dialog\DialogUtility.cs" />
-        <Compile Include="Dialog\Dialog_ChooseAPawn.cs" />
+        <Compile Include="Dialog\Dialog_ChoosePawn.cs" />
         <Compile Include="Dialog\Gizmo_List.cs" />
         <Compile Include="Dialog\Menus\VerticalMenu.cs" />
         <Compile Include="Dialog\Menus\VerticalTitleWithMenu.cs" />
@@ -109,6 +116,8 @@
         <Compile Include="Hediffs\Hediff_WithGiver.cs" />
         <Compile Include="Jobs\CT_Toils_GoToBed.cs" />
         <Compile Include="Jobs\JobDefof.cs" />
+        <Compile Include="Jobs\JobDriver_ DoMaltreat .cs" />
+        <Compile Include="Jobs\JobDriver_GotoAndOpenWindow.cs" />
         <Compile Include="Jobs\JobDriver_Laying.cs" />
         <Compile Include="Jobs\JobDriver_PlayExecuteBuilding_Masochist.cs" />
         <Compile Include="Jobs\JobDriver_PlayExecuteBuilding_Sadism.cs" />
@@ -116,19 +125,18 @@
         <Compile Include="Jobs\JobDriver_UseBondageBed.cs" />
         <Compile Include="Jobs\JobDriver_UseBondageAlone.cs" />
         <Compile Include="Jobs\JobDriver_WaitTillAbuseFinish.cs" />
-        <Compile Include="Jobs\JoyGiver_PlayExecuteBuilding_Masochist.cs" />
-        <Compile Include="Jobs\JoyGiver_PlayExecuteBuilding_Sadism.cs" />
+        <Compile Include="Jobs\JoyGiver_PlayExecuteBuilding.cs" />
         <Compile Include="ModSetting\ModSetting.cs" />
         <Compile Include="Patch\BodyPartWithGenderPatch.cs" />
         <Compile Include="Patch\BondageBedPatch.cs" />
-        <Compile Include="Patch\LifeContinue.cs" />
+        <Compile Include="Patch\LifeContinuePatch.cs" />
         <Compile Include="Patch\MainPatch.cs" />
         <Compile Include="Patch\MoreCorpseKindsPatch.cs" />
         <Compile Include="Patch\NeverPainDownedPatch.cs" />
         <Compile Include="Patch\PawnGizmoPatch.cs" />
+        <Compile Include="Patch\PawnTickPatch.cs" />
         <Compile Include="Patch\TraitWithHediffPatch.cs" />
-        <Compile Include="Data\DataStore.cs" />
-        <Compile Include="Data\DesignatorsData.cs" />
+        <Compile Include="Data\StoreData.cs" />
         <Compile Include="Data\ModLog.cs" />
         <Compile Include="Data\PawnData.cs" />
         <Compile Include="Data\SaveStorage.cs" />
@@ -147,9 +155,6 @@
         <Compile Include="Utility\DefOf\ThingCategoryDefOf.cs" />
         <Compile Include="Utility\RJWUtility.cs" />
         <Compile Include="Utility\TortureUtility.cs" />
-    </ItemGroup>
-    <ItemGroup>
-      <Folder Include="Damages" />
     </ItemGroup>
     <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
     <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

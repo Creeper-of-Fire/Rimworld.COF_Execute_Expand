@@ -19,106 +19,125 @@ namespace COF_Torture.Component
             //var targetA = IsValidBedFor(this.parent,pawn, pawn, true, guestStatus: pawn.GuestStatus);
             //var targetB = RestUtility.IsValidBedFor(this.parent,pawn, pawn, true, guestStatus: pawn.GuestStatus);
             //Log.Message("A:"+targetA + "B:"+targetB);
-            CompUsableBondageBed usableBondageBed = this;
-            Building_TortureBed ParentBed = usableBondageBed.parent as Building_TortureBed;
-            if (ParentBed != null && pawn.Map != null && pawn.Map == Find.CurrentMap)
+            var usableBondageBed = this;
+            var ParentBed = usableBondageBed.parent as Building_TortureBed;
+            if (ParentBed == null || pawn.Map == null || pawn.Map != Find.CurrentMap) 
+                yield break;
+            if (!pawn.CanReach((LocalTargetInfo)(Thing)usableBondageBed.parent, PathEndMode.Touch,
+                    Danger.Deadly))
             {
-                if (!pawn.CanReach((LocalTargetInfo)(Thing)usableBondageBed.parent, PathEndMode.Touch,
-                        Danger.Deadly))
-                    yield return new FloatMenuOption(
-                        usableBondageBed.FloatMenuOptionLabel(pawn) + " (" + "NoPath".Translate() + ")",
-                        null, MenuOptionPriority.DisabledOption);
-                else if (!pawn.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation))
+                yield return new FloatMenuOption(
+                    usableBondageBed.FloatMenuOptionLabel(pawn) + " (" + "NoPath".Translate() + ")",
+                    null, MenuOptionPriority.DisabledOption);
+                yield break;
+            }
+
+            if (pawn.WorkTagIsDisabled(WorkTypeDefOf.Warden.workTags))
+            {
+                yield return new FloatMenuOption(
+                    usableBondageBed.FloatMenuOptionLabel(pawn) + " (" + "CT_Forbid".Translate() + ")",
+                    null, MenuOptionPriority.DisabledOption);
+                yield break;
+            }
+
+            if (ParentBed.hasVictim)
+            {
+                Pawn victim = ParentBed.victim;
+                if (!pawn.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation) &&
+                    (victim.IsPrisonerOfColony || victim.IsSlaveOfColony))
+                {
                     yield return new FloatMenuOption(
                         usableBondageBed.FloatMenuOptionLabel(pawn) + " (" + "Incapable".Translate() + ")",
                         null, MenuOptionPriority.DisabledOption);
-                else if (pawn.WorkTagIsDisabled(WorkTypeDefOf.Warden.workTags))
-                    yield return new FloatMenuOption(
-                        usableBondageBed.FloatMenuOptionLabel(pawn) + " (" + "CT_Forbid".Translate() + ")",
-                        null, MenuOptionPriority.DisabledOption);
-                else if (ParentBed.inExecuteProgress)
-                {
-                    //不可用，则执行释放逻辑
-                    if (!pawn.CanReserve((LocalTargetInfo)(Thing)ParentBed)&&!pawn.CanReserve((LocalTargetInfo)(Thing)pawn))
-                        yield return new FloatMenuOption(
-                            usableBondageBed.FloatMenuOptionLabel(pawn) + " (" +
-                            "CT_Reserved".Translate() + ")", null, MenuOptionPriority.DisabledOption);
-                    else
-                        yield return new FloatMenuOption(
-                            "CT_Release_BondageBed".Translate((NamedArgument)ParentBed.victim.Label),
-                            ReleaseAction, MenuOptionPriority.GoHere);
+                    yield break;
                 }
-                else
+
+                if (!pawn.CanReserve((LocalTargetInfo)(Thing)ParentBed) &&
+                    !pawn.CanReserve((LocalTargetInfo)(Thing)pawn))
                 {
-                    bool hasColonist = false;
-                    foreach (Pawn allPawn in pawn.Map.mapPawns.AllPawns)
+                    yield return new FloatMenuOption(
+                        usableBondageBed.FloatMenuOptionLabel(pawn) + " (" +
+                        "CT_Reserved".Translate() + ")", null, MenuOptionPriority.DisabledOption);
+                    yield break;
+                }
+
+                yield return new FloatMenuOption(
+                    "CT_Release_BondageBed".Translate((NamedArgument)victim.Label),
+                    ReleaseAction, MenuOptionPriority.GoHere); //正在处刑中，则可以执行释放
+                //yield return new FloatMenuOption(
+                //    "CT_DoAbuse_BondageBed".Translate((NamedArgument)victim.Label),
+                //    AbuseAction, MenuOptionPriority.GoHere); //也可以被虐待
+                yield break;
+
+                void ReleaseAction() => TryReleaseVictim(pawn);
+                //void AbuseAction() => TryAbuseVictim(pawn);
+            }
+
+            bool hasColonist = false;
+            foreach (Pawn allPawn in pawn.Map.mapPawns.AllPawns)
+            {
+                Pawn victim = allPawn;
+                if (victim.Spawned &&
+                    (victim.IsColonist || victim.IsPrisonerOfColony || victim.IsSlaveOfColony))
+                {
+                    hasColonist = true;
+                    if (victim != pawn)
                     {
-                        Pawn victim = allPawn;
-                        if (victim.Spawned && (victim.IsColonist||victim.IsPrisonerOfColony||victim.IsSlaveOfColony))
+                        if (ParentBed.ForPrisoners == victim.IsPrisoner)
                         {
-                            hasColonist = true;
-                            if (victim != pawn)
+                            //只有囚犯和囚犯床匹配，或者非囚犯和非囚犯床匹配的才会显示
+                            if (!pawn.CanReserve((LocalTargetInfo)(Thing)victim))
+                                //对象被占用了
                             {
-                                if (ParentBed.ForPrisoners == victim.IsPrisoner)
-                                {
-                                    //只有囚犯和囚犯床匹配，或者非囚犯和非囚犯床匹配的才会显示
-                                    if (!pawn.CanReserve((LocalTargetInfo)(Thing)victim))
-                                        //对象被占用了
-                                        yield return new FloatMenuOption(
-                                            usableBondageBed.FloatMenuOptionLabel(victim) + " (" +
-                                            "CT_Reserved".Translate((NamedArgument)victim.Label) + ")",
-                                            null, MenuOptionPriority.DisabledOption);
-                                    else if (victim.GetPawnData().IsFixed) //已经被固定
-                                    {
-                                        //因为已经被固定所以需要先释放
-                                        yield return new FloatMenuOption(
-                                            "CT_ReleaseAndBound".Translate(pawn.Named(pawn.Name.ToString()),
-                                                victim.Named(victim.Name.ToString())),
-                                            ReleaseAndBoundAction,
-                                            MenuOptionPriority.VeryLow);
-                                    }
-                                    else
-                                    {
-                                        //执行捆绑别人
-                                        yield return new FloatMenuOption(
-                                            "CT_BondageBed".Translate(pawn.Named(pawn.Name.ToString()),
-                                                victim.Named(victim.Name.ToString())), BondAction,
-                                            MenuOptionPriority.VeryLow);
-                                    }
-                                }
-                            }
-                            else if (!ParentBed.ForPrisoners)
-                            {
-                                //执行捆绑自己
-                                hasColonist = true;
                                 yield return new FloatMenuOption(
-                                    "CT_BondageBedSelf".Translate(),
-                                    BondAction,
-                                    MenuOptionPriority.GoHere);
+                                    usableBondageBed.FloatMenuOptionLabel(victim) + " (" +
+                                    "CT_Reserved".Translate((NamedArgument)victim.Label) + ")",
+                                    null, MenuOptionPriority.DisabledOption);
+                                yield break;
                             }
 
-                            void ReleaseAndBoundAction() =>
-                                TryReleaseAndBoundVictim(pawn, (LocalTargetInfo)(Thing)victim);
+                            if (victim.GetPawnData().IsFixed) //已经被固定
+                            {
+                                //因为已经被固定所以需要先释放
+                                /*yield return new FloatMenuOption(
+                                        "CT_ReleaseAndBound".Translate(pawn.Named(pawn.Name.ToString()),
+                                            victim.Named(victim.Name.ToString())),
+                                        ReleaseAndBoundAction,
+                                        MenuOptionPriority.VeryLow);*/
+                                yield break;
+                            }
 
-                            void BondAction() => TryStartUseJob(pawn, (LocalTargetInfo)(Thing)victim);
+
+                            //执行捆绑别人
+                            yield return new FloatMenuOption(
+                                "CT_BondageBed".Translate(pawn.Named(pawn.Name.ToString()),
+                                    victim.Named(victim.Name.ToString())), BondAction,
+                                MenuOptionPriority.VeryLow);
                         }
                     }
-
-                    if (!hasColonist)
+                    else if (!ParentBed.ForPrisoners)
+                    {
+                        //执行捆绑自己
+                        hasColonist = true;
                         yield return new FloatMenuOption(
-                            usableBondageBed.FloatMenuOptionLabel(pawn) + " (" + "CT_NoTarget".Translate() +
-                            ")", null, MenuOptionPriority.DisabledOption);
+                            "CT_BondageBedSelf".Translate(),
+                            BondAction,
+                            MenuOptionPriority.GoHere);
+                    }
+
+                    //void ReleaseAndBoundAction() =>TryReleaseAndBoundVictim(pawn, (LocalTargetInfo)(Thing)victim);
+
+                    void BondAction() => TryStartUseJob(pawn, (LocalTargetInfo)(Thing)victim);
                 }
             }
 
-
-            void ReleaseAction() => TryReleaseVictim(pawn);
+            if (!hasColonist)
+                yield return new FloatMenuOption(
+                    usableBondageBed.FloatMenuOptionLabel(pawn) + " (" + "CT_NoTarget".Translate() +
+                    ")", null, MenuOptionPriority.DisabledOption);
         }
 
-        public virtual void TryReleaseAndBoundVictim(Pawn pawn, LocalTargetInfo extraTarget)
-        {
-            TryStartUseJob(pawn, extraTarget);
-        }
+        //public virtual void TryReleaseAndBoundVictim(Pawn pawn, LocalTargetInfo extraTarget) => TryStartUseJob(pawn, extraTarget);
 
         public virtual void TryReleaseVictim(Pawn pawn)
         {
@@ -129,6 +148,16 @@ namespace COF_Torture.Component
             job.count = 1;
             pawn.jobs.TryTakeOrderedJob(job);
         }
+
+        /*public virtual void TryAbuseVictim(Pawn pawn)
+        {
+            if (!pawn.CanReach((LocalTargetInfo)(Thing)parent, PathEndMode.Touch, Danger.Some))
+                return;
+            Job job = JobMaker.MakeJob(JobDefOf.CT_GotoAndOpenWindow,
+                (LocalTargetInfo)(Thing)parent);
+            job.count = 1;
+            pawn.jobs.TryTakeOrderedJob(job);
+        }*/
 
 
         public override void TryStartUseJob(Pawn pawn, LocalTargetInfo extraTarget, bool forced = false)

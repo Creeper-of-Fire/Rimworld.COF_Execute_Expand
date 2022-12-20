@@ -8,6 +8,9 @@ namespace COF_Torture.Body
     {
         private Pawn Pawn;
 
+        public VirtualPartData()
+        {
+        }
         public VirtualPartData(Pawn pawn)
         {
             this.Pawn = pawn;

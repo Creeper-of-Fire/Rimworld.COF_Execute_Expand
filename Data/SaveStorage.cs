@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using COF_Torture.Cell;
 using COF_Torture.Utility;
 using HugsLib;
 using RimWorld;
@@ -7,34 +9,18 @@ namespace COF_Torture.Data
 {
     public class SaveStorage : ModBase
     {
-        public static DataStore DataStore;
-        public static DesignatorsData DesignatorsData;
-
-        public override string ModIdentifier => ModId;
-
-        public static string ModId => "COF_Torture";
-
-        public override void SettingsChanged() => ToggleTabIfNeeded();
+        public static StoreData StoreData;
+        public static Dictionary<int, CellEffectorData> CellEffectorDataDict = new Dictionary<int, CellEffectorData>();
+        public override string ModIdentifier => "COF_Torture";
 
         public override void WorldLoaded()
         {
-            DataStore = Find.World.GetComponent<DataStore>();
-            DesignatorsData = Find.World.GetComponent<DesignatorsData>();
-            DesignatorsData.Update();
-            ToggleTabIfNeeded();
-            BodyPartFix();
+            StoreData = Find.World.GetComponent<StoreData>();
         }
 
-        private void BodyPartFix()
+        public override void MapLoaded(Map map)
         {
-            //foreach (var pawn in PawnsFinder.All_AliveOrDead) 
-                //PawnExtendUtility.Notify_CheckGenderChange(pawn);
-        }
-
-        protected override bool HarmonyAutoPatch => false;
-
-        private void ToggleTabIfNeeded()
-        {
+            CellEffectorDataDict.SetOrAdd(map.uniqueID, map.GetComponent<CellEffectorData>());
         }
 
         private SaveStorage()

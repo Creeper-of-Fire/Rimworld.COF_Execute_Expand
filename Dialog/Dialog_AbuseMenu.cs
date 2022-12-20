@@ -10,6 +10,8 @@ using COF_Torture.Utility;
 using RimWorld;
 using UnityEngine;
 using Verse;
+using Verse.AI;
+using JobDefOf = COF_Torture.Jobs.JobDefOf;
 
 namespace COF_Torture.Dialog
 {
@@ -18,7 +20,8 @@ namespace COF_Torture.Dialog
         /// <summary>
         /// 窗口所属的角色
         /// </summary>
-        private readonly Pawn pawn;
+        private readonly Pawn victim;
+
 
         /// <summary>
         /// 删除按钮的大小
@@ -79,24 +82,17 @@ namespace COF_Torture.Dialog
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="pawn"></param>
+        /// <param name="victim"></param>
         /// <param name="fixer"></param>
-        public Dialog_AbuseMenu(Pawn pawn, ITortureThing fixer)
+        public Dialog_AbuseMenu(Pawn victim, ITortureThing fixer)
         {
-            this.pawn = pawn;
-            this.pawn.GetPawnData().VirtualParts.RefreshVirtualParts();
-            var a = this.pawn.GetPawnData().VirtualParts;
-            //ModLog.MessageEach(a.VirtualParts, (o) => o.Key.ToString());
-            ModLog.MessageEach(a.VirtualHediffByPart, (o) => o.Key + o.Value.hediffs.Count.ToString());
-            //ModLog.MessageEach(a.AllVirtualParts, (o) => o.Key.ToString());
-            //PawnExtendUtility.Notify_CheckGenderChange(pawn);
+            this.victim = victim;
+            this.victim.GetPawnData().VirtualParts.RefreshVirtualParts();
+            var a = this.victim.GetPawnData().VirtualParts;
             this.fixer = fixer;
-            //this.doCloseButton = true;
             doCloseX = true;
-            //this.preventCameraMotion = false;
             draggable = true;
             resizeable = true;
-            //this.onlyOneOfTypeAllowed = false;
             closeOnClickedOutside = true;
             absorbInputAroundWindow = true;
             forcePause = true;
@@ -106,11 +102,9 @@ namespace COF_Torture.Dialog
             {
                 if (fixer is Thing Fixer)
                 {
-                    //Log.Message("4" + fixer);
                     var comp = Fixer.TryGetComp<CompAffectedByFacilities>();
                     foreach (var thing in comp.LinkedFacilitiesListForReading)
                     {
-                        //Log.Message("5" + thing);
                         linker.Add(thing.def.defName);
                     }
                 }
@@ -134,10 +128,7 @@ namespace COF_Torture.Dialog
                     linker.Contains(maltreatDef.maltreat.enableByBuilding.defName))
                 {
                     AllHediff.Add(maltreatDef);
-                    //Log.Message("2" + maltreatDef.maltreat.enableByBuilding);
                 }
-
-                //Log.Message("1" + maltreatDef);
             }
         }
 
@@ -148,8 +139,8 @@ namespace COF_Torture.Dialog
         private void Set_AbleBodyPartGroups()
         {
             var ablePartGroupsDict = new Dictionary<string, List<BodyPartRecord>>();
-            var bodyParts = pawn.health.hediffSet.GetNotMissingParts().ToList();
-            bodyParts.AddRange(BodyUtility.GetVirtualParts(pawn).ToList());
+            var bodyParts = victim.health.hediffSet.GetNotMissingParts().ToList();
+            bodyParts.AddRange(BodyUtility.GetVirtualParts(victim).ToList());
             foreach (var bodyPart in bodyParts)
             {
                 foreach (var group in bodyPart.groups)
@@ -381,8 +372,11 @@ namespace COF_Torture.Dialog
 
         private void DoAddHediffJob(MaltreatDef def, BodyPartRecord bodyPart)
         {
-            Hediff_COF_Torture_IsAbusing.AddHediff_COF_Torture_IsAbusing(pawn).AddAction(def, bodyPart);
-            //TODO 加入另一个人
+            Hediff_COF_Torture_IsAbusing.AddHediff_COF_Torture_IsAbusing(victim).AddAction(def, bodyPart);
+            var job = JobMaker.MakeJob(JobDefOf.CT_DoMaltreat,
+                (LocalTargetInfo)(Thing)fixer);
+            job.count = 1;
+            //Todo 窗口
         }
 
         public class Menus

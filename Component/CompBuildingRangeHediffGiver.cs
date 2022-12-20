@@ -7,27 +7,38 @@ using Verse;
 
 namespace COF_Torture.Component
 {
-    public class CompProperties_BuildingSitHediffGiver : CompProperties
+    public class CompProperties_BuildingRangeHediffGiver : CompProperties
     {
         public HediffDef hediff;
         public BodyPartDef part;
+        public float range;
 
-        public CompProperties_BuildingSitHediffGiver() => compClass = typeof(CompBuildingSitHediffGiver);
+        public CompProperties_BuildingRangeHediffGiver() => compClass = typeof(Comp_BuildingRangeHediffGiver);
     }
 
-    public class CompBuildingSitHediffGiver : ThingComp
+    public class Comp_BuildingRangeHediffGiver : ThingComp
     {
-        private CompProperties_BuildingSitHediffGiver Props => (CompProperties_BuildingSitHediffGiver)props;
+        private CompProperties_BuildingRangeHediffGiver Props => (CompProperties_BuildingRangeHediffGiver)props;
 
         public override void PostSpawnSetup(bool respawningAfterLoad)
         {
             base.PostSpawnSetup(respawningAfterLoad);
-            var effector = new CellEffector_AddHediffSiting(this.Props.hediff,this.Props.part);
+            var effector = new CellEffector_AddHediffWhenPass(this.Props.hediff, this.Props.part);
+            
             var parentMap = this.parent.Map;
-            //if (parentMap != null)
+            if (parentMap == null) return;
+            var data = DataUtility.GetCellEffectorData(parentMap);
+            if (data == null) return;
+            
+            var posList = new List<IntVec3>();
+            for (var index1 = 0; index1 < GenRadial.NumCellsInRadius(this.Props.range); ++index1)
             {
-                var data = DataUtility.GetCellEffectorData(parentMap);
-                data.AddCellEffector(effector,this.parent);
+                posList.Add(this.parent.Position + GenRadial.RadialPattern[index1]);
+            }
+            
+            foreach (var pos in posList)
+            {
+                data.AddCellEffector(effector, this.parent, pos);
             }
         }
 

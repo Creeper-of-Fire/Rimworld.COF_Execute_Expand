@@ -4,11 +4,11 @@ using Verse;
 
 namespace COF_Torture.Data
 {
-    public class DataStore : WorldComponent
+    public class StoreData : WorldComponent
     {
         private Dictionary<int, PawnData> PawnDataDict = new Dictionary<int, PawnData>();
 
-        public DataStore(World world)
+        public StoreData(World world)
             : base(world)
         {
         }

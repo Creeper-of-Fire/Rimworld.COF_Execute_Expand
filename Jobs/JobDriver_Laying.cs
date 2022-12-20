@@ -9,11 +9,11 @@ namespace COF_Torture.Jobs
     
     public class JobDriver_Laying : JobDriver
     {
-        public Building_Bed Bed => job.GetTarget(TargetIndex.A).Thing as Building_Bed;
+        public Building_Bed Thing => job.GetTarget(TargetIndex.A).Thing as Building_Bed;
 
         public override bool TryMakePreToilReservations(bool errorOnFailed) =>
-            Bed == null ||
-            pawn.Reserve((LocalTargetInfo)(Thing)Bed, job, Bed.SleepingSlotsCount, 0,
+            Thing == null ||
+            pawn.Reserve((LocalTargetInfo)(Thing)Thing, job, Thing.SleepingSlotsCount, 0,
                 errorOnFailed: errorOnFailed);
 
         /*public override bool CanBeginNowWhileLyingDown()
@@ -24,7 +24,7 @@ namespace COF_Torture.Jobs
 
         protected override IEnumerable<Toil> MakeNewToils()
         {
-            bool hasBed = Bed != null;
+            bool hasBed = Thing != null;
             yield return Toils_LayDown.LayDown(TargetIndex.A, hasBed, false,
                 noBedLayingPosture: PawnPosture.LayingInBed);
         }

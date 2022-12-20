@@ -40,7 +40,7 @@ namespace COF_Torture.Body
         public Dictionary<BodyPartDef, List<VirtualPartRecord>> cachedPartsByDef =
             new Dictionary<BodyPartDef, List<VirtualPartRecord>>();
 
-        public VirtualPartTree(BodyPartDef def,Pawn pawn)
+        public VirtualPartTree(BodyPartDef def, Pawn pawn)
         {
             this.parentPartDef = def;
             this.pawn = pawn;
@@ -55,6 +55,7 @@ namespace COF_Torture.Body
                     //ModLog.Message(virtualPartTreeDef+"");
                 }
             }
+
             this.BuildVirtualPartReferences();
         }
 
@@ -98,7 +99,9 @@ namespace COF_Torture.Body
         /// <param name="hediff"></param>
         public void AddHediff(Hediff hediff)
         {
-            if (hediff != null) AllParts?.AsEnumerable()?.RandomElement()?.AddHediff(hediff);
+            if (hediff == null) return;
+            if (AllParts.NullOrEmpty()) return;
+            AllParts.AsEnumerable()?.RandomElement()?.AddHediff(hediff);
         }
 
         public bool HasPartWithTag(BodyPartTagDef tag)

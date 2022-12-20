@@ -20,6 +20,21 @@ namespace COF_Torture.Hediffs
         private const float SeverityPerHour = 5f;
         private const int tickPerHour = 2500;
 
+        public int Count {
+            get
+            {
+                if (ActionList.NullOrEmpty())
+                    return 0;
+                int count = 0;
+                foreach (var pair in ActionList)
+                {
+                    count += pair.Value.Count;
+                }
+
+                return count;
+            }
+        }
+
         public override string Description
         {
             get
@@ -134,7 +149,7 @@ namespace COF_Torture.Hediffs
             //String OldLabel = ;
             if (bodyPart is VirtualPartRecord vBodyPart)
             {
-                var parentPart =  vBodyPart.PartTree.parentPart;
+                var parentPart = vBodyPart.PartTree.parentPart;
                 hediff = HediffMaker.MakeHediff(hediffDef, pawn, parentPart);
                 action = delegate
                 {

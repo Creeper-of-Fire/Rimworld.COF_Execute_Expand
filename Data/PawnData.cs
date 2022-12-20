@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using COF_Torture.Body;
+using COF_Torture.Cell;
 using COF_Torture.Utility;
 using RimWorld;
 using Verse;
@@ -18,6 +19,7 @@ namespace COF_Torture.Data
         public bool IsMasochism;
         public Thing Fixer;
         private VirtualPartData _virtualParts;
+        //public CellEffectorSet CellEffectorSet;
 
         public VirtualPartData VirtualParts
         {
@@ -49,6 +51,7 @@ namespace COF_Torture.Data
             Scribe_Values.Look(ref IsMasochism, "IsMasochism", IsMasochistDefault(), forceSave: true);
             Scribe_References.Look(ref Fixer, "Fixer");
             Scribe_Deep.Look(ref _virtualParts, "VirtualParts");
+            //Scribe_References.Look(ref CellEffectorSet,"CellEffectorSet");
             if (Fixer == null)
                 Fixer = FixerDefault();
         }
@@ -62,7 +65,7 @@ namespace COF_Torture.Data
         private Thing FixerDefault()
         {
             var h = Pawn?.health?.hediffSet?.GetFirstHediffOfDef(HediffDefOf.COF_Torture_Fixed);
-            if (h is IWithGiver iH)
+            if (h is IWithThingGiver iH)
                 return iH.Giver;
             return null;
         }

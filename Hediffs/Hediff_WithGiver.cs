@@ -1,9 +1,10 @@
+using System;
 using COF_Torture.Utility;
 using Verse;
 
 namespace COF_Torture.Hediffs
 {
-    public class Hediff_WithGiver : HediffWithComps, IWithGiver
+    public class Hediff_WithGiver : HediffWithComps, IWithThingGiver
     {
         private Thing giver;
 

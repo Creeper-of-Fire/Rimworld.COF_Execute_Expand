@@ -7,6 +7,13 @@ namespace COF_Torture.Jobs
 {
     public class CT_Toils_GoToBed
     {
+
+        public static Toil OpenAWindow(Window window)
+        {
+            var toil = ToilMaker.MakeToil();
+            toil.initAction = () => Find.WindowStack.Add(window);
+            return toil;
+        }
         public static Toil BondageIntoBed(Building_Bed bed, Pawn takee, Pawn taker = null)
         {
             var toil = ToilMaker.MakeToil();

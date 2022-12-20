@@ -11,5 +11,7 @@ namespace COF_Torture.Jobs
         public static JobDef ReleaseBondageBed;
         public static JobDef UseBondageAlone;
         public static JobDef CT_LayDown;
+        //public static JobDef CT_GotoAndOpenWindow;
+        public static JobDef CT_DoMaltreat;
     }
 }

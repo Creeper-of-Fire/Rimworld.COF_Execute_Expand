@@ -5,7 +5,7 @@ using Verse;
 
 namespace COF_Torture.Hediffs
 {
-    public class Hediff_ExecuteInjury : Hediff_Injury, IWithGiver
+    public class Hediff_ExecuteInjury : Hediff_Injury, IWithThingGiver
     {
         protected Thing giver;
 
