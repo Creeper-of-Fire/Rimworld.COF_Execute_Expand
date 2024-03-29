@@ -14,11 +14,17 @@ namespace COF_Torture.Data
     /// </summary>
     public class PawnData : IExposable
     {
+        public class SexData
+        {
+            public float Orgasm;
+        }
         private Pawn Pawn;
         public bool IsFixed;
         public bool IsMasochism;
         public Thing Fixer;
         private VirtualPartData _virtualParts;
+        public SexData sexData;
+        
         //public CellEffectorSet CellEffectorSet;
 
         public VirtualPartData VirtualParts
@@ -57,7 +63,7 @@ namespace COF_Torture.Data
         }
 
         private bool IsMasochistDefault() =>
-            Pawn?.story?.traits != null && Pawn.story.traits.HasTrait(TraitDefOf.Masochist);
+            Pawn.IsMasochist();
 
         private bool IsFixedDefault() =>
             Pawn?.health?.hediffSet?.GetFirstHediffOfDef(HediffDefOf.COF_Torture_Fixed) != null;

@@ -6,3 +6,9 @@ C:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\做点刑具\Source\
 C:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\做点刑具\Source\COF_Torture\obj\Debug\COF_Torture.pdb
 C:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\做点刑具\1.4\Assemblies\COF_Torture.dll
 C:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\做点刑具\1.4\Assemblies\COF_Torture.pdb
+C:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\COF_Torture_RJW_Recreate\1.4\Assemblies\COF_Torture.dll
+C:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\COF_Torture_RJW_Recreate\1.4\Assemblies\COF_Torture.pdb
+C:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\COF_Torture_RJW_Recreate\Source\COF_Torture\obj\Debug\COF_Torture.csproj.AssemblyReference.cache
+C:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\COF_Torture_RJW_Recreate\Source\COF_Torture\obj\Debug\COF_Torture.csproj.CoreCompileInputs.cache
+C:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\COF_Torture_RJW_Recreate\Source\COF_Torture\obj\Debug\COF_Torture.dll
+C:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\COF_Torture_RJW_Recreate\Source\COF_Torture\obj\Debug\COF_Torture.pdb

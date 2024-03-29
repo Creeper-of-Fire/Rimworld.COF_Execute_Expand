@@ -1,7 +1,7 @@
 using UnityEngine;
 using Verse;
 
-namespace COF_Torture.Component
+namespace COF_Torture.HediffComp
 {
     public class HediffCompProperties_BecomePermanent : HediffCompProperties
     {
@@ -11,6 +11,10 @@ namespace COF_Torture.Component
 
         public HediffCompProperties_BecomePermanent() => compClass = typeof(HediffComp_BecomePermanent);
     }
+    
+    /// <summary>
+    /// 处刑器具刚刚安装上时会流血，之后转为永久伤口。
+    /// </summary>
     public class HediffComp_BecomePermanent : HediffComp_GetsPermanent
     {
         public new HediffCompProperties_BecomePermanent Props => (HediffCompProperties_BecomePermanent)props;

@@ -85,16 +85,27 @@ namespace COF_Torture.Dialog.Units
             width = size.x + LittleBlankSize;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="_action">要执行的动作</param>
+        /// <param name="_label">显示的文字</param>
+        /// <param name="_desc">描述文字（浮窗显示）</param>
+        /// <param name="_disabled">不可用</param>
+        /// <param name="_disabledReason">不可用原因</param>
+        /// <param name="_inactive">不活跃</param>
+        /// <param name="_inactiveReason">不活跃原因</param>
+        /// <param name="_font">字体</param>
         public void InitInfo(Action _action, string _label, string _desc, bool _disabled = false,
             string _disabledReason = "", bool _inactive = false, string _inactiveReason = "",
             GameFont _font = GameFont.Small) =>
             base.InitInfo(_action, _label, _desc, _font, _disabled, _disabledReason, _inactive, _inactiveReason);
 
         public void InitInfo(Command_Action command) =>
-            InitInfo(command.action, command.Label, command.Desc, command.disabled, command.disabledReason);
+            InitInfo(command.action, command.Label, command.Desc, command.Disabled, command.disabledReason);
 
         public void InitInfo(Command_Toggle command) =>
-            InitInfo(command.toggleAction, command.Label, command.Desc, command.disabled, command.disabledReason);
+            InitInfo(command.toggleAction, command.Label, command.Desc, command.Disabled, command.disabledReason);
     }
 
     public sealed class ButtonIconUnit : ButtonUnit
@@ -122,7 +133,7 @@ namespace COF_Torture.Dialog.Units
             float _Height = 20f)
         {
             color = _color == default ? _color : Color.red;
-            ButtonIcon = Icon.NullOrBad() ? Icon : TexButton.DeleteX;
+            ButtonIcon = Icon.NullOrBad() ? Icon : TexButton.Delete;
             IconSize = new Vector2(_Width, _Height);
             base.InitInfo(_action, "IconButton" + Icon.GetHashCode() + "" + _action.GetHashCode(), "", default);
         }

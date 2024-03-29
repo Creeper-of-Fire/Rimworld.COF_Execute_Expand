@@ -11,7 +11,7 @@ namespace COF_Torture.Data
 {
     public static class DataUtility
     {
-        [CanBeNull]
+        //[CanBeNull]
         public static PawnData GetPawnData(this Pawn pawn)
         {
             if (SaveStorage.StoreData == null)
@@ -20,6 +20,7 @@ namespace COF_Torture.Data
                     SaveStorage.StoreData = Find.World.GetComponent<StoreData>();
                 else
                 {
+                    ModLog.Error("错误，没有找到对应的世界");
                     return null;
                 }
             }

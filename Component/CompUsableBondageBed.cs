@@ -93,7 +93,7 @@ namespace COF_Torture.Component
                                     usableBondageBed.FloatMenuOptionLabel(victim) + " (" +
                                     "CT_Reserved".Translate((NamedArgument)victim.Label) + ")",
                                     null, MenuOptionPriority.DisabledOption);
-                                yield break;
+                                continue;
                             }
 
                             if (victim.GetPawnData().IsFixed) //已经被固定

@@ -7,20 +7,38 @@ using COF_Torture.Data;
 using COF_Torture.Utility;
 using COF_Torture.Utility.DefOf;
 using Verse;
+using Verse.Noise;
 
 namespace COF_Torture.Hediffs
 {
     public class Hediff_COF_Torture_IsAbusing : Hediff
     {
-        private readonly Dictionary<Hediff, List<ActionWithBar>> ActionList =
-            new Dictionary<Hediff, List<ActionWithBar>>();
+        public Dictionary<Hediff, ExposableList<ActionWithBar>> ActionList =
+            new Dictionary<Hediff, ExposableList<ActionWithBar>>();
 
-        private KeyValuePair<Hediff, List<ActionWithBar>> nowActions;
+        private ExposableList<ActionWithBar> nowActions;
+        private Hediff nowHediff;
+
         private ActionWithBar nowAction;
-        private const float SeverityPerHour = 5f;
-        private const int tickPerHour = 2500;
+        private bool started = false;
 
-        public int Count {
+        public void Start()
+        {
+            started = true;
+        }
+
+        public override void ExposeData()
+        {
+            base.ExposeData();
+            Scribe_Values.Look(ref started, "started", false);
+            Scribe_Collections.Look(ref ActionList, "ActionList", LookMode.Reference, LookMode.Deep);
+            Scribe_References.Look(ref nowHediff, "nowHediff");
+            Scribe_Deep.Look(ref nowActions, "nowActions");
+            Scribe_Deep.Look(ref nowAction, "nowAction");
+        }
+
+        public int Count
+        {
             get
             {
                 if (ActionList.NullOrEmpty())
@@ -28,7 +46,7 @@ namespace COF_Torture.Hediffs
                 int count = 0;
                 foreach (var pair in ActionList)
                 {
-                    count += pair.Value.Count;
+                    count += pair.Value.list.Count;
                 }
 
                 return count;
@@ -42,7 +60,7 @@ namespace COF_Torture.Hediffs
                 var str = new StringBuilder();
                 foreach (var actionWithBars in ActionList.Values)
                 {
-                    foreach (var actionWithBar in actionWithBars)
+                    foreach (var actionWithBar in actionWithBars.list)
                     {
                         str.Append(actionWithBar.label + "\n");
                     }
@@ -55,6 +73,8 @@ namespace COF_Torture.Hediffs
         public override void Tick()
         {
             base.Tick();
+            if (!started)
+                return;
             DoTick(100);
         }
 
@@ -84,10 +104,10 @@ namespace COF_Torture.Hediffs
                 return;
             }
 
-            if (nowActions.Key != null && !pawn.health.hediffSet.GetNotMissingParts().Contains(nowActions.Key.Part))
+            if (nowHediff != null && !pawn.health.hediffSet.GetNotMissingParts().Contains(nowHediff.Part))
             {
                 nowAction = null;
-                ActionList.Remove(nowActions.Key);
+                ActionList.Remove(nowHediff);
                 nowActions = default;
             }
 
@@ -111,24 +131,26 @@ namespace COF_Torture.Hediffs
                 }
 
                 //情况1，nowActions不存在，获取新nowActions
-                if (nowActions.Key == null)
+                if (nowHediff == null) //|| nowActions.NullOrEmpty())
                 {
-                    nowActions = ActionList.First();
+                    nowHediff = ActionList.First().Key;
+                    nowActions = ActionList.First().Value;
                     return;
                 }
 
                 //情况2，nowActions为空，移除的同时获取新nowActions
-                if (nowActions.Value.NullOrEmpty())
+                if (nowActions.list.NullOrEmpty())
                 {
-                    ActionList.Remove(nowActions.Key);
-                    nowActions = default;
+                    ActionList.Remove(nowHediff);
+                    nowHediff = null;
+                    nowActions = null;
                     return;
                 }
 
                 //情况3，nowAction不存在，获取新nowAction
                 if (nowAction == null)
                 {
-                    nowAction = nowActions.Value[0];
+                    nowAction = nowActions.list[0];
                     return;
                 }
 
@@ -137,41 +159,9 @@ namespace COF_Torture.Hediffs
                 {
                     nowAction.EndDirect();
                     nowAction = null;
-                    nowActions.Value.RemoveAt(0);
+                    nowActions.list.RemoveAt(0);
                 }
             }
-        }
-
-        public void AddAction(MaltreatDef hediffDef, BodyPartRecord bodyPart)
-        {
-            Action action;
-            Hediff hediff;
-            //String OldLabel = ;
-            if (bodyPart is VirtualPartRecord vBodyPart)
-            {
-                var parentPart = vBodyPart.PartTree.parentPart;
-                hediff = HediffMaker.MakeHediff(hediffDef, pawn, parentPart);
-                action = delegate
-                {
-                    if (!parentPart.IsMissingForPawn(pawn))
-                    {
-                        pawn.health.AddHediff(hediff, vBodyPart);
-                    }
-                };
-            }
-            else
-            {
-                hediff = HediffMaker.MakeHediff(hediffDef, pawn, bodyPart);
-                action = delegate
-                {
-                    if (!bodyPart.IsMissingForPawn(pawn))
-                        pawn.health.AddHediff(hediffDef, bodyPart, dinfo: new DamageInfo());
-                };
-            }
-
-            var tick = hediff.Severity / SeverityPerHour * tickPerHour;
-            ActionList.DictListAdd(hediff,
-                new ActionWithBar(action, pawn, tick, bodyPart.Label + "," + hediffDef.GetLabelAction()));
         }
 
         private void Break()
@@ -179,6 +169,7 @@ namespace COF_Torture.Hediffs
             nowAction?.EndDirect();
             ActionList.Clear();
             Severity = 0f;
+            started = false;
         }
 
         public static Hediff_COF_Torture_IsAbusing AddHediff_COF_Torture_IsAbusing(Pawn pawn)

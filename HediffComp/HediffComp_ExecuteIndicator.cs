@@ -8,7 +8,7 @@ using COF_Torture.Utility;
 using UnityEngine;
 using Verse;
 
-namespace COF_Torture.Component
+namespace COF_Torture.HediffComp
 {
     public class HediffCompProperties_ExecuteIndicator : HediffCompProperties
     {
@@ -22,7 +22,7 @@ namespace COF_Torture.Component
     /// <summary>
     /// 处理绝大多数的处刑相关内容——特别是关于殖民者何时死亡
     /// </summary>
-    public class HediffComp_ExecuteIndicator : HediffComp
+    public class HediffComp_ExecuteIndicator : Verse.HediffComp
     {
         public HediffCompProperties_ExecuteIndicator Props => (HediffCompProperties_ExecuteIndicator)props;
         public Hediff_WithGiver Parent => (Hediff_WithGiver)parent;

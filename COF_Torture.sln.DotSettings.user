@@ -15,9 +15,6 @@
 	<s:Boolean x:Key="/Default/AddReferences/RecentPaths/=C_003A_005CProgram_0020Files_0020_0028x86_0029_005CSteam_005Csteamapps_005Cworkshop_005Ccontent_005C294100_005C2009463077_005CCurrent_005CAssemblies_005C0Harmony_002Edll/@EntryIndexedValue">True</s:Boolean>
 	<s:String x:Key="/Default/Environment/AssemblyExplorer/XmlDocument/@EntryValue">&lt;AssemblyExplorer&gt;&#xD;
   &lt;Assembly Path="C:\Program Files (x86)\Steam\steamapps\common\RimWorld\RimWorldWin64_Data\Managed\Assembly-CSharp.dll" /&gt;&#xD;
-  &lt;Assembly Path="C:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\rjw\1.4\Assemblies\RJW.dll" /&gt;&#xD;
-  &lt;Assembly Path="C:\Program Files (x86)\Steam\steamapps\workshop\content\294100\2755167249\1.4\Assemblies\RW_NodeTree.dll" /&gt;&#xD;
-  &lt;Assembly Path="C:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\做点刑具\Source\HugsLib.dll" /&gt;&#xD;
 &lt;/AssemblyExplorer&gt;</s:String>
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=refee/@EntryIndexedValue">True</s:Boolean>
 	</wpf:ResourceDictionary>

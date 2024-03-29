@@ -232,7 +232,7 @@ namespace COF_Torture.Things
 
         private void TryRemoveHediffFromAllPawns()
         {
-            List<Pawn> allPawnsSpawned = Map.mapPawns.AllPawnsSpawned;
+            var allPawnsSpawned = Map.mapPawns.AllPawnsSpawned;
             ModLog.Message_Start("Try Remove Hediff From All Pawns.");
             foreach (var aps in allPawnsSpawned)
             {
@@ -247,7 +247,7 @@ namespace COF_Torture.Things
             }
         }
 
-        public override void Draw()
+        protected override void DrawAt(Vector3 drawLoc, bool flip = false)
         {
             //base.Draw();
             IntVec3 position = Position;

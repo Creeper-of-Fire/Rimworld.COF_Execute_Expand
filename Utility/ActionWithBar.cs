@@ -5,7 +5,7 @@ using Verse;
 
 namespace COF_Torture.Utility
 {
-    public class ActionWithBar
+    public class ActionWithBar: IExposable
     {
         private Action EndAction;
         private Pawn pawn;
@@ -15,6 +15,21 @@ namespace COF_Torture.Utility
         protected float progressPerTick;
         protected float offsetZ = -0.5f;
 
+        public void ExposeData()
+        {
+            Scribe_Values.Look(ref EndAction,"endAction");
+            Scribe_References.Look(ref pawn,"pawn");
+            Scribe_Values.Look(ref effecter,"effecter");
+            Scribe_Values.Look(ref progress,"progress");
+            Scribe_Values.Look(ref label,"label");
+            Scribe_Values.Look(ref progressPerTick,"progressPerTick");
+            Scribe_Values.Look(ref offsetZ,"offsetZ");
+        }
+
+        public ActionWithBar()
+        {
+        }
+        
         public ActionWithBar(Action endAction,Pawn pawn, float tick, string label = null)
         {
             EndAction = endAction;
@@ -38,7 +53,7 @@ namespace COF_Torture.Utility
             mote.progress = Mathf.Clamp01(progress);
             mote.offsetZ = offsetZ;
             mote.alwaysShow = true;
-            mote.Draw();
+            //mote.DrawAt();
             if (progress >= 1f)
                 End();
         }

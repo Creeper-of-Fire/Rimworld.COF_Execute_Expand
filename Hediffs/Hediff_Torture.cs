@@ -1,5 +1,6 @@
 using COF_Torture.Component;
 using COF_Torture.Data;
+using COF_Torture.HediffComp;
 using Verse;
 
 namespace COF_Torture.Hediffs

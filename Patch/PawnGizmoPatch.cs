@@ -22,9 +22,9 @@ namespace COF_Torture.Patch
                 yield return gizmo;
             //var ___hediff = __instance.health.hediffSet.GetFirstHediffOfDef(HediffDefOf.COF_Torture_Fixed);
             var ___thing = __instance.GetPawnData()?.Fixer;
-            if (CompBuilding_AutoAbuse.IsAuto((Building)___thing))
-                foreach (var gizmo in ((ITortureThing)___thing).Gizmo_AbuseMenu())
-                    yield return gizmo;
+            //if (CompBuilding_AutoAbuse.IsAuto((Building)___thing))
+            foreach (var gizmo in ((ITortureThing)___thing).Gizmo_AbuseMenu())
+                yield return gizmo;
 
             if (!ModSettingMain.Instance.Setting.controlMenuOn) yield break;
             if (__instance.health.hediffSet.hediffs.OfType<IWithThingGiver>().Any())

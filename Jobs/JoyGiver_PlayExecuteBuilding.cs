@@ -1,3 +1,4 @@
+using COF_Torture.Utility;
 using RimWorld;
 using Verse;
 using Verse.AI;
@@ -18,7 +19,7 @@ namespace COF_Torture.Jobs
                     return (Job)null;
                 }
             }*/
-            if (!pawn.story.traits.HasTrait(TraitDefOf.Masochist))
+            if (!pawn.IsMasochist())
                 return null;
             if (pawn.CanReach((LocalTargetInfo)t, PathEndMode.ClosestTouch,
                     Danger.Some))

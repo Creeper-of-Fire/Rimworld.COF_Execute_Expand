@@ -3,7 +3,7 @@ using COF_Torture.Dialog;
 using COF_Torture.ModSetting;
 using Verse;
 
-namespace COF_Torture.Component
+namespace COF_Torture.HediffComp
 {
     public class HediffCompProperties_SwitchAbleSeverity : HediffCompProperties
     {
@@ -13,7 +13,7 @@ namespace COF_Torture.Component
     /// <summary>
     /// 可手动调节严重度
     /// </summary>
-    public class HediffComp_SwitchAbleSeverity : HediffComp
+    public class HediffComp_SwitchAbleSeverity : Verse.HediffComp
     {
         public HediffCompProperties_SwitchAbleSeverity Props => (HediffCompProperties_SwitchAbleSeverity)props;
         public int stageLimit;

@@ -3,6 +3,7 @@ using System.Linq;
 using COF_Torture.Component;
 using COF_Torture.Data;
 using COF_Torture.Dialog.Units;
+using COF_Torture.HediffComp;
 using COF_Torture.Hediffs;
 using COF_Torture.Things;
 using COF_Torture.Utility;

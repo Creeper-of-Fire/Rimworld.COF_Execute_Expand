@@ -12,7 +12,7 @@ namespace COF_Torture.Jobs
         public Building_Bed Thing => job.GetTarget(TargetIndex.A).Thing as Building_Bed;
 
         public override bool TryMakePreToilReservations(bool errorOnFailed) =>
-            Thing == null ||
+            Thing != null &&
             pawn.Reserve((LocalTargetInfo)(Thing)Thing, job, Thing.SleepingSlotsCount, 0,
                 errorOnFailed: errorOnFailed);
 

@@ -8,37 +8,35 @@ using HediffDefOf = COF_Torture.Utility.DefOf.HediffDefOf;
 
 namespace COF_Torture.Patch
 {
-    [HarmonyPatch]
-    public class MoreCorpseKindsPatch
-    {
-        [HarmonyPrefix]
-        [HarmonyPatch(typeof(Pawn), "MakeCorpse", typeof(Building_Grave), typeof(Building_Bed))]
-        public static bool prefix(Pawn __instance, ref Corpse __result, Building_Grave assignedGrave,
-            Building_Bed currentBed)
-        {
-            if (!__instance.health.hediffSet.HasHediff(HediffDefOf.COF_Torture_Barbecued))
-            {
-                if (__instance.genes == null) return true;
-                if (__instance.genes != null && !__instance.genes.HasGene(GeneDefOf.COF_Torture_Barbecued)) return true;
-            }
-
-            if (__instance.story != null)
-            {
-                __instance.story.skinColorOverride = new Color(205, 97, 4);
-                __instance.Drawer.renderer.graphics.ResolveAllGraphics();
-                //__instance.story.SkinColorBase = new Color(5, 97, 4);
-            }
-            //Log.Message(""+__instance.story?.SkinColor);
-            //Log.Message(""+__instance.story?.SkinColorOverriden);
-            float a;
-            if (currentBed != null)
-                a = currentBed.Rotation.AsAngle;
-            else
-                a = 0.0f;
-            __result = __instance.MakeCorpse_DifferentKind(assignedGrave, currentBed != null, a);
-            return false;
-        } //Todo
-    }
+    // [HarmonyPatch]
+    // public class MoreCorpseKindsPatch
+    // {
+    //     [HarmonyPrefix]
+    //     [HarmonyPatch(typeof(Pawn), "MakeCorpse", typeof(Building_Grave), typeof(Building_Bed))]
+    //     public static bool prefix(Pawn __instance, ref Corpse __result, Building_Grave assignedGrave,
+    //         Building_Bed currentBed)
+    //     {
+    //         if (!__instance.health.hediffSet.HasHediff(HediffDefOf.COF_Torture_Barbecued))
+    //         {
+    //             if (__instance.genes == null) return true;
+    //             if (__instance.genes != null && !__instance.genes.HasGene(GeneDefOf.COF_Torture_Barbecued)) return true;
+    //         }
+    //
+    //         if (__instance.story != null)
+    //         {
+    //             __instance.story.skinColorOverride = new Color(205, 97, 4);
+    //             __instance.Drawer.renderer.graphics.ResolveAllGraphics();
+    //             //__instance.story.SkinColorBase = new Color(5, 97, 4);
+    //         }
+    //         float a;
+    //         if (currentBed != null)
+    //             a = currentBed.Rotation.AsAngle;
+    //         else
+    //             a = 0.0f;
+    //         __result = __instance.MakeCorpse_DifferentKind(assignedGrave, currentBed != null, a);
+    //         return false;
+    //     } //Todo
+    // }
 
     /*[HarmonyPatch]
     public class CorpseColorPatch

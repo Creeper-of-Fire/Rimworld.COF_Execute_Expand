@@ -32,7 +32,8 @@ namespace COF_Torture.Utility
         /// </summary>
         /// <param name="pawn"></param>
         /// <param name="OrgasmTimes"></param>
-        public static void Orgasm(Pawn pawn, int OrgasmTimes = 1)
+        /// <param name="OrgasmReason"></param>
+        public static void Orgasm(Pawn pawn, int OrgasmTimes = 1, Sexual_Gratification OrgasmReason = null )
         {
             if (OrgasmTimes < 1)
                 OrgasmTimes = 1;
@@ -88,9 +89,12 @@ namespace COF_Torture.Utility
 
                 if (pawn.IsColonyMechPlayerControlled)
                     list.Add(pawn);
+                
+                if (pawn.IsColonist)
+                    list.Add(pawn);
             }
-
-            return list;
+            
+            return list.Distinct().ToList();
         }
 
         public static Corpse MakeCorpse_DifferentKind(this Pawn pawn, Building_Grave assignedGrave, bool inBed,
@@ -147,7 +151,7 @@ namespace COF_Torture.Utility
             ingestible.maxNumToIngestAtOnce = 1;
             ingestible.ingestEffect = EffecterDefOf.EatMeat;
             ingestible.ingestSound = SoundDefOf.RawMeat_Eat;
-            ingestible.tasteThought = ThoughtDefOf.AteFineMeal; // ThoughtDefOf.AteHumanlikeMeatAsIngredient;
+            ingestible.tasteThought = DefOf.ThoughtDefOf.AteFineMeal; // ThoughtDefOf.AteHumanlikeMeatAsIngredient;
             ingestible.specialThoughtDirect = null; //pawnDef.race.FleshType.ateDirect;
             ingestible.specialThoughtAsIngredient = null;
             ingestible.ateEvent = HistoryEventDefOf.AteHumanMeatAsIngredient;
@@ -170,7 +174,28 @@ namespace COF_Torture.Utility
         /// <param name="value">值</param>
         /// <typeparam name="T">键的类型</typeparam>
         /// <typeparam name="V">值的类型</typeparam>
-        public static void DictListAdd<T, V>(this Dictionary<T, List<V>> dict, T key, V value)
+        /// <typeparam name="VList">值的列表的类型</typeparam>
+        public static void DictListAdd<T,V,VList>(this Dictionary<T, VList> dict, T key, V value) where VList: ICollection<V>, new()
+        {
+            if (dict.ContainsKey(key))
+            {
+                dict[key].Add(value);
+            }
+            else
+            {
+                var tempList = new VList { value };
+                dict.Add(key, tempList);
+            }
+        }
+
+        public static bool IsMasochist(this Pawn pawn)
+        {
+            if (pawn.DestroyedOrNull()) return false;
+            if (pawn.story == null) return false;
+            if (pawn.story.traits == null) return false;
+            return  pawn.story.traits.HasTrait(DefOf.TraitDefOf.Masochist);
+        }
+        /*public static void DictListAdd<T, V>(this Dictionary<T, List<V>> dict, T key, V value)
         {
             if (dict.ContainsKey(key))
             {
@@ -181,7 +206,7 @@ namespace COF_Torture.Utility
                 var tempList = new List<V> { value };
                 dict.Add(key, tempList);
             }
-        }
+        }*/
 
         /// <summary>
         /// 绕过ShouldBeDead，直接杀死某人（会处理Deathrest），并且会给Kill函数注入本模组专有的死亡讯息
@@ -193,7 +218,7 @@ namespace COF_Torture.Utility
                 Log.Error("try to kill a dead pawn");
             DamageDef execute;
             Hediff dHediff;
-            if (SettingPatch.RimJobWorldIsActive && pawn.story.traits.HasTrait(TraitDefOf.Masochist))
+            if (SettingPatch.RimJobWorldIsActive && pawn.IsMasochist())
             {
                 execute = DamageDefOf.Execute_Licentious;
                 dHediff = HediffMaker.MakeHediff(HediffDefOf.COF_Torture_Licentious, pawn);

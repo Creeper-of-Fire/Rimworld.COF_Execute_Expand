@@ -1,8 +1,8 @@
 using Verse;
 
-namespace COF_Torture.Component
+namespace COF_Torture.HediffComp
 {
-    public abstract class HediffComp_ExecuteEffector : HediffComp
+    public abstract class HediffComp_ExecuteEffector : Verse.HediffComp
     {
         public bool isInProgress;
 

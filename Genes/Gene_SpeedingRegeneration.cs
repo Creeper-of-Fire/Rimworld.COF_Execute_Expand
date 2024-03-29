@@ -1,14 +1,19 @@
 using System.Collections.Generic;
+using COF_Torture.Hediffs;
 using Verse;
 
 namespace COF_Torture.Genes
 {
+    /// <summary>
+    /// 快速恢复，但是会累积快感 TODO 懒得写GeneDef了
+    /// </summary>
     public class Gene_SpeedingRegeneration : Gene
     {
         private int ticksToHeal;
 
         private IEnumerable<Hediff> hediffsToHeal;
         private static readonly int HealingIntervalTicksRange = 720;
+        private static readonly float HealingAmount = 1;
 
         public override void PostAdd()
         {
@@ -19,16 +24,15 @@ namespace COF_Torture.Genes
         public override void Tick()
         {
             base.Tick();
-            //Log.Message("1");
             --ticksToHeal;
             if (ticksToHeal > 0)
                 return;
             ResetInterval();
-            //Log.Message("2");
             if (hediffsToHeal == null)
             {
                 hediffsToHeal = SetHealAbleHediffs(pawn.health);
             }
+
             if (hediffsToHeal != null)
                 HealHediffs(pawn.health, hediffsToHeal);
         }
@@ -52,8 +56,11 @@ namespace COF_Torture.Genes
         {
             foreach (var h in hediffs)
             {
-                h.Heal(1);
+                h.Heal(HealingAmount);
             }
+
+            Hediff_COF_Sexual_Gratification.GetHediffOrgasmIndicator(health.hediffSet.pawn)
+                .InOrDecrease_Gratification(HealingAmount);
         }
 
         private void ResetInterval() =>

@@ -3,11 +3,11 @@ using COF_Torture.Things;
 using COF_Torture.Utility;
 using Verse;
 
-namespace COF_Torture.Component
+namespace COF_Torture.HediffComp
 {
     public abstract class HediffComp_ExecuteIndicatorWithEffector : HediffComp_ExecuteIndicator
     {
-        protected abstract HediffComp GetChildComp();
+        protected abstract Verse.HediffComp GetChildComp();
 
         public override void StartProgress()
         {
@@ -47,7 +47,7 @@ namespace COF_Torture.Component
 
     public class HediffComp_ExecuteIndicatorAddHediff : HediffComp_ExecuteIndicatorWithEffector
     {
-        protected sealed override HediffComp GetChildComp()
+        protected sealed override Verse.HediffComp GetChildComp()
         {
             var comp = Parent.TryGetComp<HediffComp_ExecuteEffector_AddHediff>();
             return comp;
@@ -78,7 +78,7 @@ namespace COF_Torture.Component
                 TortureUtility.KillVictimDirect(Pawn);
         }
 
-        protected sealed override HediffComp GetChildComp()
+        protected sealed override Verse.HediffComp GetChildComp()
         {
             var comp = Parent.TryGetComp<HediffComp_ExecuteEffector_Mincer>();
             return comp;

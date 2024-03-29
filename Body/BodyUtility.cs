@@ -7,8 +7,24 @@ using Verse;
 
 namespace COF_Torture.Body
 {
-    public static class BodyUtility
+    public static class VirtualPartUtility
     {
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
         /// <summary>
         /// 原本的BodyPartGroup是层层嵌套的，这个算法把嵌套解开，使得一个BodyPart只对应一个BodyPartGroup。/n这个算法同样适用于其他情况
         /// </summary>
@@ -227,6 +243,12 @@ namespace COF_Torture.Body
             vTree?.AddHediff(hediff);
         }
 
+        /// <summary>
+        /// 根据Pawn的类型找到对应的虚拟部件树 
+        /// </summary>
+        /// <param name="pawn"></param>
+        /// <param name="part"></param>
+        /// <returns></returns>
         public static VirtualPartTree GetVirtualPartTree(this Pawn pawn, BodyPartRecord part)
         {
             var virtualParts = pawn.GetPawnData().VirtualParts.VirtualTrees;

@@ -1,3 +1,4 @@
+using COF_Torture.Utility;
 using HarmonyLib;
 using RimWorld;
 using Verse;
@@ -27,7 +28,7 @@ namespace COF_Torture.Patch
         {
             try
             {
-                if (__instance.story.traits.HasTrait(TraitDefOf.Masochist))
+                if (__instance.IsMasochist())
                 {
                     if (__instance.health.hediffSet.GetFirstHediffOfDef(HediffDefOf
                             .COF_Torture_SexualHeatWithPain) == null)

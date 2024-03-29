@@ -14,9 +14,11 @@ namespace COF_Torture.Dialog
         /// 绘制自己
         /// </summary>
         void Draw(Rect rect);
+
         float width { get; }
         float height { get; }
     }
+
     public static class DialogUtility
     {
         public static IEnumerable<IWithThingGiver> AllTortureHediff(this Pawn pawn)
@@ -86,7 +88,7 @@ namespace COF_Torture.Dialog
 
             public int Count => multiDict.Count;
         }
-        
+
         /// <summary>
         /// 把多个Gizmo替换成多个按钮
         /// </summary>

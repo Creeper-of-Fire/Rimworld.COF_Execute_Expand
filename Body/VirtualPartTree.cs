@@ -7,6 +7,9 @@ using Verse;
 
 namespace COF_Torture.Body
 {
+    /// <summary>
+    /// VirtualPartTree是用来解包的，专门对接VirtualPartTreeDef并且进行处理，然后对外提供处理结果的查找接口
+    /// </summary>
     public class VirtualPartTree
     {
         public Pawn pawn;

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using COF_Torture.Utility;
 using RimWorld;
 using Verse;
 using Verse.AI;
@@ -22,7 +23,7 @@ namespace COF_Torture.Jobs
         protected override IEnumerable<Toil> MakeNewToils()
         {
             yield return new Toil().FailOnDestroyedNullOrForbidden(TargetIndex.A);
-            if (pawn.story.traits.HasTrait(TraitDefOf.Masochist) && pawn.health.capacities.CapableOf(PawnCapacityDefOf.Moving))
+            if (pawn.IsMasochist() && pawn.health.capacities.CapableOf(PawnCapacityDefOf.Moving))
             {
                 if (pawn.Position != TargetA.Cell)
                     yield return Toils_Goto.GotoCell(TargetIndex.A, PathEndMode.OnCell);

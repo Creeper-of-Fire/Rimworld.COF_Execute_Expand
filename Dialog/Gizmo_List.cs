@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using COF_Torture.Component;
+using COF_Torture.HediffComp;
 using COF_Torture.Hediffs;
 using COF_Torture.ModSetting;
 using COF_Torture.Things;

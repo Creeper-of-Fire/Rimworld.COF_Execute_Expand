@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Text;
 using COF_Torture.Body;
 using COF_Torture.Component;
+using COF_Torture.HediffComp;
 using UnityEngine;
 using Verse;
 
@@ -64,11 +65,11 @@ namespace COF_Torture.Hediffs
                         stringBuilder.Append(", ");
                     stringBuilder.Append(sourceHediffDef.label);
                 }
-                else if (source != null)
+                else if (this.sourceLabel != default)
                 {
                     if (stringBuilder.Length != 0)
                         stringBuilder.Append(", ");
-                    stringBuilder.Append(source.label);
+                    stringBuilder.Append(this.sourceLabel);
                     if (sourceBodyPartGroup != null)
                     {
                         stringBuilder.Append(" ");

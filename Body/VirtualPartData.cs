@@ -4,14 +4,23 @@ using Verse;
 
 namespace COF_Torture.Body
 {
-    public class VirtualPartData : IExposable
+    public interface IVirtualPart
+    {
+        
+    }
+    /// <summary>
+    /// VirtualPartData才是真正的存放数据的地方
+    /// </summary>
+    public class VirtualPartData : IExposable, IVirtualPart
     {
         private Pawn Pawn;
+        public float Sensitivity = 1;
 
         public VirtualPartData()
         {
         }
-        public VirtualPartData(Pawn pawn)
+
+        public VirtualPartData(Pawn pawn) 
         {
             this.Pawn = pawn;
             RefreshVirtualParts();
@@ -85,6 +94,7 @@ namespace COF_Torture.Body
             Scribe_References.Look(ref Pawn, "pawn");
             Scribe_Collections.Look(ref _virtualHediffByPart, "VirtualHediffData", LookMode.Value, LookMode.Deep);
         }
+
         public VirtualPartRecord GetVirtualPartRecordByUniLabel(string label)
         {
             if (this.AllVirtualParts.ContainsKey(label))

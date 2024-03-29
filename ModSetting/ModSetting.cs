@@ -79,7 +79,7 @@ namespace COF_Torture.ModSetting
             ls.Label("CT_Setting_ExecutionTimeDesc".Translate());
             ls.Gap(10f);
 
-            TextFieldNumericLabeled(ls, "CT_Setting_ExecutionTime".Translate(), ref Setting.executeHours, 0f, 2500f);
+            TextFieldNumericLabeled(ls, "CT_Setting_ExecutionTime".Translate(), ref Setting.executeHours, 0f, 42f);
             ls.End();
             Text.Font = GameFont.Small;
         }
@@ -100,7 +100,7 @@ namespace COF_Torture.ModSetting
         public bool isImmortal = true;
         public bool isRemoveTempInjuries = true;
         public bool isNoWayBack = false;
-        public int executeHours = 2500;
+        public int executeHours = 42;
         public float topTransparency = 1.0f;
         public float mistakeStartUp = 0f;
         public bool controlMenuOn = false;
@@ -119,7 +119,7 @@ namespace COF_Torture.ModSetting
             Scribe_Values.Look(ref controlMenuOn, "controlMenuOn", false);
             Scribe_Values.Look(ref topTransparency, "topTransparency", 1f);
             Scribe_Values.Look(ref mistakeStartUp, "mistakeStartUp", 0f);
-            Scribe_Values.Look(ref executeHours, "executeHours", 4);
+            Scribe_Values.Look(ref executeHours, "executeHours", 42);
             Scribe_Values.Look(ref specificOrgans, "specificOrgans", true);
             Scribe_Values.Look(ref specificOrgansForAllHediffAdded, "specificOrgansForAllHediffAdded", false);
         }

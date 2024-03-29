@@ -15,7 +15,7 @@ using JobDefOf = COF_Torture.Jobs.JobDefOf;
 
 namespace COF_Torture.Dialog
 {
-    public class Dialog_AbuseMenu : Window
+    public sealed class Dialog_AbuseMenu : Dialog_MenuBase
     {
         /// <summary>
         /// 窗口所属的角色
@@ -55,14 +55,9 @@ namespace COF_Torture.Dialog
         private readonly List<ButtonTextUnit> todoList = new List<ButtonTextUnit>();
 
         /// <summary>
-        /// 菜单
+        /// 菜单，用于保存数据
         /// </summary>
         private readonly Menus DialogMenus = new Menus();
-
-        /// <summary>
-        /// 刷新屏幕，如果为true就执行刷新
-        /// </summary>
-        private bool flagShouldRefresh;
 
         /// <summary>
         ///fixer是角色被捆绑到的建筑物，不应当为空
@@ -115,7 +110,7 @@ namespace COF_Torture.Dialog
 
                 Set_AbleBodyPartGroups();
                 Set_AllAbuseHediff();
-                IntMenus(DialogMenus);
+                IntMenus();
             }
         }
 
@@ -140,7 +135,7 @@ namespace COF_Torture.Dialog
         {
             var ablePartGroupsDict = new Dictionary<string, List<BodyPartRecord>>();
             var bodyParts = victim.health.hediffSet.GetNotMissingParts().ToList();
-            bodyParts.AddRange(BodyUtility.GetVirtualParts(victim).ToList());
+            bodyParts.AddRange(VirtualPartUtility.GetVirtualParts(victim).ToList());
             foreach (var bodyPart in bodyParts)
             {
                 foreach (var group in bodyPart.groups)
@@ -154,7 +149,7 @@ namespace COF_Torture.Dialog
                 }
             }
 
-            ableBodyPartGroupsDict = BodyUtility.untieNestedDict(ablePartGroupsDict, "CT_Others".Translate());
+            ableBodyPartGroupsDict = VirtualPartUtility.untieNestedDict(ablePartGroupsDict, "CT_Others".Translate());
         }
 
         /// <summary>
@@ -290,7 +285,7 @@ namespace COF_Torture.Dialog
         {
             //var h = HediffMaker.MakeHediff(focusHediff, pawn, bodyPart);
             var focus = focusHediff;
-            var actionToDo = new Action(delegate { DoAddHediffJob(focus, bodyPart); });
+            var actionToDo = new Action(delegate { DoAddHediffAction(focus, bodyPart); });
             var buttonToDo = new ButtonTextUnit();
             buttonToDo.InitInfo(actionToDo,
                 bodyPart.Label + "," + focusHediff.GetLabelAction().Colorize(focusHediff.defaultLabelColor),
@@ -325,20 +320,34 @@ namespace COF_Torture.Dialog
 
         private ButtonTextUnit Button_Close()
         {
-            var action = new Action(delegate
-            {
-                foreach (var b in todoList)
-                {
-                    b.DoAction();
-                }
-
-                Close();
-            });
+            var action = new Action(delegate { DoAbuseAction(); });
             var button = new ButtonTextUnit();
             button.InitInfo(action,
                 "CT_CloseWindowForSure".Translate(),
                 "CT_CloseWindowForSureDesc".Translate());
             return button;
+        }
+
+        private void DoAbuseAction()
+        {
+            foreach (var b in todoList)
+            {
+                b.DoAction();
+            }
+
+            var action = new Action<Pawn>(delegate(Pawn pawn) { AbuseUtility.StartAbuseJob(victim, pawn, fixer); });
+
+            var Dialog = new Dialog_ChoosePawn(action, victim.Map,IsAblePawn);
+            Find.WindowStack.Add(Dialog);
+
+            Close();
+
+            bool IsAblePawn(Pawn pawn)
+            {
+                if (pawn == this.victim)
+                    return false;
+                return true;
+            }
         }
 
         private List<LabelWithUnits> Label_TodoList()
@@ -361,7 +370,7 @@ namespace COF_Torture.Dialog
 
                     flagShouldRefresh = true;
                 });
-                delButton.InitInfo(action, TexButton.DeleteX, Color.red);
+                delButton.InitInfo(action, TexButton.Delete, Color.red);
                 var label = new LabelWithUnits();
                 label.InitInfo(delButton, stack.label, stack.desc);
                 labels.Add(label);
@@ -370,18 +379,15 @@ namespace COF_Torture.Dialog
             return labels;
         }
 
-        private void DoAddHediffJob(MaltreatDef def, BodyPartRecord bodyPart)
+        private void DoAddHediffAction(MaltreatDef def, BodyPartRecord bodyPart)
         {
-            Hediff_COF_Torture_IsAbusing.AddHediff_COF_Torture_IsAbusing(victim).AddAction(def, bodyPart);
-            var job = JobMaker.MakeJob(JobDefOf.CT_DoMaltreat,
-                (LocalTargetInfo)(Thing)fixer);
-            job.count = 1;
-            //Todo 窗口
+            Hediff_COF_Torture_IsAbusing.AddHediff_COF_Torture_IsAbusing(victim).ActionList
+                .InitOneAction(def, bodyPart, victim);
         }
 
-        public class Menus
+        private class Menus : MenuBase
         {
-            public Dialog_AbuseMenu window;
+            //public Dialog_AbuseMenu window;
 
             public List<DialogUnit> titleHediffs = new List<DialogUnit>();
             public List<DialogUnit> titleBodyGroup = new List<DialogUnit>();
@@ -444,8 +450,9 @@ namespace COF_Torture.Dialog
         }
 
 
-        private void IntMenus(Menus menus)
+        protected override void IntMenus()
         {
+            var menus = DialogMenus;
             menus.buttons_Hediffs = Buttons_Hediffs().ListReform<ButtonTextUnit, DialogUnit>();
             menus.buttons_BodyPartGroups = Buttons_BodyPartGroups().ListReform<ButtonTextUnit, DialogUnit>();
             menus.buttons_BodyParts = Buttons_BodyParts().ListReform<ButtonTextUnit, DialogUnit>();
@@ -465,8 +472,9 @@ namespace COF_Torture.Dialog
                 new VerticalTitleWithMenu(menus.titleTodoList, new SimpleVerticalMenu(menus.label_TodoList));
         }
 
-        private void RefreshMenus(Menus menus)
+        protected override void RefreshMenus()
         {
+            var menus = DialogMenus;
             if (focusBodyPartGroup != null)
             {
                 if (ShouldBodyPartGroupDisabled(focusBodyPartGroup)) //如果focusBodyPartGroup不被允许
@@ -481,6 +489,7 @@ namespace COF_Torture.Dialog
             menus.buttons_BodyPartGroups.InsertRange(0, Buttons_BodyPartGroups());
             menus.buttons_BodyParts.InsertRange(0, Buttons_BodyParts());
             menus.label_TodoList.InsertRange(0, Label_TodoList());
+
             menus.menu_Hediffs.Refresh();
             menus.menu_BodyPartGroups.Refresh();
             menus.menu_BodyParts.Refresh();
@@ -493,7 +502,7 @@ namespace COF_Torture.Dialog
             if (flagShouldRefresh)
             {
                 flagShouldRefresh = false;
-                RefreshMenus(DialogMenus);
+                RefreshMenus();
             }
 
             Rect outRect = new Rect(inRect);
